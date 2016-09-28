@@ -13,7 +13,7 @@ import java.util.Set;
  * server class
  * </p>
  * @author linam@joysim.cn
- * @date 2016Äê9ÔÂ28ÈÕ
+ * @date 2016å¹´9æœˆ28æ—¥
  * @version 1.0
  */
 public class MultiplexerTimeServer implements Runnable{
