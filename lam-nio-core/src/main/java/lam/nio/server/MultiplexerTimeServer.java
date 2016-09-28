@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
+import lam.util.DateUtil;
+
 /**
  * <p>
  * server class
@@ -34,7 +36,8 @@ public class MultiplexerTimeServer implements Runnable{
 			serverSocketChannel.configureBlocking(false);
 			serverSocketChannel.socket().bind(new InetSocketAddress(port), 1024);
 			serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-			System.out.println(getClass() + " listen at port:" + port);
+			
+			System.out.println(String.format("%s %s-listen at port:%d", DateUtil.getCurrentTime(), getClass().getName() ,port));
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -104,9 +107,11 @@ public class MultiplexerTimeServer implements Runnable{
 					byte[] bytes = new byte[byteBuffer.remaining()];
 					byteBuffer.get(bytes);
 					String body = new String(bytes, "utf-8");
-					System.out.println(getClass() + " receive:" + body);
+					
+					System.out.println(String.format("%s %s-receive:%s", DateUtil.getCurrentTime(), getClass().getName(), body));
+					
 					String currentTime = null;
-					if("QUERY TIME".equalsIgnoreCase(body)){
+					if("QEURY TIME".equalsIgnoreCase(body)){
 						currentTime = new Date().toString();
 					}else{
 						currentTime = "BAD PARAMETER";
