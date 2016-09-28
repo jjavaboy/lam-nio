@@ -2,9 +2,12 @@ package lam.nio.server;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -52,10 +55,31 @@ public class MultiplexerTimeServer implements Runnable{
 				SelectionKey key = null;
 				while(iter.hasNext()){
 					key = iter.next();
+					iter.remove();
+					try{
+						handleInput(key);
+					}catch(Exception e){
+						e.printStackTrace();
+						if(key != null){
+							key.cancel();
+							if(key.channel() != null){
+								key.channel().close();
+							}
+						}
+					}
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
-			}//
+			}
+		}
+		
+		//多路复用器关闭后，注册在selctor上的channel和pipe都自动去注册并关闭，所以不需要重复关闭资源
+		if(selector != null){
+			try {
+				selector.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -64,10 +88,53 @@ public class MultiplexerTimeServer implements Runnable{
 			//accept the new connection
 			if(key.isAcceptable()){
 				ServerSocketChannel ssChannel = (ServerSocketChannel) key.channel();
-				ssChannel.configureBlocking(false);
-				ssChannel.register(selector, SelectionKey.OP_READ);
+				SocketChannel sChannel = ssChannel.accept();
+				sChannel.configureBlocking(false);
+				//add new connection to the selector
+				sChannel.register(selector, SelectionKey.OP_READ);
+			}
+			if(key.isReadable()){
+				//read the data
+				SocketChannel sChannel = (SocketChannel) key.channel();
+				//allocate 1KB to buffer
+				ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+				int readBytes = sChannel.read(byteBuffer);
+				if(readBytes > 0){
+					byteBuffer.flip();
+					byte[] bytes = new byte[byteBuffer.remaining()];
+					byteBuffer.get(bytes);
+					String body = new String(bytes, "utf-8");
+					System.out.println(getClass() + " receive:" + body);
+					String currentTime = null;
+					if("QUERY TIME".equalsIgnoreCase(body)){
+						currentTime = new Date().toString();
+					}else{
+						currentTime = "BAD PARAMETER";
+					}
+					doWrite(sChannel, currentTime);
+				}else if(readBytes < 0){
+					//对端链路关闭
+					key.cancel();
+					sChannel.close();
+				}else{
+					//读取0字节，忽略
+				}
 			}
 		}
+	}
+
+	/**
+	 * 结果写回客户端
+	 */
+	private void doWrite(SocketChannel sChannel, String response) throws IOException {
+		if(response != null && response.trim().length() > 0){
+			byte[] bytes = response.getBytes();
+			ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
+			byteBuffer.put(bytes);
+			byteBuffer.flip();
+			sChannel.write(byteBuffer);
+		}
+		
 	}
 
 }
