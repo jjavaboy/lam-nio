@@ -6,4 +6,34 @@
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <artifactId>lam-nio-core</artifactId>
+  <properties>
+  		<!-- 文件拷贝时的编码 -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>  
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>  
+        <!-- 编译时的编码 -->  
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+  </properties>
+  <dependencies>
+  	<dependency>
+	    <groupId>io.netty</groupId>
+	    <artifactId>netty-all</artifactId>
+	    <version>4.1.5.Final</version>
+	</dependency>
+	<dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-api</artifactId>
+		<version>1.7.21</version>
+	</dependency>
+	<dependency>
+		<groupId>org.slf4j</groupId>
+		<artifactId>slf4j-log4j12</artifactId>
+		<version>1.7.21</version>
+	</dependency>
+	<dependency>
+		<groupId>log4j</groupId>
+  		<artifactId>log4j</artifactId>
+  		<version>1.2.17</version>
+	</dependency>
+  </dependencies>
+  <name>${project.artifactId}</name>
 </project>
