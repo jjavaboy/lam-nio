@@ -1,5 +1,6 @@
-package lam.netty.server;
+package lam.netty.demo.server;
 
+import java.net.InetSocketAddress;
 import java.util.Date;
 
 import org.slf4j.Logger;
@@ -7,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
@@ -26,6 +26,13 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 public class TimeServerHandler extends ChannelInboundHandlerAdapter{
 	
 	private static Logger logger = LoggerFactory.getLogger(TimeServerHandler.class);
+	
+	//this event will be called when netty client connect to server
+	@Override
+	public void channelActive(ChannelHandlerContext ctx) throws Exception {
+		InetSocketAddress inetSocketAddress =  (InetSocketAddress) ctx.channel().remoteAddress();
+		logger.info("channelActive, {}:{}", inetSocketAddress.getHostName(), inetSocketAddress.getPort());
+	}
 	
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -48,6 +55,13 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter{
 	@Override
 	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
 		ctx.flush();
+	}
+	
+	//this event will be called when netty client close
+	@Override
+	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+		InetSocketAddress inetSocketAddress =  (InetSocketAddress) ctx.channel().remoteAddress();
+		logger.info("channelInactive, {}:{}", inetSocketAddress.getHostName(), inetSocketAddress.getPort());
 	}
 
 	@Override
