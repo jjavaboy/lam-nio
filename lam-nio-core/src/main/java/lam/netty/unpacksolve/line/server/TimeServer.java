@@ -1,4 +1,4 @@
-package lam.netty.unpacksolve.server;
+package lam.netty.unpacksolve.line.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

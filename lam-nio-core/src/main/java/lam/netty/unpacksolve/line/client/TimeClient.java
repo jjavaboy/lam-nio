@@ -1,4 +1,4 @@
-package lam.netty.unpacksolve.client;
+package lam.netty.unpacksolve.line.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
