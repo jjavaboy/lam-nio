@@ -3,6 +3,8 @@ package lam.netty.http.json.decoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageDecoder;
@@ -28,7 +30,7 @@ public abstract class AbstractHttpJsonDecoder<T> extends MessageToMessageDecoder
 	
 	protected Object decode0(ChannelHandlerContext ctx, ByteBuf body){
 		String content = body.toString(CharsetUtil.UTF_8);
-		return content;
+		return new Gson().fromJson(content, clazz);
 	}
 	
 	@Override

@@ -53,15 +53,15 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
 	
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-		if(!request.getDecoderResult().isSuccess()){
+		if(!request.decoderResult().isSuccess()){
 			sendError(ctx, HttpResponseStatus.BAD_REQUEST);
 			return ;
 		}
-		if(!request.getMethod().equals(HttpMethod.GET)){
+		if(!request.method().equals(HttpMethod.GET)){
 			sendError(ctx, HttpResponseStatus.METHOD_NOT_ALLOWED);
 			return ;
 		}
-		final String uri = request.getUri();
+		final String uri = request.uri();
 		final String path = sanitizeUri(uri);
 		if(path == null){
 			sendError(ctx, HttpResponseStatus.FORBIDDEN);

@@ -18,6 +18,19 @@ public class Order {
 	private Shipping shipping;
 	
 	private Float total;
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{")
+		.append("orderNo:").append(orderNo)
+		.append(", customer:").append(customer)
+		.append(", address:").append(address)
+		.append(", shipping:").append(shipping)
+		.append(", total:").append(total)
+		.append("}");
+		return sb.toString();
+	}
 
 	public Long getOrderNo() {
 		return orderNo;

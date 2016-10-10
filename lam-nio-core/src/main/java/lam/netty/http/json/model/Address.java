@@ -16,6 +16,20 @@ public class Address {
 	private String country;
 	private String postCode;
 	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{")
+		.append("street:").append(street)
+		.append(",area:").append(area)
+		.append(",city:").append(city)
+		.append(",state:").append(state)
+		.append(",country:").append(country)
+		.append(",postCode:").append(postCode)
+		.append("}");
+		return sb.toString();
+	}
+	
 	public Address(){}
 
 	public String getStreet() {

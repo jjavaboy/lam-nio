@@ -15,6 +15,17 @@ public class Customer {
 	
 	private String lastName;
 	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{")
+		.append("idno:").append(idno)
+		.append(",firstName:").append(firstName)
+		.append(",lastName:").append(lastName)
+		.append("}");
+		return sb.toString();
+	}
+	
 	public Customer(){}
 
 	public String getIdno() {
