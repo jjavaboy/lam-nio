@@ -6,5 +6,6 @@
   <packaging>pom</packaging>
   <modules>
   	<module>lam-nio-core</module>
+  	<module>lam-mongodb</module>
   </modules>
 </project>
