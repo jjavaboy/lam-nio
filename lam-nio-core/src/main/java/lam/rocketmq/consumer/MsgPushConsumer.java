@@ -25,15 +25,17 @@ public class MsgPushConsumer {
 		consumer.setNamesrvAddr(namesrvAddr);
 		
 		try {
-			consumer.subscribe("Topic", "MsgTag");
+			//can subscribe many tags , format like 'MsgTag || MsgTag2 ...'
+			consumer.subscribe("Topic", "MsgTag || MsgTag2");
 			consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
 			consumer.registerMessageListener(new MessageListenerConcurrently(){
 				@Override
 				public ConsumeConcurrentlyStatus consumeMessage(
 						List<MessageExt> list,	ConsumeConcurrentlyContext context) {
-					System.out.println("size:" + list.size());
 					MessageExt msgExt = list.get(0);
-					System.out.println("msgExt:" + msgExt.toString());
+					System.out.println(String.format("%s, %s, %s", msgExt.getTags(), msgExt.getTopic(), new String(msgExt.getBody())));
+					
+					//ConsumeConcurrentlyStatus.RECONSUME_LATER;
 					return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
 				}
 			});

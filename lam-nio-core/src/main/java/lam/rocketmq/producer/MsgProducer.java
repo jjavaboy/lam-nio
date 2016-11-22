@@ -23,24 +23,28 @@ public class MsgProducer {
 		try {
 			producer.start();
 			
-//			printNameServerAddress(producer);
+			for(int i = 0; i < 10; i++){
+				Message msg = new Message("Topic", "MsgTag", "key" + i, "my message-我的消息".getBytes());
+				SendResult result = producer.send(msg);
+				System.out.println(String.format("tag:%s, key:%s, body:%s, rs:%s", msg.getTags(), msg.getKeys(), new String(msg.getBody()), result.getSendStatus().toString()));
+			}
 			
-			Message msg = new Message("Topic", "MsgTag", "key1", "my message".getBytes());
-			SendResult result = producer.send(msg);
+			for(int i = 0; i < 10; i++){
+				Message msg = new Message("Topic", "MsgTag2", "key" + i, "my message-我的消息".getBytes());
+				SendResult result = producer.send(msg);
+				System.out.println(String.format("tag:%s, key:%s, body:%s, rs:%s", msg.getTags(), msg.getKeys(), new String(msg.getBody()), result.getSendStatus().toString()));
+			}
 			
-			System.out.println(result);
-		} catch (Exception e) {
+		} catch (MQClientException e) {
+			e.printStackTrace();
+		} catch (RemotingException e) {
+			e.printStackTrace();
+		} catch (MQBrokerException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} finally {
 			producer.shutdown();
-		}
-	}
-	
-	public void printNameServerAddress(DefaultMQProducer producer){
-		java.util.List<String> list =
-		producer.getDefaultMQProducerImpl().getmQClientFactory().getMQClientAPIImpl().getNameServerAddressList();
-		for(String str : list){
-			System.out.println(str);
 		}
 	}
 
