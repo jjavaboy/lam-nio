@@ -4,9 +4,11 @@ import org.bson.Document;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mongodb.client.FindIterable;
+import com.sun.corba.se.spi.ior.ObjectId;
 
 import lam.mongo.db.MongoDBClient;
-import lam.mongo.json.strategy.JsonExclusionStrategy;
+import lam.mongo.json.strategy.JsonStrategy;
 import lam.mongo.model.Role;
 
 /**
@@ -19,12 +21,14 @@ import lam.mongo.model.Role;
 */
 public class JsonExclusionTest {
 	
-	private static Gson gson = new GsonBuilder().setExclusionStrategies(JsonExclusionStrategy.fieldExclustionStrategy).create();
+	private static Gson gson = new GsonBuilder()//.registerTypeAdapter(ObjectId.class, JsonStrategy.createObjectIdAdapter())
+			.setExclusionStrategies(JsonStrategy.fieldExclustionStrategy).create();
 
 	public static void main(String[] args){
 		MongoDBClient client = new MongoDBClient("192.168.204.127", 28017, "test").init();
 		
-		insertTest(client);
+		//insertTest(client);
+		findRoleTest(client);
 		
 		client.close();
 	}
@@ -39,6 +43,13 @@ public class JsonExclusionTest {
 		role.setUpdateTime(role.getCreateTime());
 		
 		client.getCollection(Role.class).insertOne(Document.parse(gson.toJson(role)));;
+	}
+	
+	public static void findRoleTest(MongoDBClient client){
+		FindIterable<Document> iter = client.getCollection(Role.class).find(new Document("id", 2));
+		if(iter != null){
+			System.out.println(iter.first());
+		}
 	}
 	
 }
