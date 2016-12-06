@@ -5,6 +5,7 @@ import org.bson.Document;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
+import com.mongodb.ReadPreference;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
@@ -26,14 +27,22 @@ public class MongoDBClient {
 	
 	private String defaultDatabase;
 	
+	private boolean isSecondary;
+	
 	public MongoDBClient(String host, int port, String defaultDatabase){
 		this.host = host;
 		this.port = port;
 		this.defaultDatabase = defaultDatabase;
+		this.isSecondary = false;
+	}
+	
+	public MongoDBClient(String host, int port, String defaultDatabase, boolean isSecondary){
+		this(host, port, defaultDatabase);
+		this.isSecondary = isSecondary;
 	}
 	
 	public MongoDBClient init(){
-		String uri = String.format("mongodb://%s:%d", host, port);
+		String uri = String.format("mongodb://%s:%d, isSecondary:%b", host, port, isSecondary);
 		
 		System.out.println("uri:" + uri);
 		
@@ -50,6 +59,13 @@ public class MongoDBClient {
 		
 		//客户端与数据库建立连接的timeout设置为1分钟
 		build.connectTimeout(1000 * 60 * 1);
+		
+		//设置从库只读的属性
+		if(isSecondary){
+			//ReadPreference.secondary() replaces slaveOk() in instance of MongoClient;
+			//slaveOk() is deprecated.
+			build.readPreference(ReadPreference.secondary());
+		}
 		
 		MongoClientURI mongoClinetUri = new MongoClientURI(uri, build);
 		mongoClient = new MongoClient(mongoClinetUri);
