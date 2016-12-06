@@ -42,9 +42,7 @@ public class MongoDBClient {
 	}
 	
 	public MongoDBClient init(){
-		String uri = String.format("mongodb://%s:%d, isSecondary:%b", host, port, isSecondary);
-		
-		System.out.println("uri:" + uri);
+		String uri = String.format("mongodb://%s:%d", host, port);
 		
 		MongoClientOptions.Builder build = new MongoClientOptions.Builder();
 		
@@ -69,6 +67,8 @@ public class MongoDBClient {
 		
 		MongoClientURI mongoClinetUri = new MongoClientURI(uri, build);
 		mongoClient = new MongoClient(mongoClinetUri);
+		
+		System.out.println(String.format("mongodb://%s:%d, isSecondary:%b", host, port, isSecondary));
 		
 		return this;
 	}
