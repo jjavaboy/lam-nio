@@ -12,5 +12,6 @@
     <module>lam-dubbo-provider</module>
     <module>lam-dubbo-core</module>
     <module>lam-dubbo-consumer</module>
+    <module>lam-redis</module>
   </modules>
 </project>
