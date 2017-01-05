@@ -1,5 +1,8 @@
 package lam.mongo.demo;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bson.Document;
 import org.bson.types.ObjectId;
 
@@ -7,6 +10,7 @@ import com.google.gson.Gson;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 
@@ -27,7 +31,7 @@ public class DemoTest {
 	private static Gson gson = new Gson();
 	
 	public static void main(String[] args){
-		MongoDBClient client = new MongoDBClient("192.168.20.110", 28017, "datacenter").init();
+		MongoDBClient client = new MongoDBClient("192.168.204.127", 28017, "datacenter").init();
 		
 		userInsertTest(client);
 		//userFindAllTest(client);
@@ -36,6 +40,7 @@ public class DemoTest {
 		//userFindTest(client);
 		//userUpdateTest(client);
 		//userDeleteTest(client);
+		//pushElementTest(client);
 		
 		client.close();
 	}
@@ -88,12 +93,22 @@ public class DemoTest {
 		MongoCollection<Document> coll = client.getCollection(User.class);
 		
 		User user = new User();
-		user.setId(3);
-		user.setUsername("lin3");
-		user.setFullname("超级3");
-		user.setGender(Gender.female.getValue());
+		user.setId(6);
+		user.setUsername("li");
+		user.setFullname("超级");
+		user.setGender(Gender.man.getValue());
 		
 		coll.insertOne(Document.parse(gson.toJson(user)));
+	}
+	
+	private static void pushElementTest(MongoDBClient client){
+		MongoCollection<Document> coll = client.getCollection(User.class);
+		
+		Map<String, Object> m = new HashMap<String, Object>();
+		m.put("name", "angel");
+		Document d = new Document("classmate", m);
+		
+		coll.updateOne(new Document("id", 3), new Document("$push", d)); //, new UpdateOptions().upsert(true)
 	}
 	
 	private static void printFindIterable(FindIterable<Document> iter){
