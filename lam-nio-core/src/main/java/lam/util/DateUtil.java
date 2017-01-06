@@ -13,10 +13,16 @@ import java.util.Date;
 */
 public class DateUtil {
 	
-	public static final String FROMAT_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+	public static final String FORMAT_YYYY_MM_DD_HH_MM_SS = "yyyy-MM-dd HH:mm:ss";
+
+	public static final String FORMAT_YYYY_MM_DD_HH_MM_SS_SSS = "yyyy-MM-dd HH:mm:ss SSS";
+	
+	public static String getCurrentTimeSSS(){
+		return getCurrentTime(FORMAT_YYYY_MM_DD_HH_MM_SS_SSS);
+	}
 	
 	public static String getCurrentTime(){
-		return getCurrentTime(new Date(), FROMAT_YYYY_MM_DD_HH_MM_SS);
+		return getCurrentTime(FORMAT_YYYY_MM_DD_HH_MM_SS);
 	}
 	
 	public static String getCurrentTime(String format){
