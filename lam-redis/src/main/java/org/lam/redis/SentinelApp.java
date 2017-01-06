@@ -31,7 +31,7 @@ public class SentinelApp {
     	Jedis jedis = null;
     	try{
     		//返回master redis的连接，
-    		//则master down掉之后，sentinel进行故障转移，slave被提升为master，则进行返回master(即为之前的slave)
+    		//如果master down掉之后，sentinel进行故障转移，slave被提升为master，则进行返回master(即为之前的slave)
     		jedis = pool.getResource();
 	    	String reply = jedis.set("mykey", "myvalue");
     		
