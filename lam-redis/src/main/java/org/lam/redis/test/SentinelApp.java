@@ -1,4 +1,4 @@
-package org.lam.redis;
+package org.lam.redis.test;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,7 +52,7 @@ public class SentinelApp {
     
     private static void initializeSentinels(Set<String> sentinels){
     	//Notice: sentinel server config, neither master nor slave redis config. 
-    	sentinels.add(new HostAndPort("192.168.204.127", 26379).toString());//toString():192.168.204.127:26379
+    	sentinels.add(new HostAndPort("192.168.20.111", 26379).toString());//toString():192.168.204.127:26379
     }
     
     private static void sleep(){
