@@ -1,8 +1,11 @@
 package org.lam.redis.client;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import redis.clients.jedis.HostAndPort;
@@ -17,21 +20,21 @@ import redis.clients.jedis.JedisSentinelPool;
 * @date 2017年1月9日
 * @versio 1.0
 */
-public class SentinelRedisClient {
+public class SentinelRedisClient implements Closeable{
 	
-	private GenericObjectPoolConfig config;
+	protected GenericObjectPoolConfig config;
 	
-	private JedisSentinelPool pool;
+	protected JedisSentinelPool pool;
 	
-	private Set<String> sentinels;
+	protected Set<String> sentinels;
 	
-	private String masterName;
+	protected String masterName;
 
-	private SentinelRedisClient(){
+	protected SentinelRedisClient(){
 		initSentinels();
 	}
 	
-	private void initSentinels(){
+	protected void initSentinels(){
 		config = new GenericObjectPoolConfig();
     	config.setMaxIdle(GenericObjectPoolConfig.DEFAULT_MAX_IDLE);
     	config.setMinIdle(GenericObjectPoolConfig.DEFAULT_MIN_IDLE);
@@ -41,8 +44,12 @@ public class SentinelRedisClient {
     	sentinels = new HashSet<String>();
     	sentinels.add(new HostAndPort("192.168.20.111", 26379).toString());
     	
-    	masterName = "mymaster";
+    	masterName = toMasterName(masterName);
     	pool = new JedisSentinelPool(masterName, sentinels, config);
+	}
+	
+	protected String toMasterName(String masterName){
+		return StringUtils.isBlank(masterName) ? "mymaster" : masterName;
 	}
 	
 	public Jedis getJedis(){
@@ -54,7 +61,13 @@ public class SentinelRedisClient {
 			//deprecated
 			//pool.returnResource(jedis);
 			jedis.close();
-			
+		}
+	}
+
+	@Override
+	public void close(){
+		if(pool != null){
+			pool.destroy();
 		}
 	}
 
