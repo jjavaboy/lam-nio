@@ -1,7 +1,6 @@
 package org.lam.redis.client;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
