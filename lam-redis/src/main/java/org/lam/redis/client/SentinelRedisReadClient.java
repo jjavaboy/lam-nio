@@ -7,6 +7,6 @@ package org.lam.redis.client;
 * @date 2017年1月10日
 * @versio 1.0
 */
-public class SentinelRedisReadWriteClient {
+public class SentinelRedisReadClient {
 
 }
