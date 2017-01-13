@@ -1,6 +1,10 @@
 package org.lam.redis.test;
 
+import java.util.Set;
+
 import org.junit.Test;
+import org.lam.redis.client.SentinelRedisClient;
+import org.lam.redis.client.SentinelRedisReadClient;
 import org.lam.redis.model.SNode;
 
 import redis.clients.jedis.Jedis;
@@ -15,7 +19,7 @@ import redis.clients.jedis.Jedis;
 */
 public class AppTest {
 	
-	@Test
+	//@Test
 	public void slaveRedis(){
 		Jedis slave = new Jedis("192.168.204.127", 6378);
 		String reply = slave.info("replication");
@@ -28,6 +32,18 @@ public class AppTest {
 			}
 		}
 		slave.close();
+	}
+	
+	@Test
+	public void redisReadClient(){
+		SentinelRedisReadClient client = new SentinelRedisReadClient();
+		Jedis jedis = client.getResource();
+		Set<String> ks = jedis.keys("*");
+		for(String k : ks){
+			System.out.println(k);
+		}
+		client.close(jedis);
+		client.close();
 	}
 	
 	public static void main(String[] args){
