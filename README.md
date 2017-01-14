@@ -12,3 +12,5 @@ lam-redis
 #2017-01-14
 Some functions needs to be improved below:
 The Program needs to deal with the situation of slave node failure.
+
+Fit the slave node failure bug.
