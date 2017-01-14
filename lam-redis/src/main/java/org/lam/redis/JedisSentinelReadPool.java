@@ -103,6 +103,7 @@ public class JedisSentinelReadPool extends Pool<Jedis>{
 					logger.warn("reply of command:sentinel get-master-addr-by-name mymaster is invalid, reply:{}", reply);
 					continue ;
 				}
+				logger.info(String.format("Get master:%s:%s successfully", reply.get(0), reply.get(1)));
 				return new HostAndPort(reply.get(0), Integer.parseInt(reply.get(1)));
 			}catch(JedisException e){
 				logger.error(String.format("Get master fail, sentinel:%s", sentinel), e);
@@ -146,7 +147,7 @@ public class JedisSentinelReadPool extends Pool<Jedis>{
 			logger.error("Fail to get slave address, error:" + e.getMessage());
 			throw new RuntimeException("Fail to get slave address");
 		}finally{
-			if(master != null){
+			if(masterJedis != null){
 				masterJedis.close();
 			}
 		}
@@ -262,8 +263,9 @@ public class JedisSentinelReadPool extends Pool<Jedis>{
 							String[] messageArray = message.split(" ");
 							if(messageArray.length > 3){
 								if(masterName.equals(messageArray[0])){
-									int port = Integer.parseInt(messageArray[4]);
-									master = new HostAndPort(messageArray[3], port);
+									logger.info(String.format("master %s switch to %s:%s", master, messageArray[3], messageArray[4]));
+																		
+									master = initMaster(sentinels, masterName);
 									slave = initSlave(master);
 									initPool(slave);
 								}else{

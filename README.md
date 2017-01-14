@@ -7,3 +7,8 @@ lam-dubbo-core
 lam-dubbo-api
 lam-dubbo-provider
 lam-dubbo-consumer
+lam-redis
+
+#2017-01-14
+Some functions needs to be improved below:
+The Program needs to deal with the situation of slave node failure.

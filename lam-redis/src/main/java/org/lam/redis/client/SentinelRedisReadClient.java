@@ -33,7 +33,7 @@ public class SentinelRedisReadClient implements Closeable{
 	
 	private void init(){
 		sentinels = new HashSet<String>();
-		sentinels.add(new HostAndPort("192.168.204.127", 26379).toString());
+		sentinels.add(new HostAndPort("192.168.20.111", 26379).toString());
 		
 		config = new GenericObjectPoolConfig();
 		
