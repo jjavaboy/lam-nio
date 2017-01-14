@@ -20,9 +20,8 @@ import redis.clients.util.JedisURIHelper;
 
 /**
 * <p>
-* jedis facory
+* @see {@link redis.clients.jedis.JedisFactory}
 * </p>
-* @author linanmiao
 * @date 2017年1月11日
 * @versio 1.0
 */

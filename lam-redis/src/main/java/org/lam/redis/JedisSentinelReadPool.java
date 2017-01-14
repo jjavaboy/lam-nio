@@ -259,7 +259,7 @@ public class JedisSentinelReadPool extends Pool<Jedis>{
 					jedis.subscribe(new JedisPubSub(){
 						@Override
 						public void onMessage(String channel, String message) {
-							logger.info(String.format("Sentinel[%s:%d] publish message:%s", host, port, message));
+							logger.info(String.format("Sentinel[%s:%d] channel:%s, publish message:%s", channel, host, port, message));
 							String[] messageArray = message.split(" ");
 							if(messageArray.length > 3){
 								if(masterName.equals(messageArray[0])){
@@ -278,6 +278,24 @@ public class JedisSentinelReadPool extends Pool<Jedis>{
 							}
 						}
 					}, "+switch-master");
+					
+					//subscribe +sdown even
+					//+sdown slave 192.168.20.111:6378 192.168.20.111 6378 @ mymaster 192.168.20.111 6379
+					jedis.subscribe(new JedisPubSub(){
+						@Override
+						public void onMessage(String channel, String message) {
+							logger.info(String.format("Sentinel[%s:%d] channel:%s, publish message:%s", channel, host, port, message));
+							String[] messageArray = message.split(" ");
+							if("slave".equals(messageArray[0]) && messageArray.length > 8){
+								//It meams that the current slave is down.
+								if(slave.getHost().equals(messageArray[2]) && Integer.toString(slave.getPort()).equals(messageArray[3])){
+									logger.info(String.format("slave %s:%d is down", slave.getHost(), slave.getPort()));
+									slave = initSlave(master);
+									initPool(slave);
+								}
+							}
+						}
+					}, "+sdown");
 				}catch(JedisConnectionException e){
 					if(running.get()){
 						logger.error(String.format("sleep %d and retry to connection redis", subscribeRetryWaitTimeMillis));
