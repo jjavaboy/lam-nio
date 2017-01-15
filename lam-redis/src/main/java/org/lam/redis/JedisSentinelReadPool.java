@@ -296,6 +296,14 @@ public class JedisSentinelReadPool extends Pool<Jedis>{
 							}
 						}
 					}, "+sdown");
+					
+					//subscribe
+					jedis.subscribe(new JedisPubSub(){
+						@Override
+						public void onMessage(String channel, String message) {
+							logger.info(String.format("Sentinel[%s:%d] channel:%s, publish message:%s", channel, host, port, message));
+						}
+					}, "__sentinel__:hello");
 				}catch(JedisConnectionException e){
 					if(running.get()){
 						logger.error(String.format("sleep %d and retry to connection redis", subscribeRetryWaitTimeMillis));
