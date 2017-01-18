@@ -13,5 +13,7 @@
     <module>lam-dubbo-core</module>
     <module>lam-dubbo-consumer</module>
     <module>lam-redis</module>
+    <module>lam-hongbao-core</module>
+    <module>lam-hongbao-service</module>
   </modules>
 </project>
