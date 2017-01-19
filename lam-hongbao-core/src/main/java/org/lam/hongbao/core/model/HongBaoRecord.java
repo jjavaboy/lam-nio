@@ -3,7 +3,7 @@ package org.lam.hongbao.core.model;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.google.gson.Gson;
+import org.lam.hongbao.core.constant.Status;
 
 /**
 * <p>
@@ -25,7 +25,7 @@ public class HongBaoRecord implements Serializable{
 	
 	private Long hongbaoId;
 	
-	private byte status;
+	private byte status = Status.HongBaoRecord.UNCONSUME.getValue();
 	
 	private Date createTime;
 	
@@ -85,10 +85,6 @@ public class HongBaoRecord implements Serializable{
 	
 	public void setUpdateTime(Date updateTime) {
 		this.updateTime = updateTime;
-	}
-	
-	public String toString(){
-		return new Gson().toJson(this);
 	}
 	
 }

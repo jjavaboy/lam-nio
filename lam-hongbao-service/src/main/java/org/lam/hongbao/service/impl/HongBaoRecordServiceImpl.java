@@ -14,21 +14,22 @@ import org.lam.hongbao.core.service.HongBaoRecordService;
 public class HongBaoRecordServiceImpl implements HongBaoRecordService{
 
 	@Override
-	public boolean saveHongBao(HongBaoRecord hongBao) {
+	public boolean saveHongBaoRecord(HongBaoRecord hongBao) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean updateHongBao(HongBaoRecord hongBao) {
+	public boolean updateHongBaoRecord(HongBaoRecord hongBao) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public HongBaoRecord findHongBao(long id) {
+	public HongBaoRecord findHongBaoRecord(long id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 
 }

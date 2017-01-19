@@ -12,16 +12,22 @@ public class CacheKeys {
 	
 	public static final String KEY_SPLIT = ":";
 	
-	private static final String HONEBAO_QUEUE_CONSUME = "hongbao:queue:consume";
+	private static final String HONGBAO_QUEUE_CONSUME = "hongbao:queue:consume";
 	
-	private static final String HONEBAO_QUEUE_UNCONSUME = "hongbao:queue:unconsume";
+	private static final String HONGBAO_QUEUE_UNCONSUME = "hongbao:queue:unconsume";
+	
+	private static final String HONGBAO_MAP_TAKE = "hongbao:map:take";
 	
 	public static String hongbaoQueueConsumeKey(long hongbaoId){
-		return HONEBAO_QUEUE_CONSUME + KEY_SPLIT + hongbaoId;
+		return HONGBAO_QUEUE_CONSUME + KEY_SPLIT + hongbaoId;
 	}
 	
 	public static String hongbaoQueueUnConsumeKey(long hongbaoId){
-		return HONEBAO_QUEUE_UNCONSUME + KEY_SPLIT + hongbaoId;
+		return HONGBAO_QUEUE_UNCONSUME + KEY_SPLIT + hongbaoId;
+	}
+	
+	public static String hongbaoMapTakeKey(long hongbaoId){
+		return HONGBAO_MAP_TAKE + KEY_SPLIT + hongbaoId;
 	}
 
 }

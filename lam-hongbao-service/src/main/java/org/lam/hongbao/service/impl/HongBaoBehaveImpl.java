@@ -1,13 +1,19 @@
 package org.lam.hongbao.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.lam.hongbao.core.constant.CacheKeys;
+import org.lam.hongbao.core.constant.Status;
 import org.lam.hongbao.core.model.HongBao;
 import org.lam.hongbao.core.model.HongBaoRecord;
 import org.lam.hongbao.core.service.HongBaoBehave;
+import org.lam.hongbao.core.service.HongBaoRecordService;
 import org.lam.hongbao.service.factory.HongBaoFactory;
 import org.lam.redis.client.RedisClient;
+
+import com.google.gson.Gson;
 
 import redis.clients.jedis.Jedis;
 
@@ -21,32 +27,65 @@ import redis.clients.jedis.Jedis;
 */
 public class HongBaoBehaveImpl implements HongBaoBehave{
 
+	private HongBaoRecordService hongBaoRecordService;
+	
+	RedisClient client = new RedisClient("192.168.204.127", 6378, null);
+
 	@Override
 	public boolean issueHongBao(HongBao hongBao) {
 		List<HongBaoRecord> recordList = HongBaoFactory.generateRandomMoneyHongBao(hongBao);
-		RedisClient client = new RedisClient("192.168.204.127", 6378, null);
+		for(HongBaoRecord record : recordList){
+			hongBaoRecordService.saveHongBaoRecord(record);
+		}
+		
 		Jedis jedis = client.getResource();
 		try{
-		String key = CacheKeys.hongbaoQueueUnConsumeKey(hongBao.getId());
-		boolean exists = jedis.exists(key);
-		if(exists){
-			jedis.del(key);
-		}
-		String[] recordArray = toStringArray(recordList);
-		jedis.lpush(key, recordArray);
+			String key = CacheKeys.hongbaoQueueUnConsumeKey(hongBao.getId());
+			boolean exists = jedis.exists(key);
+			if(exists){
+				jedis.del(key);
+			}
+			String[] recordArray = toJsonArray(recordList);
+			jedis.lpush(key, recordArray);
 		}finally{
 			client.close(jedis);
-			client.close();
 		}
 		return false;
 	}
 	
-	private String[] toStringArray(List<HongBaoRecord> recordList){
+	private String[] toJsonArray(List<HongBaoRecord> recordList){
 		String[] array = new String[recordList.size()];
+		Gson gson = new Gson();
 		for(int idx = 0; idx < recordList.size(); idx++){
-			array[idx] = recordList.get(idx).toString();
+			array[idx] = gson.toJson(recordList.get(idx));
 		}
 		return array;
+	}
+
+	@Override
+	public boolean takeHongBao(long userId, long hongbaoId) {
+		String key = CacheKeys.hongbaoMapTakeKey(hongbaoId);
+		Jedis jedis = client.getResource();
+		try{
+			String hongbaoRecordId = jedis.hget(key, String.valueOf(userId));
+			if(StringUtils.isNotBlank(hongbaoRecordId)){
+				return false;
+			}
+			String recordStr = jedis.lpop(CacheKeys.hongbaoQueueUnConsumeKey(hongbaoId));
+			if(StringUtils.isBlank(recordStr)){
+				return false;
+			}
+			Gson gson = new Gson();
+			HongBaoRecord record = gson.fromJson(recordStr, HongBaoRecord.class);
+			record.setUserId(userId);
+			record.setStatus(Status.HongBaoRecord.CONSUME.getValue());
+			record.setUpdateTime(new Date());
+			
+			jedis.lpush(CacheKeys.hongbaoQueueConsumeKey(hongbaoId), gson.toJson(record));
+		}finally{
+			client.close(jedis);
+		}
+		return true;
 	}
 
 }

@@ -18,5 +18,13 @@ public interface HongBaoBehave {
 	 * @return
 	 */
 	public boolean issueHongBao(HongBao hongBao);
+	
+	/**
+	 * 抢红包
+	 * @param userId
+	 * @param hongbaoId
+	 * @return
+	 */
+	public boolean takeHongBao(long userId, long hongbaoId);
 
 }
