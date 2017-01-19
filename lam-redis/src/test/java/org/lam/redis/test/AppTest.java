@@ -1,8 +1,10 @@
 package org.lam.redis.test;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import org.lam.redis.client.RedisClient;
 import org.lam.redis.client.SentinelRedisClient;
 import org.lam.redis.client.SentinelRedisReadClient;
 import org.lam.redis.model.SNode;
@@ -47,9 +49,21 @@ public class AppTest {
 	}
 	
 	public static void main(String[] args){
-		String key1 = null;
-		String key2 = null;
-		System.out.println(key1 == key2);
+		RedisClient client = new RedisClient("192.168.204.127", 6378, null);
+		Jedis jedis = client.getResource();
+		boolean exist = jedis.exists("myke");
+		System.out.println(exist);
+		client.close(jedis);
+		sleepMillsecond(3000);
+		client.close();
+	}
+	
+	private static void sleepMillsecond(long timeout){
+		try {
+			TimeUnit.MILLISECONDS.sleep(timeout);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 	
 }
