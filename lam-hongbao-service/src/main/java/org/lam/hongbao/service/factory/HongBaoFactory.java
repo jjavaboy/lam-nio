@@ -27,7 +27,7 @@ public class HongBaoFactory {
 	 * @param hongBao
 	 * @return
 	 */
-	public static List<HongBaoRecord> generateRandomPriceHongBao(HongBao hongBao){
+	public static List<HongBaoRecord> generateRandomMoneyHongBao(HongBao hongBao){
 		if(hongBao.getMinMoney() > hongBao.getMaxMoney()){
 			throw new IllegalArgumentException(String.format("minMoney(%d) bigger than maxMoney(%d).", hongBao.getMinMoney(), hongBao.getMaxMoney()));
 		}
@@ -67,7 +67,7 @@ public class HongBaoFactory {
 		hongBao.setMoney(15);
 		hongBao.setNum(7);
 	
-		List<HongBaoRecord> recordList = generateRandomPriceHongBao(hongBao);
+		List<HongBaoRecord> recordList = generateRandomMoneyHongBao(hongBao);
 		for(HongBaoRecord record : recordList){
 			System.out.println(record);
 		}

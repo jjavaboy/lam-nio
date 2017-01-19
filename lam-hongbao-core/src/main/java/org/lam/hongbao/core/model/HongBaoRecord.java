@@ -25,7 +25,11 @@ public class HongBaoRecord implements Serializable{
 	
 	private Long hongbaoId;
 	
+	private byte status;
+	
 	private Date createTime;
+	
+	private Date updateTime;
 
 	public Long getId() {
 		return id;
@@ -58,6 +62,14 @@ public class HongBaoRecord implements Serializable{
 	public void setHongbaoId(Long hongbaoId) {
 		this.hongbaoId = hongbaoId;
 	}
+	
+	public byte getStatus() {
+		return status;
+	}
+	
+	public void setStatus(byte status) {
+		this.status = status;
+	}
 
 	public Date getCreateTime() {
 		return createTime;
@@ -65,6 +77,14 @@ public class HongBaoRecord implements Serializable{
 
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+	
+	public Date getUpdateTime() {
+		return updateTime;
+	}
+	
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
 	}
 	
 	public String toString(){
