@@ -3,6 +3,8 @@ package org.lam.hongbao.core.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import com.google.gson.Gson;
+
 /**
 * <p>
 * hong bao record
@@ -19,7 +21,7 @@ public class HongBaoRecord implements Serializable{
 	
 	private Long userId;
 	
-	private Integer money;
+	private int money;
 	
 	private Long hongbaoId;
 	
@@ -41,11 +43,11 @@ public class HongBaoRecord implements Serializable{
 		this.userId = userId;
 	}
 
-	public Integer getMoney() {
+	public int getMoney() {
 		return money;
 	}
 
-	public void setMoney(Integer money) {
+	public void setMoney(int money) {
 		this.money = money;
 	}
 	
@@ -63,6 +65,10 @@ public class HongBaoRecord implements Serializable{
 
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+	
+	public String toString(){
+		return new Gson().toJson(this);
 	}
 	
 }

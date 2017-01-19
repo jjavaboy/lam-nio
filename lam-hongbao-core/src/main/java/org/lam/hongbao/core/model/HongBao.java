@@ -3,6 +3,8 @@ package org.lam.hongbao.core.model;
 import java.io.Serializable;
 import java.util.Date;
 
+import org.lam.hongbao.core.constant.HongBaoRange;
+
 /**
 * <p>
 * TODO
@@ -19,7 +21,16 @@ public class HongBao implements Serializable {
 	
 	private Long userId;
 	
-	private Integer money;
+	private int money;
+	
+	//红包的最小值
+	private int minMoney = HongBaoRange.MIN.getValue();
+	
+	//红包的最大值
+	private int maxMoney = HongBaoRange.MAX.getValue();
+	
+	//数量
+	private int num;
 	
 	private byte status;
 	
@@ -43,12 +54,36 @@ public class HongBao implements Serializable {
 		this.userId = userId;
 	}
 
-	public Integer getMoney() {
+	public int getMoney() {
 		return money;
 	}
 
-	public void setMoney(Integer money) {
+	public void setMoney(int money) {
 		this.money = money;
+	}
+	
+	public int getMinMoney() {
+		return minMoney;
+	}
+	
+	public void setMinMoney(int minMoney) {
+		this.minMoney = minMoney;
+	}
+	
+	public int getMaxMoney() {
+		return maxMoney;
+	}
+	
+	public void setMaxMoney(int maxMoney) {
+		this.maxMoney = maxMoney;
+	}
+	
+	public int getNum() {
+		return num;
+	}
+	
+	public void setNum(int num) {
+		this.num = num;
 	}
 
 	public byte getStatus() {
