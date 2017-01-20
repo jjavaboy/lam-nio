@@ -9,6 +9,26 @@ package org.lam.hongbao.core.constant;
 */
 public interface Status {
 	
+	enum HttpResponse{
+		OK(200, "success");
+		
+		private int value;
+		private String describe;
+		
+		HttpResponse(int value, String describe){
+			this.value = value;
+			this.describe = describe;
+		}
+		
+		public int getValue() {
+			return value;
+		}
+		
+		public String getDescribe() {
+			return describe;
+		}
+	}
+	
 	enum HongBao{
 		
 	}

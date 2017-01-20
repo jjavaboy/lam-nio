@@ -10,6 +10,7 @@ import org.lam.hongbao.core.model.HongBao;
 import org.lam.hongbao.core.model.HongBaoRecord;
 import org.lam.hongbao.core.service.HongBaoBehave;
 import org.lam.hongbao.core.service.HongBaoRecordService;
+import org.lam.hongbao.service.concurrent.DistributedExecutor;
 import org.lam.hongbao.service.factory.HongBaoFactory;
 import org.lam.redis.client.RedisClient;
 
@@ -64,28 +65,41 @@ public class HongBaoBehaveImpl implements HongBaoBehave{
 
 	@Override
 	public boolean takeHongBao(long userId, long hongbaoId) {
-		String key = CacheKeys.hongbaoMapTakeKey(hongbaoId);
-		Jedis jedis = client.getResource();
+		String key = CacheKeys.hongbaoMapTakenKey(hongbaoId);
+		final Jedis jedis = client.getResource();
 		try{
 			String hongbaoRecordId = jedis.hget(key, String.valueOf(userId));
 			if(StringUtils.isNotBlank(hongbaoRecordId)){
 				return false;
 			}
-			String recordStr = jedis.lpop(CacheKeys.hongbaoQueueUnConsumeKey(hongbaoId));
+			final String recordStr = jedis.lpop(CacheKeys.hongbaoQueueUnConsumeKey(hongbaoId));
 			if(StringUtils.isBlank(recordStr)){
 				return false;
 			}
-			Gson gson = new Gson();
-			HongBaoRecord record = gson.fromJson(recordStr, HongBaoRecord.class);
-			record.setUserId(userId);
-			record.setStatus(Status.HongBaoRecord.CONSUME.getValue());
-			record.setUpdateTime(new Date());
+			final long fUserId = userId, fHongbaoId = hongbaoId;
+			boolean take = new DistributedExecutor(CacheKeys.hongbaoTakingKey(hongbaoId, userId)){
+				@Override
+				public boolean execute() {
+					Gson gson = new Gson();
+					HongBaoRecord record = gson.fromJson(recordStr, HongBaoRecord.class);
+					record.setUserId(fUserId);
+					record.setStatus(Status.HongBaoRecord.CONSUME.getValue());
+					record.setUpdateTime(new Date());
+					
+					jedis.lpush(CacheKeys.hongbaoQueueConsumeKey(fHongbaoId), gson.toJson(record));
+					return true;
+			}}.run();
 			
-			jedis.lpush(CacheKeys.hongbaoQueueConsumeKey(hongbaoId), gson.toJson(record));
+			return take;
 		}finally{
 			client.close(jedis);
 		}
-		return true;
+	}
+
+	@Override
+	public boolean changeHongBao() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

@@ -26,5 +26,11 @@ public interface HongBaoBehave {
 	 * @return
 	 */
 	public boolean takeHongBao(long userId, long hongbaoId);
+	
+	/**
+	 * 更新红包到库
+	 * @return
+	 */
+	public boolean changeHongBao();
 
 }
