@@ -57,24 +57,16 @@ public class AppTest {
 	}
 	
 	public static void main(String[] args){
-		RedisClient client = new RedisClient();
+		RedisClient client = new RedisClient("192.168.204.127", 6378, null);
 		Jedis jedis = client.getResource();
 		boolean exist = jedis.exists("myke");
 		System.out.println(exist);
 		client.close(jedis);
-		sleepMillsecond(3000);
+		sleepMillseconds(3000);
 		client.close();
 	}
 	
-	private static void sleepMillsecond(long timeout){
-		try {
-			TimeUnit.MILLISECONDS.sleep(timeout);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	private void sleepMillseconds(long timeout){
+	private static void sleepMillseconds(long timeout){
 		try {
 			TimeUnit.MILLISECONDS.sleep(timeout);
 		} catch (InterruptedException e) {

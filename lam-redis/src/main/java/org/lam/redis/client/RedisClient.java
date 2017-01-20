@@ -20,9 +20,9 @@ public class RedisClient implements Closeable{
 	
 	private JedisPool pool;
 	
-	private String host;
+	private String host = Protocol.DEFAULT_HOST;
 	
-	private int port;
+	private int port = Protocol.DEFAULT_PORT;
 	
 	private String password;
 	
@@ -32,15 +32,19 @@ public class RedisClient implements Closeable{
 		init();
 	}
 	
+	public RedisClient(String host, int port, String password){
+		this.host = host;
+		this.port = port;
+		this.password = password;
+		init();
+	}
+	
 	private void init(){
 		final GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
 		poolConfig.setMaxTotal(GenericObjectPoolConfig.DEFAULT_MAX_TOTAL);
 		poolConfig.setMaxIdle(GenericObjectPoolConfig.DEFAULT_MAX_IDLE);
 		poolConfig.setMinIdle(GenericObjectPoolConfig.DEFAULT_MIN_IDLE);
 		//You can also configurate other arguments for poolConfig.
-		
-		host = "127.0.0.1";
-		port = 6379;
 		
 		pool = new JedisPool(poolConfig, host, port, timeout, password, Protocol.DEFAULT_DATABASE);
 	}

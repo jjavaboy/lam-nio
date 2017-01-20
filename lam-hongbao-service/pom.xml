@@ -20,6 +20,11 @@
 	  <artifactId>lam-hongbao-core</artifactId>
 	  <version>0.0.1-SNAPSHOT</version>
   	</dependency>
+  	<dependency>
+  		<groupId>lam</groupId>
+  		<artifactId>lam-redis</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

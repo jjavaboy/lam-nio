@@ -12,10 +12,10 @@ import org.lam.hongbao.core.model.HongBaoRecord;
 */
 public interface HongBaoRecordService {
 	
-	public boolean saveHongBao(HongBaoRecord hongBao);
+	public boolean saveHongBaoRecord(HongBaoRecord hongBao);
 	
-	public boolean updateHongBao(HongBaoRecord hongBao);
+	public boolean updateHongBaoRecord(HongBaoRecord hongBao);
 	
-	public HongBaoRecord findHongBao(long id);
+	public HongBaoRecord findHongBaoRecord(long id);
 
 }
