@@ -1,8 +1,10 @@
 package org.lam.redis.test;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
+import org.lam.redis.client.RedisClient;
 import org.lam.redis.client.SentinelRedisClient;
 import org.lam.redis.client.SentinelRedisReadClient;
 import org.lam.redis.model.SNode;
@@ -37,19 +39,46 @@ public class AppTest {
 	@Test
 	public void redisReadClient(){
 		SentinelRedisReadClient client = new SentinelRedisReadClient();
-		Jedis jedis = client.getResource();
+		while(true){
+			Jedis jedis = client.getResource();
+			try{
 		Set<String> ks = jedis.keys("*");
 		for(String k : ks){
 			System.out.println(k);
 		}
-		client.close(jedis);
-		client.close();
+			}catch(Exception e){
+				e.printStackTrace();
+			}finally{
+				client.close(jedis);				
+			}
+			sleepMillseconds(1200);
+		}
+		//client.close();
 	}
 	
 	public static void main(String[] args){
-		String key1 = null;
-		String key2 = null;
-		System.out.println(key1 == key2);
+		RedisClient client = new RedisClient();
+		Jedis jedis = client.getResource();
+		boolean exist = jedis.exists("myke");
+		System.out.println(exist);
+		client.close(jedis);
+		sleepMillsecond(3000);
+		client.close();
 	}
 	
+	private static void sleepMillsecond(long timeout){
+		try {
+			TimeUnit.MILLISECONDS.sleep(timeout);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void sleepMillseconds(long timeout){
+		try {
+			TimeUnit.MILLISECONDS.sleep(timeout);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 }
