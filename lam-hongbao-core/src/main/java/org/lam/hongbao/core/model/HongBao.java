@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import org.lam.hongbao.core.constant.HongBaoRange;
+import org.lam.hongbao.core.constant.Status;
 
 /**
 * <p>
@@ -32,7 +33,7 @@ public class HongBao implements Serializable {
 	//数量
 	private int num;
 	
-	private byte status;
+	private byte status = Status.HongBao.UNCONSUME.getValue();
 	
 	private Date createTime;
 	

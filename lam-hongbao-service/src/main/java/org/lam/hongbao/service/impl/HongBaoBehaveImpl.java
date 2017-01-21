@@ -10,6 +10,7 @@ import org.lam.hongbao.core.model.HongBao;
 import org.lam.hongbao.core.model.HongBaoRecord;
 import org.lam.hongbao.core.service.HongBaoBehave;
 import org.lam.hongbao.core.service.HongBaoRecordService;
+import org.lam.hongbao.core.service.HongBaoService;
 import org.lam.hongbao.service.concurrent.DistributedExecutor;
 import org.lam.hongbao.service.factory.HongBaoFactory;
 import org.lam.redis.client.RedisClient;
@@ -28,6 +29,8 @@ import redis.clients.jedis.Jedis;
 */
 public class HongBaoBehaveImpl implements HongBaoBehave{
 
+	private HongBaoService hongBaoService;
+	
 	private HongBaoRecordService hongBaoRecordService;
 	
 	RedisClient client = new RedisClient("192.168.204.127", 6378, null);
@@ -65,26 +68,27 @@ public class HongBaoBehaveImpl implements HongBaoBehave{
 
 	@Override
 	public boolean takeHongBao(long userId, long hongbaoId) {
-		String key = CacheKeys.hongbaoMapTakenKey(hongbaoId);
 		final Jedis jedis = client.getResource();
 		try{
-			String hongbaoRecordId = jedis.hget(key, String.valueOf(userId));
-			if(StringUtils.isNotBlank(hongbaoRecordId)){
+			HongBao hongBao = hongBaoService.findHongBao(hongbaoId);
+			if(hongBao == null || hongBao.getStatus() == Status.HongBao.CONSUME.getValue()){
 				return false;
 			}
-			final String recordStr = jedis.lpop(CacheKeys.hongbaoQueueUnConsumeKey(hongbaoId));
-			if(StringUtils.isBlank(recordStr)){
+			String hongbaoRecordId = jedis.hget(CacheKeys.hongbaoMapTakenKey(hongbaoId), String.valueOf(userId));
+			if(StringUtils.isNotBlank(hongbaoRecordId)){
 				return false;
 			}
 			final long fUserId = userId, fHongbaoId = hongbaoId;
 			boolean take = new DistributedExecutor(CacheKeys.hongbaoTakingKey(hongbaoId, userId)){
 				@Override
 				public boolean execute() {
+					String recordStr = jedis.lpop(CacheKeys.hongbaoQueueUnConsumeKey(fHongbaoId));
+					if(StringUtils.isBlank(recordStr)){
+						return false;
+					}
 					Gson gson = new Gson();
 					HongBaoRecord record = gson.fromJson(recordStr, HongBaoRecord.class);
 					record.setUserId(fUserId);
-					record.setStatus(Status.HongBaoRecord.CONSUME.getValue());
-					record.setUpdateTime(new Date());
 					
 					jedis.lpush(CacheKeys.hongbaoQueueConsumeKey(fHongbaoId), gson.toJson(record));
 					return true;
@@ -97,9 +101,35 @@ public class HongBaoBehaveImpl implements HongBaoBehave{
 	}
 
 	@Override
-	public boolean changeHongBao() {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean finalizeHongBao(long hongbaoId) {
+		Jedis jedis = client.getResource();
+		try{
+			String consumeHongbaoKey = CacheKeys.hongbaoQueueConsumeKey(hongbaoId);
+			long consumeHongbaoLen = jedis.llen(consumeHongbaoKey);
+			if(consumeHongbaoLen == 0){
+				return true;
+			}
+			Gson gson = new Gson();
+			Date now = new Date();
+			while(consumeHongbaoLen-- > 0){
+				String recordStr = jedis.lpop(consumeHongbaoKey);
+				HongBaoRecord record = gson.fromJson(recordStr, HongBaoRecord.class);
+				record.setStatus(Status.HongBaoRecord.CONSUME.getValue());
+				record.setUpdateTime(now);
+				hongBaoRecordService.updateHongBaoRecord(record);
+			}
+			String unConsumeHongbaoKey = CacheKeys.hongbaoQueueUnConsumeKey(hongbaoId);
+			long unConsumeHongbaoLen = jedis.llen(unConsumeHongbaoKey);
+			if(unConsumeHongbaoLen == 0){
+				HongBao hongBao = hongBaoService.findHongBao(hongbaoId);
+				hongBao.setStatus(Status.HongBao.CONSUME.getValue());
+				hongBao.setUpdateTime(new Date());
+				hongBaoService.updateHongBao(hongBao);
+			}
+			return true;
+		}finally{
+			client.close(jedis);
+		}
 	}
 
 }

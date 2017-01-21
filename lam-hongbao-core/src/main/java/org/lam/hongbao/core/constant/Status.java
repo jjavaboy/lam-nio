@@ -30,7 +30,24 @@ public interface Status {
 	}
 	
 	enum HongBao{
+		UNCONSUME((byte)0, "未消费"),
+		CONSUME((byte)1, "已消费");
 		
+		private byte value;
+		private String describe;
+		
+		HongBao(byte value, String describe){
+			this.value = value;
+			this.describe = describe;
+		}
+		
+		public byte getValue() {
+			return value;
+		}
+		
+		public String getDescribe() {
+			return describe;
+		}
 	}
 	
 	enum HongBaoRecord{

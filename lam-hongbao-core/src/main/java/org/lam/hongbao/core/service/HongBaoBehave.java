@@ -28,9 +28,9 @@ public interface HongBaoBehave {
 	public boolean takeHongBao(long userId, long hongbaoId);
 	
 	/**
-	 * 更新红包到库
+	 * 将抢的红包记录更新到库，如果红包已经抢完，则更新红包状态
 	 * @return
 	 */
-	public boolean changeHongBao();
+	public boolean finalizeHongBao(long hongbaoId);
 
 }
