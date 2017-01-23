@@ -1,6 +1,7 @@
 package lam.concurrent;
 
 import java.io.File;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -75,7 +76,7 @@ public class CalculatePlatform {
 		return size.get();
 	}
 	
-	public void destry(){
+	public void destroy(){
 		executorService.shutdown();
 	}
 	
@@ -99,13 +100,14 @@ public class CalculatePlatform {
 				e.printStackTrace();
 			}
 		}
+		
 		long start = System.nanoTime();
 		CalculatePlatform calculatePlatform = new CalculatePlatform(nThreads);
 		calculatePlatform.calculate(new String[]{"C:\\", "D:\\"});
 		System.out.println("size:" + calculatePlatform.getSize());
 		System.out.println("time:" + (System.nanoTime() - start) / 1.0e9);
 		System.out.println("nThread:" + nThreads);
-		calculatePlatform.destry();
+		calculatePlatform.destroy();
 	}
 
 }

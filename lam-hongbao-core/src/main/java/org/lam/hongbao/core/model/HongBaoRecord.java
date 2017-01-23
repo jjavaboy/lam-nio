@@ -21,7 +21,7 @@ public class HongBaoRecord implements Serializable{
 	
 	private Long userId;
 	
-	private int money;
+	private double money;
 	
 	private Long hongbaoId;
 	
@@ -47,11 +47,11 @@ public class HongBaoRecord implements Serializable{
 		this.userId = userId;
 	}
 
-	public int getMoney() {
+	public double getMoney() {
 		return money;
 	}
 
-	public void setMoney(int money) {
+	public void setMoney(double money) {
 		this.money = money;
 	}
 	
