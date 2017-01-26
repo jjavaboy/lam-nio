@@ -3,7 +3,6 @@ package lam.util;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.Random;
 
 /**
 * <p>
@@ -14,6 +13,13 @@ import java.util.Random;
 * @version 1.0
 */
 public class MathUtil {
+	
+	/**
+	 * function: d1 - d2
+	 */
+	public static double subtraction(double d1, double d2){
+		return sum(d1, 0 - d2);
+	}
 	
 	public static double sum(double d1, double d2){
 		BigDecimal big1 = new BigDecimal(Double.toString(d1));
@@ -43,15 +49,6 @@ public class MathUtil {
 		decimalFormat.setRoundingMode(RoundingMode.HALF_UP);
 		String ds = decimalFormat.format(d);
 		return new Double(ds).doubleValue();
-	}
-	
-	public static double positiveGaussian(double average, double deviation){
-		Random random = new Random();
-		double gaussian = Math.sqrt(deviation) * random.nextGaussian() + average;
-		if(gaussian > 0 && (gaussian = decimal(gaussian, "#.00")) > 0){
-			return gaussian;
-		}
-		return positiveGaussian(average, deviation);
 	}
 
 }

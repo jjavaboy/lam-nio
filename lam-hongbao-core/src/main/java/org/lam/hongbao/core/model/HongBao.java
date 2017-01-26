@@ -22,13 +22,13 @@ public class HongBao implements Serializable {
 	
 	private Long userId;
 	
-	private int money;
+	private double money;
 	
 	//红包的最小值
-	private int minMoney = HongBaoRange.MIN.getValue();
+	private double minMoney = HongBaoRange.MIN.getValue();
 	
 	//红包的最大值
-	private int maxMoney = HongBaoRange.MAX.getValue();
+	private double maxMoney = HongBaoRange.MAX.getValue();
 	
 	//数量
 	private int num;
@@ -55,15 +55,15 @@ public class HongBao implements Serializable {
 		this.userId = userId;
 	}
 
-	public int getMoney() {
+	public double getMoney() {
 		return money;
 	}
 
-	public void setMoney(int money) {
+	public void setMoney(double money) {
 		this.money = money;
 	}
 	
-	public int getMinMoney() {
+	public double getMinMoney() {
 		return minMoney;
 	}
 	
@@ -71,7 +71,7 @@ public class HongBao implements Serializable {
 		this.minMoney = minMoney;
 	}
 	
-	public int getMaxMoney() {
+	public double getMaxMoney() {
 		return maxMoney;
 	}
 	

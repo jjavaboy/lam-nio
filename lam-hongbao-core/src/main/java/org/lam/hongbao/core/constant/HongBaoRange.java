@@ -9,17 +9,17 @@ package org.lam.hongbao.core.constant;
 */
 public enum HongBaoRange {
 	
-	MIN(1),
+	MIN(0.01),
 	
 	MAX(200);
 	
-	private int value;
+	private double value;
 	
-	private HongBaoRange(int value){
+	private HongBaoRange(double value){
 		this.value = value;
 	}
 	
-	public int getValue(){
+	public double getValue(){
 		return this.value;
 	}
 
