@@ -43,7 +43,7 @@ public abstract class DistributedExecutor {
 	public boolean run() {
 		Jedis jedis = client.getResource();
 		try {
-			while (retry-- == 0) {
+			while (retry-- >= 0) {
 				try{
 				if (jedis.setnx(getKey(), getValue()) == 1) {
 					jedis.expire(getKey(), expireSeconds);
