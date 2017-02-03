@@ -50,7 +50,8 @@ public class HongBaoFactory {
 				double diffMoney = random.nextDouble() * remain;
 				diffMoney = MathUtil.decimal(diffMoney, Constants.DEFAULT_DECIMAL);
 				remain = MathUtil.subtraction(remain, diffMoney);
-				record.setMoney(hongBao.getMinMoney() + diffMoney);
+				double money = MathUtil.sum(hongBao.getMinMoney(), diffMoney);
+				record.setMoney(money);
 			}
 			recordList.add(record);
 		}
