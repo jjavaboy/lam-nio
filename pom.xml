@@ -15,5 +15,6 @@
     <module>lam-redis</module>
     <module>lam-hongbao-core</module>
     <module>lam-hongbao-service</module>
+    <module>lam-zookeeper</module>
   </modules>
 </project>
