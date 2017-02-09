@@ -19,16 +19,26 @@
   </properties>
 
   <dependencies>
+	<dependency>
+    	<groupId>lam</groupId>
+ 		<artifactId>lam-nio-core</artifactId>
+   	    <version>0.0.1-SNAPSHOT</version>
+    </dependency>
   	<dependency>
 	    <groupId>org.apache.zookeeper</groupId>
 	    <artifactId>zookeeper</artifactId>
 	    <version>3.4.6</version>
 	</dependency>
 	<dependency>
-    <groupId>lam</groupId>
- 		<artifactId>lam-nio-core</artifactId>
-   	    <version>0.0.1-SNAPSHOT</version>
-    	</dependency>
+	    <groupId>org.apache.curator</groupId>
+	    <artifactId>curator-framework</artifactId>
+	    <version>3.2.1</version>
+	</dependency>
+	<dependency>
+	    <groupId>com.google.guava</groupId>
+	    <artifactId>guava</artifactId>
+	    <version>17.0</version>
+	</dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
