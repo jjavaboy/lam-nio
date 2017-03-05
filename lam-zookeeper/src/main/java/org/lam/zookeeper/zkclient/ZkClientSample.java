@@ -113,7 +113,7 @@ public class ZkClientSample {
 		acls.add(new ACL(ZooDefs.Perms.ADMIN, new Id(digest, DigestAuthenticationProvider.generateDigest(adminAuth))));
 		
 		path = "/test";
-		//zkClient.createPersistent(path, data, acls);
+		zkClient.createPersistent(path, data, acls);
 		/**
 		[zk: 192.168.20.111:2181(CONNECTED) 8] getAcl /test
 		'digest,'superUser:vLmzknrXH9dGsV4jNWsPmK2gqUU=
@@ -130,7 +130,7 @@ public class ZkClientSample {
 		: a		 
 		 */
 		
-		Console.println("AuthNode data:" + gson.toJson(zkClient.readData(path)));
+		//Console.println("AuthNode data:" + gson.toJson(zkClient.readData(path)));
 		
 
 		waitSelf();
