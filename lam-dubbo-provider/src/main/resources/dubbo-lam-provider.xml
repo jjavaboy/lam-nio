@@ -21,19 +21,24 @@
 	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 	
 	<!-- 提供方应用信息，用于计算依赖关系 -->
-    <dubbo:application name="lam-dubbo-provider"  />
+    <dubbo:application name="lam-dubbo-provider" owner="skylin" />
  
     <!-- 使用multicast广播注册中心暴露服务地址 -->
     <!-- <dubbo:registry address="multicast://224.5.6.7:1234" /> -->
     
     <!-- 使用zookeeper注册服务 -->
-    <dubbo:registry protocol="zookeeper" address="192.168.20.110:2181" /><!-- 192.168.20.110:2181,192.168.20.111:2181 -->
+    <dubbo:registry protocol="zookeeper" address="192.168.20.112:2181" /> <!-- 192.168.20.110:2181,192.168.20.111:2181 -->
  
-    <!-- 用dubbo协议在20880端口暴露服务 -->
-    <dubbo:protocol name="dubbo" port="20880" />
+    <!-- 用dubbo协议在20880端口暴露服务 --> <!-- config in dubbo.properties -->
+    <dubbo:protocol name="dubbo" port="20880" threadpool="fixed" threads="100" dispatcher="all" transporter="netty" charset="UTF-8" serialization="hessian2"/>
+    
+    <!-- 监控中心 -->
+    <!-- <dubbo:monitor protocol="dubbo" address="" /> -->
 	
 	<bean id="userService" class="lam.dubbo.provider.api.impl.UserServiceImpl" />
+	<bean id="loginService" class="lam.dubbo.provider.api.impl.LoginServiceImpl" />
 	
 	<dubbo:service interface="lam.dubbo.api.UserService" ref="userService" />
+	<dubbo:service interface="lam.dubbo.api.LoginService" ref="loginService" />
 	
 </beans>

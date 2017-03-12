@@ -98,6 +98,21 @@ public class ZkClientSample {
 		String writeAuth   = "writeUser:111111";  	   //WRITE(w): 写权限，可以向当前node写数据
 		String adminAuth   = "adminUser:111111";       //ADMIN(a): 管理权限，可以设置当前node的permission
 		
+		/**
+		public interface Perms {
+        int READ = 1 << 0;    //00001
+
+        int WRITE = 1 << 1;   //00010
+
+        int CREATE = 1 << 2;  //00100
+
+        int DELETE = 1 << 3;  //01000
+
+        int ADMIN = 1 << 4;   //10000
+
+        int ALL = READ | WRITE | CREATE | DELETE | ADMIN;  //11111
+    	} 
+		 */
 		//schema:权限控制模式(world,auth,digest,ip)
 		//auth:foo:true，类似:username:password
 		//先添加一个认证用户

@@ -21,4 +21,10 @@ public class UserServiceImpl implements UserService{
 		return "hello, " + username;
 	}
 
+	@Override
+	public String sayGoodBye(String username) {
+		System.out.println(String.format("%s [%s] - args:%s", DateUtil.now(), className, username));
+		return "good bye, " + username;
+	}
+
 }

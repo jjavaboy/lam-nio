@@ -1,7 +1,5 @@
 package lam.dubbo.provider.start;
 
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-
 /**
 * <p>
 * main class
@@ -13,15 +11,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class StartUp {
 
 	public static void main(String[] args){
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"dubbo-lam-provider.xml"});
-		context.start();
-		
-		try{
-			System.in.read();
-			context.stop();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+		com.alibaba.dubbo.container.Main.main(new String[]{});
 	}
 	
 }
