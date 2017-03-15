@@ -8,12 +8,14 @@ import java.util.concurrent.TimeUnit;
 
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkDataListener;
+import org.I0Itec.zkclient.IZkStateListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
 import org.I0Itec.zkclient.exception.ZkMarshallingError;
 import org.I0Itec.zkclient.serialize.SerializableSerializer;
 import org.I0Itec.zkclient.serialize.ZkSerializer;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.Watcher.Event.KeeperState;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Id;
@@ -39,6 +41,20 @@ public class ZkClientSample {
 	public static void main(String[] args) throws Exception {
 		int connectionTimeOut = Integer.MAX_VALUE;//time out for connecting to server
 		ZkClient zkClient = new ZkClient(buildDefaultZkConnection(), connectionTimeOut, buildDefaultZkSerializer());
+		
+		zkClient.subscribeStateChanges(new IZkStateListener(){
+			@Override
+			public void handleNewSession() throws Exception {
+			}
+
+			@Override
+			public void handleSessionEstablishmentError(Throwable arg0) throws Exception {
+			}
+
+			@Override
+			public void handleStateChanged(KeeperState arg0) throws Exception {
+			}
+		});
 	
 		String path = "/test1";
 		String rootPath = "/";
