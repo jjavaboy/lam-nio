@@ -1,5 +1,7 @@
 package lam.dubbo.consumer.start;
 
+import java.io.IOException;
+
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import lam.dubbo.api.UserService;
@@ -22,6 +24,12 @@ public class StartUp {
         String hello = userService.sayHello("linanmiao"); // 执行远程方法
  
         System.out.println( hello ); // 显示调用结果
+        try {
+			System.in.read();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+        context.close();
 	}
 
 }

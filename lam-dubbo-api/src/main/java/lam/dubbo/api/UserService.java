@@ -10,5 +10,7 @@ package lam.dubbo.api;
 public interface UserService {
 	
 	public String sayHello(String username);
+	
+	public String sayGoodBye(String username);
 
 }

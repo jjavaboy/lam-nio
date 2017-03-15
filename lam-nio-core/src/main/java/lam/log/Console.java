@@ -15,7 +15,7 @@ import com.google.gson.Gson;
 public class Console {
 	
 	private static PrintStream out = System.out;
-//	private static 
+
 	private static Gson gson = new Gson();
 	
 	public static void println(String log){
