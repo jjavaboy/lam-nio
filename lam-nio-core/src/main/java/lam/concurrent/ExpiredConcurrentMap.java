@@ -1,24 +1,72 @@
 package lam.concurrent;
 
+import java.io.Closeable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
 * <p>
-* 过期map
+* 过期map<br/>
+* 两个方法:<br/>
+* 1.操作key时操作判断是否过期<br/>
+* 2.定期判断key是否过期，每次定期判断20个<br/>
 * </p>
 * @author linanmiao
 * @date 2017年3月14日
 * @versio 1.0
 */
-public class ExpiredConcurrentMap <K, V>{
+public class ExpiredConcurrentMap <K, V> implements Closeable{
 	
 	private final ConcurrentMap<K, Entry> concurrentMap = new ConcurrentHashMap<K, Entry>();
+	private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ExpiredThreadFactory());
+	private final int expiredKeyNumberEachTask = 20;
 	
 	private static final long TTL_LIVE_FOREVER = -1;//never expired
 	private static final long TTL_NOT_EXISTS = -2;//key not exits;
+	
+	public ExpiredConcurrentMap(){
+		startSchedule();
+	}
+	
+	/**
+	 * start the schedule to determine if the key is expired.
+	 */
+	private void startSchedule(){
+		int corePoolSize = scheduledThreadPoolExecutor.getCorePoolSize();
+		for(int i = 0; i < corePoolSize; i++){
+			scheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable(){
+				@Override
+				public void run() {
+					Thread t = Thread.currentThread();
+					System.out.print("[" + t.getName() + "]schedule to check key expired start.\n=============================================\n");
+					Iterator<Map.Entry<K, Entry>> iter = concurrentMap.entrySet().iterator();
+					int expiredKeyNumber = 0;
+					while(iter.hasNext()){
+						Map.Entry<K, Entry> entry = iter.next();
+						if(entry.getValue() != null && isExpired(entry.getValue())){
+							//remove the key when it is expired and increment expired number
+							remove(entry.getKey());
+							expiredKeyNumber++;
+							System.out.println("[" + t.getName() + "]entry expired:" + entry.getValue());
+						}
+						if(expiredKeyNumber >= expiredKeyNumberEachTask){
+							break ;
+						}
+					}
+				}
+			}, 5000, 10000, TimeUnit.MILLISECONDS);
+		}
+	}
 	
 	public V get(K k){
 		Entry entry = concurrentMap.get(k);
@@ -26,11 +74,24 @@ public class ExpiredConcurrentMap <K, V>{
 	}
 	
 	public V set(K k, V v){
-		return set(new Entry(k, v));
+		Entry entry = concurrentMap.get(k);
+		if(entry == null){
+			entry = new Entry(k, v);
+		}else{
+			entry.v = v;			
+		}
+		return set(entry);
 	}
 	
-	public V set(K k, V v, int ttl){
-		return set(new Entry(k, v, ttl));
+	public V set(K k, V v, long ttl){
+		Entry entry = concurrentMap.get(k);
+		if(entry == null){
+			entry = new Entry(k, v, ttl); 
+		}else{
+			entry.v = v;
+			entry.setTtl(ttl);
+		}
+		return set(entry);
 	}
 	
 	/**
@@ -79,7 +140,7 @@ public class ExpiredConcurrentMap <K, V>{
 	
 	private boolean isExpired(Entry entry){
 		checkNull(entry);
-		return millisTtl(entry) > 0;
+		return millisTtl(entry) == TTL_NOT_EXISTS;
 	}
 	
 	private boolean isLiveForever(Entry entry){
@@ -130,6 +191,80 @@ public class ExpiredConcurrentMap <K, V>{
 				throw new IllegalArgumentException("ttl must positive");
 			}
 		}
+		
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			sb.append("date:").append(getCurrentTime(new Date(initMillisecond + getTtl()), "yyyy-MM-hh HH:mm:ss SSS"))
+			.append("{").append("K:").append(k).append(", V:").append(v).append(", ttl:").append(getTtl())
+			.append(", initMillisecond:").append(initMillisecond).append("}");
+			return sb.toString();
+		}
+	}
+	
+	static class ExpiredThreadFactory implements ThreadFactory{
+		private static final AtomicInteger THREAD_POOL_NUMBER = new AtomicInteger(0);
+		private final AtomicInteger threadNumber = new AtomicInteger(0);
+		private ThreadGroup threadGroup;
+		private String namePrefix;
+		
+		ExpiredThreadFactory(){
+			SecurityManager securityManager = System.getSecurityManager();
+			threadGroup = securityManager != null ? securityManager.getThreadGroup() : Thread.currentThread().getThreadGroup();
+			
+			namePrefix = String.format("ExpiredThreadPool-%d-thread-", THREAD_POOL_NUMBER.incrementAndGet());
+		}
+		
+		@Override
+		public Thread newThread(Runnable r) {
+			Thread t = new Thread(threadGroup, r, namePrefix + threadNumber.incrementAndGet(), 0);
+			if(t.isDaemon()){
+				t.setDaemon(false);
+			}
+			if(t.getPriority() != Thread.NORM_PRIORITY){
+				t.setPriority(Thread.NORM_PRIORITY);
+			}
+			return t;
+		}
+		
+	}
+
+	@Override
+	public void close(){
+		concurrentMap.clear();
+		scheduledThreadPoolExecutor.shutdown();
+	}
+	
+	public static void main(String[] args) {
+		java.io.PrintStream out = new java.io.PrintStream(System.out){
+			@Override
+			public void println(String x) {
+				x = getCurrentTime(new Date(), "yyyy-MM-dd HH:mm:ss SSS") + ":" + x;
+				super.println(x);
+			}
+		};
+		System.setOut(out);
+		
+		ExpiredConcurrentMap<String, String> expiredMap = new ExpiredConcurrentMap<>();
+		Random r = new Random(); 
+		for(int i = 0; i < 1000; i++){
+			expiredMap.set("key" + i, "value" + i, 10 * 000 + r.nextInt(6 * 100 * 1000));
+		}
+		
+		synchronized (ExpiredConcurrentMap.class) {
+			try {
+				ExpiredConcurrentMap.class.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		expiredMap.close();
+	}
+	
+	public static String getCurrentTime(Date date, String format){
+		SimpleDateFormat dateFormat = new SimpleDateFormat(format);
+		return dateFormat.format(date);
 	}
 
 }
