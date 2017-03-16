@@ -44,6 +44,9 @@ public class RedisClient implements Closeable{
 		poolConfig.setMaxTotal(GenericObjectPoolConfig.DEFAULT_MAX_TOTAL);
 		poolConfig.setMaxIdle(GenericObjectPoolConfig.DEFAULT_MAX_IDLE);
 		poolConfig.setMinIdle(GenericObjectPoolConfig.DEFAULT_MIN_IDLE);
+		poolConfig.setMaxWaitMillis(60000);//(millisecond)wait for one minute
+		poolConfig.setBlockWhenExhausted(true);
+		poolConfig.setTestOnBorrow(true);
 		//You can also configurate other arguments for poolConfig.
 		
 		pool = new JedisPool(poolConfig, host, port, timeout, password, Protocol.DEFAULT_DATABASE);
