@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -28,7 +30,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public class ExpiredConcurrentMap <K, V> implements Closeable{
 	
 	private final ConcurrentMap<K, Entry> concurrentMap = new ConcurrentHashMap<K, Entry>();
-	private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1, new ExpiredThreadFactory());
+	private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = 
+			new ScheduledThreadPoolExecutor(1, new ExpiredThreadFactory(), new ExpiredRejectExecutorHandler());
 	private final int expiredKeyNumberEachTask = 20;
 	
 	private static final long TTL_LIVE_FOREVER = -1;//never expired
@@ -225,6 +228,15 @@ public class ExpiredConcurrentMap <K, V> implements Closeable{
 				t.setPriority(Thread.NORM_PRIORITY);
 			}
 			return t;
+		}
+		
+	}
+	
+	private class ExpiredRejectExecutorHandler implements RejectedExecutionHandler{
+
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+			System.out.println(String.format("Runnable(%s) reject from ThreadPoolExecutor(%s)", r, executor));
 		}
 		
 	}

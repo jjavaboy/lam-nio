@@ -33,7 +33,7 @@
     <dubbo:protocol name="dubbo" port="20880" threadpool="fixed" threads="100" dispatcher="all" transporter="netty" charset="UTF-8" serialization="hessian2"/>
     
     <!-- 监控中心 -->
-    <!-- <dubbo:monitor protocol="dubbo" address="" /> -->
+    <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" />
 	
 	<bean id="userService" class="lam.dubbo.provider.api.impl.UserServiceImpl" />
 	<bean id="loginService" class="lam.dubbo.provider.api.impl.LoginServiceImpl" />
