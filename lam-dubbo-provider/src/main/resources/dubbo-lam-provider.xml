@@ -26,14 +26,64 @@
     <!-- 使用multicast广播注册中心暴露服务地址 -->
     <!-- <dubbo:registry address="multicast://224.5.6.7:1234" /> -->
     
-    <!-- 使用zookeeper注册服务 -->
-    <dubbo:registry protocol="zookeeper" address="192.168.204.127:2181" /> <!-- 192.168.20.110:2181,192.168.20.111:2181 -->
+    <!-- 使用zookeeper注册服务，如果有多个注册中心，可以使用id区分开来，address=192.168.20.110:2181,192.168.20.111:2181 -->
+    <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.204.127:2181" />
  
     <!-- 用dubbo协议在20880端口暴露服务 --> <!-- config in dubbo.properties -->
     <dubbo:protocol name="dubbo" port="20880" threadpool="fixed" threads="100" dispatcher="all" transporter="netty" charset="UTF-8" serialization="hessian2"/>
     
-    <!-- 监控中心 -->
+    <!-- 监控中心，provider发送给monitor的调用时间，仅仅包括方法的执行时间，不包括网络时间 -->
     <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" />
+    
+    <!-- dubbo提供者的全局配置 -->
+    <dubbo:provider
+    	 protocol="dubbo"
+    	 threads="100"
+    	 payload="88388608"
+    	 server="netty"
+    	 client="netty"
+    	 serialization="hessian2"
+    	 threadpool="fixed"
+    	 accepts="0"
+    	 timeout="1000"
+    	 retries="2"
+    	 connections="0"
+		 loadbalance="random"
+		 token="false"
+		 owner="sky"
+		 weight="1"
+		 executes="0"
+		 actives="0"
+		 proxy="javassist"
+		 cluster="failover"
+		 charset="UTF-8"
+		 buffer="8192"
+		 iothreads=""
+    />
+	<!-- 
+		threads:服务线程池大小(固定大小)
+		payload:请求及响应数据包大小限制，单位：字节 88388608(=8M) 
+		server:dubbo协议缺省为netty，协议的服务器端实现类型，比如：dubbo协议的mina,netty等，http协议的jetty,servlet等
+		client:dubbo协议缺省为netty，协议的客户端实现类型，比如：dubbo协议的mina,netty等
+		serialization:dubbo协议缺省为hessian2，rmi协议缺省为java，http协议缺省为json
+		threadpool:线程池类型，可选：fixed/cached
+		accepts:服务提供者最大可接受连接数，不限制:0
+		timeout:远程服务调用超时时间(毫秒) 
+		retries:远程服务调用重试次数，不包括第一次调用，不需要重试请设为0
+		connections:对每个提供者的最大连接数，rmi、http、hessian等短连接协议表示限制连接数，dubbo等长连接协表示建立的长连接个数，不限制0
+		loadbalance:负载均衡策略，可选值：random,roundrobin,leastactive，分别表示：随机，轮循，最少活跃调用 
+		token:令牌验证，为空表示不开启，如果为true，表示随机生成动态令牌
+		registry:向指定注册中心注册，在多个注册中心时使用，值为<dubbo:registry>的id属性，多个注册中心ID用逗号分隔，如果不想将该服务注册到任何registry，可将值设为N/A
+		owner:服务负责人，用于服务治理，请填写负责人公司邮箱前缀 
+		weight:服务权重 
+		executes:服务提供者每服务每方法最大可并行执行请求数 ，不限制为0
+		actives:每服务消费者每服务每方法最大并发调用数 ，不限制为0
+		proxy:生成动态代理方式，可选：jdk/javassist
+		cluster:集群方式，可选：failover/failfast/failsafe/failback/forking
+		charset:序列化编码，如UTF-8
+		buffer:网络读写缓冲区大小，默认8192，字节
+		iothreads:数量(CPU + 1),IO线程池，接收网络读写中断，以及序列化和反序列化，不处理业务，业务线程池参见threads配置，此线程池和CPU相关，不建议配置。
+	 -->
 	
 	<bean id="userService" class="lam.dubbo.provider.api.impl.UserServiceImpl" />
 	<bean id="loginService" class="lam.dubbo.provider.api.impl.LoginServiceImpl" />

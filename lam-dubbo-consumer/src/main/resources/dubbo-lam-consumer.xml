@@ -10,15 +10,39 @@
     <!-- 使用multicast广播注册中心暴露发现服务地址 -->
     <!-- <dubbo:registry address="multicast://224.5.6.7:1234" /> -->
     
-    <!-- 使用zookeeper注册服务 -->
-    <dubbo:registry protocol="zookeeper" address="192.168.204.127:2181" /><!-- 192.168.20.110:2181,192.168.20.111:2181 -->
+    <!-- 使用zookeeper注册服务，如果有多个注册中心，可以使用id区分开来，address=192.168.20.110:2181,192.168.20.111:2181 -->
+    <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.204.127:2181" />
     
-     <!-- 监控中心 dubbo的monitor-simple模块 -->
+     <!-- 监控中心 dubbo的monitor-simple模块，consumer发送给monitor的调用时间，包括网络时间和方法执行时间 -->
     <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" />
  
-    <!-- 引用的服务 -->
+    <!-- dubbo的消息者的全局配置 -->
+    <dubbo:consumer 
+    	timeout="1000" 
+    	retries="2" 
+    	loadbalance="random" 
+    	async="false" 
+    	check="false"
+    	proxy="javassist"
+    	owner="lam"
+    	actives="0"
+    	cluster="failover"
+    	 />
+    <!-- 
+    timeout:远程服务调用超时时间(毫秒)
+    retries:远程服务调用重试次数，不包括第一次调用，不需要重试请设为0
+    loadbalance:负载均衡策略，可选值：random,roundrobin,leastactive，分别表示：随机，轮循，最少活跃调用 
+    async:是否缺省异步执行，不可靠异步，只是忽略返回值，不阻塞执行线程
+    check:启动时检查提供者是否存在，true报错，false忽略
+    proxy:生成动态代理方式，可选：jdk/javassist
+	owner:调用服务负责人
+	actives:每服务消费者每服务每方法最大并发调用数,不需要限制设为0
+	cluster:集群方式，可选：failover/failfast/failsafe/failback/forking
+	registry:向指定注册中心注册，在多个注册中心时使用，值为<dubbo:registry>的id属性，多个注册中心ID用逗号分隔，如果不想将该服务注册到任何registry，可将值设为N/A
+     -->
+    
+    
     <!-- 生成远程服务代理，可以和本地bean一样使用demoService -->
-    <dubbo:consumer timeout="10000" check="false" />
     <dubbo:reference id="loginService" interface="lam.dubbo.api.LoginService" />
     <dubbo:reference id="userService" interface="lam.dubbo.api.UserService" />
  
