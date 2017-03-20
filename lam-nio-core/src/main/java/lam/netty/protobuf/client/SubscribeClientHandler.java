@@ -33,17 +33,17 @@ public class SubscribeClientHandler extends ChannelInboundHandlerAdapter{
 	}
 	
 	private SubscribeReqProto.SubscribeReq req(int subReqId){
-		SubscribeReqProto.SubscribeReq.Builder builder =
-				SubscribeReqProto.SubscribeReq.newBuilder();
-		builder.setSubReqId(subReqId);
-		builder.setUsername("anmiaolin");
-		builder.setProductName("engineer of anmiaolin by " + subReqId);
 		List<String> address = new ArrayList<String>();
 		address.add("Beijing");
 		address.add("shanghai");
 		address.add("guangzhou");
-		builder.addAllAddress(address);
-		return builder.build();
+		return 
+		SubscribeReqProto.SubscribeReq.newBuilder()
+		.setSubReqId(subReqId)
+		.setUsername("lam")
+		.setProductName("engineer of anmiaolin by " + subReqId)
+		.addAllAddress(address)
+		.build();
 	}
 	
 	@Override
