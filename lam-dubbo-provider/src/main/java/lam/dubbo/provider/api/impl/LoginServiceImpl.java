@@ -18,13 +18,13 @@ public class LoginServiceImpl implements LoginService{
 	@Override
 	public boolean login(String username) {
 		System.out.println(String.format("%s [%s] - args:%s", DateUtil.now(), className, username));
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean logout(String username) {
 		System.out.println(String.format("%s [%s] - args:%s", DateUtil.now(), className, username));
-		return false;
+		return true;
 	}
 
 }

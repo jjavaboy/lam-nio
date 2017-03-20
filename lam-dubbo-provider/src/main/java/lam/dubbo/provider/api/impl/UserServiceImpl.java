@@ -18,13 +18,13 @@ public class UserServiceImpl implements UserService{
 	@Override
 	public String sayHello(String username) {
 		System.out.println(String.format("%s [%s] - args:%s", DateUtil.now(), className, username));
-		return "hello, " + username;
+		return "hello, " + username + "!";
 	}
 
 	@Override
 	public String sayGoodBye(String username) {
 		System.out.println(String.format("%s [%s] - args:%s", DateUtil.now(), className, username));
-		return "good bye, " + username;
+		return "good bye, " + username + "!";
 	}
 
 }
