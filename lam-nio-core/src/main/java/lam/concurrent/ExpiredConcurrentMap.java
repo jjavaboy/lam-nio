@@ -45,30 +45,27 @@ public class ExpiredConcurrentMap <K, V> implements Closeable{
 	 * start the schedule to determine if the key is expired.
 	 */
 	private void startSchedule(){
-		int corePoolSize = scheduledThreadPoolExecutor.getCorePoolSize();
-		for(int i = 0; i < corePoolSize; i++){
-			scheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable(){
-				@Override
-				public void run() {
-					Thread t = Thread.currentThread();
-					System.out.print("[" + t.getName() + "]schedule to check key expired start.\n=============================================\n");
-					Iterator<Map.Entry<K, Entry>> iter = concurrentMap.entrySet().iterator();
-					int expiredKeyNumber = 0;
-					while(iter.hasNext()){
-						Map.Entry<K, Entry> entry = iter.next();
-						if(entry.getValue() != null && isExpired(entry.getValue())){
-							//remove the key when it is expired and increment expired number
-							remove(entry.getKey());
-							expiredKeyNumber++;
-							System.out.println("[" + t.getName() + "]entry expired:" + entry.getValue());
-						}
-						if(expiredKeyNumber >= expiredKeyNumberEachTask){
-							break ;
-						}
+		scheduledThreadPoolExecutor.scheduleAtFixedRate(new Runnable(){
+			@Override
+			public void run() {
+				Thread t = Thread.currentThread();
+				System.out.print("[" + t.getName() + "]schedule to check key expired start.\n=============================================\n");
+				Iterator<Map.Entry<K, Entry>> iter = concurrentMap.entrySet().iterator();
+				int expiredKeyNumber = 0;
+				while(iter.hasNext()){
+					Map.Entry<K, Entry> entry = iter.next();
+					if(entry.getValue() != null && isExpired(entry.getValue())){
+						//remove the key when it is expired and increment expired number
+						remove(entry.getKey());
+						expiredKeyNumber++;
+						System.out.println("[" + t.getName() + "]entry expired:" + entry.getValue());
+					}
+					if(expiredKeyNumber >= expiredKeyNumberEachTask){
+						break ;
 					}
 				}
-			}, 5000, 10000, TimeUnit.MILLISECONDS);
-		}
+			}
+		}, 5000, 10000, TimeUnit.MILLISECONDS);
 	}
 	
 	public V get(K k){
