@@ -61,7 +61,7 @@ public class LamGoGo {
 			return this;
 		}
 		
-		public LamGoGo builder(){
+		public LamGoGo build(){
 			return new LamGoGo(this);
 		}
 	}
@@ -73,7 +73,7 @@ public class LamGoGo {
 		.setAge(18)
 		.setGender(2)
 		.setAddress("china")
-		.builder();
+		.build();
 		System.out.println(new Gson().toJson(lamGoGo));
 	}
 
