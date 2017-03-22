@@ -1,6 +1,7 @@
 package lam.pool;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -14,6 +15,8 @@ import java.net.UnknownHostException;
 * @versio 1.0
 */
 public class SSocket extends Socket{
+	
+	protected boolean broken;
 	
 	public SSocket(String host, int port) throws UnknownHostException, IOException{
 		super(host, port);
@@ -32,6 +35,30 @@ public class SSocket extends Socket{
 		setReceiveBufferSize(builder.receiveBufferSize);
 		setReuseAddress(builder.reuseAddress);
 		setSendBufferSize(builder.sendBufferSize);
+	}
+	
+	public void disConnect(){
+		if(isConnected()){
+			try {
+				OutputStream outputStream = super.getOutputStream();
+				if(outputStream != null){
+					outputStream.flush();
+				}
+				//super.close();
+			} catch (IOException e) {
+				broken = true;
+				e.printStackTrace();
+			} finally {
+				try{
+					super.close();
+				}catch(Exception e){
+				}
+			}
+		}
+	}
+	
+	public boolean isConnected(){
+		return super.isBound() && !super.isClosed() && super.isConnected() && !super.isInputShutdown() && !super.isOutputShutdown();
 	}
 	
 	public static class Builder{
@@ -90,7 +117,7 @@ public class SSocket extends Socket{
 			return this;
 		}
 		
-		public SSocket buid() throws UnknownHostException, IOException{
+		public SSocket build() throws UnknownHostException, IOException{
 			return new SSocket(this);
 		}
 	}

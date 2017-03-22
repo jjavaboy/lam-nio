@@ -30,7 +30,7 @@ public class SSocketFactory implements PooledObjectFactory<SSocket>{
 		/*SSocket ssocket = new SSocket.Builder()
 				.setHost(this.host)
 				.setPort(this.port)
-				.buid();*/
+				.build();*/
 		SSocket ssocket;
 		try{
 			ssocket = new SSocket(this.host, this.port);
@@ -45,25 +45,27 @@ public class SSocketFactory implements PooledObjectFactory<SSocket>{
 
 	@Override
 	public void destroyObject(PooledObject<SSocket> p) throws Exception {
-		// TODO Auto-generated method stub
-		
+		SSocket ssocket = p.getObject();
+		if(ssocket != null){
+			ssocket.disConnect();
+		}
 	}
 
 	@Override
 	public boolean validateObject(PooledObject<SSocket> p) {
-		// TODO Auto-generated method stub
-		return false;
+		SSocket ssocket = p.getObject();
+		return ssocket != null && ssocket.isConnected();
 	}
 
 	@Override
 	public void activateObject(PooledObject<SSocket> p) throws Exception {
-		// TODO Auto-generated method stub
-		
+		//SSocket ssocket = p.getObject();
+		//To do what?
 	}
 
 	@Override
 	public void passivateObject(PooledObject<SSocket> p) throws Exception {
-		// TODO Auto-generated method stub
+		//passivate object
 		
 	}
 
