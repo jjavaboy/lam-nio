@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 /**
@@ -16,10 +17,16 @@ import java.net.UnknownHostException;
 */
 public class SSocket extends Socket{
 	
+	protected String host;
+	
+	protected int port;
+	
 	protected boolean broken;
 	
 	public SSocket(String host, int port) throws UnknownHostException, IOException{
 		super(host, port);
+		this.host = host;
+		this.port = port;
 	}
 	
 	public SSocket(InetSocketAddress inetSocketAddress) throws UnknownHostException, IOException{
@@ -59,6 +66,28 @@ public class SSocket extends Socket{
 	
 	public boolean isConnected(){
 		return super.isBound() && !super.isClosed() && super.isConnected() && !super.isInputShutdown() && !super.isOutputShutdown();
+	}
+	
+	@Override
+	public String toString() {
+		String str;
+		try {
+			str = String.format("{"
+					+ "host:%s, "
+					+ "port:%d, "
+					+ "tcpNoDeplay:%b, "
+					+ "soTimeout:%d, "
+					+ "keepAlive:%b, "
+					+ "oobInline:%b, "
+					+ "receiveBufferSize:%d, "
+					+ "reuseAddress:%b, "
+					+ "sendBufferSize:%d"
+					+ "}", host, port, getTcpNoDelay(), getSoTimeout(), getKeepAlive(), getOOBInline(), getReceiveBufferSize(), 
+					getReuseAddress(), getSendBufferSize());
+		} catch (SocketException e) {
+			str = "Occurs error.";
+		}
+		return str;
 	}
 	
 	public static class Builder{

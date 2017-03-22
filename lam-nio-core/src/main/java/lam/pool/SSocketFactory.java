@@ -7,6 +7,8 @@ import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectFactory;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
 
+import lam.log.Console;
+
 /**
 * <p>
 * socket factory
@@ -59,14 +61,16 @@ public class SSocketFactory implements PooledObjectFactory<SSocket>{
 
 	@Override
 	public void activateObject(PooledObject<SSocket> p) throws Exception {
-		//SSocket ssocket = p.getObject();
+		SSocket ssocket = p.getObject();
 		//To do what?
+		Console.println("activateObject:SSocket:" + ssocket);
 	}
 
 	@Override
 	public void passivateObject(PooledObject<SSocket> p) throws Exception {
 		//passivate object
-		
+		SSocket ssocket = p.getObject();
+		Console.println("passivateObject:SSocket:" + ssocket);
 	}
 
 }
