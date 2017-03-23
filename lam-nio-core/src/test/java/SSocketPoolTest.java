@@ -25,8 +25,10 @@ public class SSocketPoolTest {
 		GenericObjectPoolConfig config = new GenericObjectPoolConfig();
 		config.setMaxTotal(8);
 		config.setMaxIdle(0);
-		config.setMaxWaitMillis(30000);
-		config.setBlockWhenExhausted(false);
+		config.setBlockWhenExhausted(true);//default value:true,
+		config.setMaxWaitMillis(30000);//this attribute will be worked only when blockWhenExhausted value is true;
+									   //(millisencod)default value:-1, 
+									   //value -1, it means wait until exists an idle Object in the pool,
 		SSocketFactory ssocketFactory = new SSocketFactory("192.168.204.127", 6378);
 		SSocketPool ssocketPool = new SSocketPool(config, ssocketFactory);
 		
