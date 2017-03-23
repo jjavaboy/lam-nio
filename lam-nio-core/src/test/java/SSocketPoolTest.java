@@ -23,18 +23,22 @@ public class SSocketPoolTest {
 	
 	public static void main(String[] args) {
 		GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-		config.setMaxTotal(8);
+		config.setMaxTotal(1);
 		config.setMaxIdle(0);
 		config.setBlockWhenExhausted(true);//default value:true,
 		config.setMaxWaitMillis(30000);//this attribute will be worked only when blockWhenExhausted value is true;
 									   //(millisencod)default value:-1, 
 									   //value -1, it means wait until exists an idle Object in the pool,
-		SSocketFactory ssocketFactory = new SSocketFactory("192.168.204.127", 6378);
+		config.setTestOnCreate(Boolean.TRUE.booleanValue());//default value:false
+		config.setTestOnBorrow(Boolean.TRUE.booleanValue());//default value:false
+		config.setTestOnReturn(Boolean.TRUE.booleanValue());//default value:false
+		config.setLifo(Boolean.TRUE.booleanValue());//last in first out,default value:true
+		SSocketFactory ssocketFactory = new SSocketFactory("192.168.20.112", 6379);
 		SSocketPool ssocketPool = new SSocketPool(config, ssocketFactory);
 		
 		long start = System.currentTimeMillis();
 		
-		for(int i = 0; i < 1000; i++){
+		for(int i = 0; i < 1; i++){
 			SSocket ssocket = null;
 			try{
 				ssocket = ssocketPool.getResource();
