@@ -3,7 +3,6 @@ package lam.pool.support;
 import java.io.PrintWriter;
 import java.util.Deque;
 
-import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.PooledObjectState;
 
 /**
@@ -15,6 +14,21 @@ import org.apache.commons.pool2.PooledObjectState;
 * @versio 1.0
 */
 public class SDefaultPooledObject<T> extends SPooledObject<T>{
+	
+	private final T object;
+	private SPooledObjectState state = SPooledObjectState.IDLE;
+	private final long createTime = System.currentTimeMillis();
+	private volatile long lastBorrowTime = createTime;
+	private volatile long lastUseTime = createTime;
+	private volatile long lastReturnTime = createTime;
+	private volatile boolean lobAbandoned = Boolean.FALSE.booleanValue();
+	private volatile Exception borrowedBy = null;
+	private volatile Exception useBy = null;
+	private volatile int borrowedCount = 0;
+	
+	public SDefaultPooledObject(T t){
+		this.object = t;
+	}
 
 	@Override
 	public int compareSTo(SPooledObject<T> other) {
@@ -24,8 +38,7 @@ public class SDefaultPooledObject<T> extends SPooledObject<T>{
 
 	@Override
 	public T getSObject() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.object;
 	}
 
 	@Override
