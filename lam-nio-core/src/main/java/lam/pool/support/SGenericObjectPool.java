@@ -1,7 +1,9 @@
 package lam.pool.support;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 /**
 * <p>
@@ -23,34 +25,176 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T>{
 		startEvictor(super.timeBetweenEvictorRunsMillis);
 	}
 	
-	public T borrowObject()throws SPoolException{
+	public T borrowObject()throws Exception{
 		boolean create = false;
 		SPooledObject<T> p = null;
 		while(p == null){
 			if(blockWhenExhausted){
 				p = idleObjects.pollFirst();
+				if(p == null && (p = create()) != null){
+					create = true;
+				}
 				if(p == null){
-					p = create();
+					if(maxWaitMillis > -1){
+						p = idleObjects.takeFirst();
+					}else{
+						p = idleObjects.pollFirst(maxWaitMillis, TimeUnit.MILLISECONDS);
+					}
+				}
+				if(p == null){
+					throw new NoSuchElementException("Time out(" + maxWaitMillis + ") waiting for idle object");
+				}
+				//to determine this object is idle
+				if(!p.allocate()){
+					//Means this object isn't idle, so get the next idel object
+					p = null;
 				}
 			}else{
-				
+				p = idleObjects.pollFirst();
+				if(p == null && (p = create()) != null){
+					create = true;
+				}
+				if(p == null){
+					throw new NoSuchElementException("Pool exhausted");
+				}
+				if(!p.allocate()){
+					p = null;
+				}
+			}
+			if(p != null){
+				try{
+					factory.activateSObject(p);
+				}catch(Exception e){
+					destroy(p);
+					p = null;//Can let it to executes the next loop
+					if(create){
+						NoSuchElementException noSuchException = new NoSuchElementException("PooledObjectFactory factory activate object fail");
+						noSuchException.initCause(e);
+						throw noSuchException;
+					}
+				}
+				if(p != null && (testOnBorrow || (create && testOnCreate))){
+					boolean validate = false;
+					Exception e1 = null;
+					try{
+						validate = factory.validateSObject(p);
+					}catch(Exception e){
+						e1 = e;
+					}
+					if(!validate){
+						destroy(p);
+						p = null;
+						if(create){
+							NoSuchElementException noSuchException = new NoSuchElementException("PooledObjectFactory factory activate object fail");
+							noSuchException.initCause(e1);
+							throw noSuchException;
+						}
+					}
+				}
 			}
 		}
-		return p.getObject();
+		return p.getSObject();
 	}
 	
-	private SPooledObject<T> create() {
-		if(createCount.get() >= maxTotal || createCount.get() >= Integer.MAX_VALUE){
+	public void returnObject(T obj){
+		SPooledObject<T> p = allObjects.get(new SObjectWrapper<T>(obj));
+		if(p == null){
+			return ;
+		}
+		synchronized (p) {
+			final SPooledObjectState state = p.getSState();
+			if(state != SPooledObjectState.ALLOCATED){
+				throw new IllegalStateException("Object has been returned to pool or invalid");
+			}else{
+				p.markReturning();
+			}
+		}
+		if(testOnReturn){
+			boolean validate = factory.validateSObject(p);
+			if(!validate){
+				try {
+					destroy(p);
+				} catch (Exception e1) {
+					return ;
+				}
+			}
+		}
+		try {
+			factory.passivateSObject(p);
+		} catch (Exception e) {
+			try {
+				destroy(p);
+			} catch (Exception e1) {
+				return ;
+			}
+		}
+		if(!p.deallocate()){
+			throw new IllegalStateException("Object has been returned to pool or invalid");
+		}
+		if(maxIdle > idleObjects.size()){
+			try {
+				destroy(p);
+			} catch (Exception e) {
+				return ;
+			}
+		}else{
+			if(lifo){
+				idleObjects.addFirst(p);
+			}else{
+				idleObjects.addLast(p);
+			}
+		}
+	}
+	
+	public void invalidateObject(T obj) throws Exception{
+		SPooledObject<T> p = allObjects.get(new SObjectWrapper<T>(obj));
+		if(p == null){
+			throw new IllegalStateException("object don't exists in this pool");
+		}
+		synchronized (p) {
+			if(p.getSState() != SPooledObjectState.INVALID){
+				destroy(p);
+			}
+		}
+	}
+	
+	private void destroy(SPooledObject<T> p) throws Exception {
+		p.invalidate();
+		idleObjects.remove(p);
+		allObjects.remove(new SObjectWrapper<T>(p.getSObject()));
+		try{
+			factory.destroySObject(p);
+		}finally{
+			createCount.decrementAndGet();
+			destroyedCount.incrementAndGet();
+		}
+	}
+
+	private SPooledObject<T> create() throws SPoolException {
+		long afterCreatedCount = createCount.incrementAndGet();
+		if(afterCreatedCount > maxTotal || afterCreatedCount > Integer.MAX_VALUE){
+			createCount.decrementAndGet();
 			return null;
 		}
-		return null;
+		final SPooledObject<T> p;
+		try {
+			p = factory.makeSObject();
+		} catch (Exception e) {
+			createCount.decrementAndGet();
+			throw new SPoolException("PooledObjectfactory make new object fail", e);
+		}
+		createdCount.incrementAndGet();
+		allObjects.put(new SObjectWrapper<T>(p.getSObject()), p);
+		return p;
 	}
 
 	/**
 	 * abandon the excess idle object
 	 */
 	public void startEvictor(long timeBetweenEvictorRunsMillis){
-		
+		if(timeBetweenEvictorRunsMillis > 0){
+			
+		}
 	}
 	
 	public static class Builder<T>{
@@ -65,6 +209,7 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T>{
 		private boolean testOnBorrow = Boolean.FALSE.booleanValue();
 		private boolean testOnReturn = Boolean.FALSE.booleanValue();
 		private long timeBetweenEvictorRunsMillis = -1;
+		private boolean lifo = false;
 		
 		private SPooledObjectFactory<T> factory;
 		
@@ -140,6 +285,15 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T>{
 		public Builder<T> setTimeBetweenEvictorRunsMillis(long timeBetweenEvictorRunsMillis) {
 			this.timeBetweenEvictorRunsMillis = timeBetweenEvictorRunsMillis;
 			return this;
+		}
+		
+		public Builder<T> setLifo(boolean lifo) {
+			this.lifo = lifo;
+			return this;
+		}
+		
+		public boolean isLifo() {
+			return lifo;
 		}
 		
 		public SPooledObjectFactory<T> getFactory() {

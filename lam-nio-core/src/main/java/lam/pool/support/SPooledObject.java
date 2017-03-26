@@ -14,7 +14,8 @@ import org.apache.commons.pool2.PooledObjectState;
 * @date 2017年3月22日
 * @versio 1.0
 */
-public abstract class SPooledObject<T> implements PooledObject<T>{
+public abstract class SPooledObject<T> /*implements PooledObject<T>*/
+	implements Comparable<SPooledObject<T>>{
 	
 	public abstract T getSObject();
 	public abstract long getSCreateTime();
@@ -23,7 +24,6 @@ public abstract class SPooledObject<T> implements PooledObject<T>{
 	public abstract long getSLastBorrowTime();
 	public abstract long getSLastReturnTime();
 	public abstract long getSLastUsedTime();
-	public abstract int compareSTo(SPooledObject<T> other);
 	public abstract boolean startSEvictionTest();
 	public abstract boolean endSEvictionTest(Deque<SPooledObject<T>> idleQueue);
 	public abstract boolean allocate();
@@ -32,59 +32,65 @@ public abstract class SPooledObject<T> implements PooledObject<T>{
 	public abstract void setLogAbandoned(boolean logAbandoned);
 	public abstract void use();
 	public abstract void printStackTrace(PrintWriter writer);
-	public abstract PooledObjectState getState();
+	public abstract SPooledObjectState getSState();
 	public abstract void markAbandoned();
 	public abstract void markReturning();
 	
-	@Override
+/*//	//	@Override
 	public T getObject() {
 		return getSObject();
 	}
 	
-	@Override
+//	//	@Override
 	public long getCreateTime() {
 		return getSCreateTime();
 	}
 	
-	@Override
+//	//	@Override
 	public long getActiveTimeMillis() {
 		return getSActiveTimeMillis();
 	}
 	
-	@Override
+//	//	@Override
 	public long getIdleTimeMillis() {
 		return getSIdleTimeMillis();
 	}
 	
-	@Override
+//	//	@Override
 	public long getLastBorrowTime() {
 		return getSLastBorrowTime();
 	}
 	
-	@Override
+	//	@Override
 	public long getLastReturnTime() {
 		return getSLastBorrowTime();
 	}
 	
-	@Override
+	//	@Override
 	public long getLastUsedTime() {
 		return getSLastBorrowTime();
 	}
 	
-	@Override
+	//	@Override
 	public int compareTo(PooledObject<T> other) {
 		return compareSTo((SPooledObject<T>)other);
 	}
 	
-	@Override
+	//	@Override
 	public boolean startEvictionTest(){
 		return startSEvictionTest();
 	}
 	
-	@Override
+	//	@Override
 	public boolean endEvictionTest(Deque<PooledObject<T>> idleQueue) {
 		//return endSEvictionTest((Deque<SPooledObject<T>>)idleQueue);
 		return true;
+	}*/
+	
+	//	@Override
+	public PooledObjectState getState() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

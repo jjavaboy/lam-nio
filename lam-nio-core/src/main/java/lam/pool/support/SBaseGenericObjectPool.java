@@ -23,10 +23,19 @@ public abstract class SBaseGenericObjectPool<T>{
 	protected volatile boolean testOnBorrow;
 	protected volatile boolean testOnReturn;
 	protected volatile long timeBetweenEvictorRunsMillis;
+	protected volatile boolean lifo;
 	
 	protected final SPooledObjectFactory<T> factory;
 	
-	protected AtomicLong createCount = new AtomicLong(0L);
+	/**
+	 * create object count, which is not destroy.
+	 */
+	protected final AtomicLong createCount = new AtomicLong(0L);
+	/**
+	 * created object count successful in history
+	 */
+	protected final AtomicLong createdCount = new AtomicLong(0L);
+	protected final AtomicLong destroyedCount = new AtomicLong(0L);
 	
 	public SBaseGenericObjectPool(SGenericObjectPool.Builder<T> builder){
 		setMaxTotal(builder.getMaxTotal());
@@ -37,6 +46,7 @@ public abstract class SBaseGenericObjectPool<T>{
 		setTestOnBorrow(builder.isTestOnBorrow());
 		setTestOnReturn(builder.isTestOnReturn());
 		setTimeBetweenEvictorRunsMillis(builder.getTimeBetweenEvictorRunsMillis());
+		setLifo(builder.isLifo());
 		
 		this.factory = builder.getFactory();
 	}
@@ -73,6 +83,10 @@ public abstract class SBaseGenericObjectPool<T>{
 
 	public void setTimeBetweenEvictorRunsMillis(long timeBetweenEvictorRunsMillis) {
 		this.timeBetweenEvictorRunsMillis = timeBetweenEvictorRunsMillis;
+	}
+	
+	public void setLifo(boolean lifo) {
+		this.lifo = lifo;
 	}
 	
 	public void checkPositive(int i){

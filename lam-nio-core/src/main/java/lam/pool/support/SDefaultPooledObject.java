@@ -3,8 +3,6 @@ package lam.pool.support;
 import java.io.PrintWriter;
 import java.util.Deque;
 
-import org.apache.commons.pool2.PooledObjectState;
-
 /**
 * <p>
 * default pooled object
@@ -13,7 +11,7 @@ import org.apache.commons.pool2.PooledObjectState;
 * @date 2017年3月23日
 * @versio 1.0
 */
-public class SDefaultPooledObject<T> extends SPooledObject<T>{
+public class SDefaultPooledObject<T> /*extends SPooledObject<T>*/ extends SPooledObject<T>{
 	
 	private final T object;
 	private SPooledObjectState state = SPooledObjectState.IDLE;
@@ -31,50 +29,51 @@ public class SDefaultPooledObject<T> extends SPooledObject<T>{
 	}
 
 	@Override
-	public int compareSTo(SPooledObject<T> other) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
 	public T getSObject() {
 		return this.object;
 	}
 
 	@Override
 	public long getSCreateTime() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.createTime;
 	}
 
 	@Override
 	public long getSActiveTimeMillis() {
-		// TODO Auto-generated method stub
-		return 0;
+		long lReturnTime = this.lastReturnTime;
+		long lBorrowTime = this.lastBorrowTime;
+		if(lReturnTime > lBorrowTime){
+			return lReturnTime - lBorrowTime;
+		}else{
+			return System.currentTimeMillis() - lBorrowTime;
+		}
 	}
 
 	@Override
 	public long getSIdleTimeMillis() {
-		// TODO Auto-generated method stub
-		return 0;
+		long now = System.currentTimeMillis();
+		//lastReturnTime maybe update by other thread, so make it final.
+		final long lReturnTime = this.lastReturnTime;
+		if(now > lReturnTime){
+			return now - lReturnTime;
+		}else{
+			return 0;
+		}
 	}
 
 	@Override
 	public long getSLastBorrowTime() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.lastBorrowTime;
 	}
 
 	@Override
 	public long getSLastReturnTime() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.lastReturnTime;
 	}
 
 	@Override
 	public long getSLastUsedTime() {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.lastUseTime;
 	}
 
 	@Override
@@ -90,33 +89,40 @@ public class SDefaultPooledObject<T> extends SPooledObject<T>{
 	}
 
 	@Override
-	public boolean allocate() {
-		// TODO Auto-generated method stub
+	public synchronized boolean allocate() {
+		if(this.state == SPooledObjectState.IDLE){
+			this.lastBorrowTime = System.currentTimeMillis();
+			this.lastUseTime = this.lastBorrowTime;
+			this.borrowedCount++;
+			this.state = SPooledObjectState.ALLOCATED;
+			return true;
+		}
 		return false;
 	}
 
 	@Override
-	public boolean deallocate() {
-		// TODO Auto-generated method stub
+	public synchronized boolean deallocate() {
+		if(this.state == SPooledObjectState.ALLOCATED || this.state == SPooledObjectState.RETURNING){
+			this.lastReturnTime = System.currentTimeMillis();
+			this.state = SPooledObjectState.IDLE;
+			return true;
+		}
 		return false;
 	}
 
 	@Override
-	public void invalidate() {
-		// TODO Auto-generated method stub
-		
+	public synchronized void invalidate() {
+		this.state = SPooledObjectState.INVALID;
 	}
 
 	@Override
 	public void setLogAbandoned(boolean logAbandoned) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void use() {
-		// TODO Auto-generated method stub
-		
+		this.lastUseTime = System.currentTimeMillis();
 	}
 
 	@Override
@@ -126,21 +132,26 @@ public class SDefaultPooledObject<T> extends SPooledObject<T>{
 	}
 
 	@Override
-	public PooledObjectState getState() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void markAbandoned() {
-		// TODO Auto-generated method stub
-		
+		this.state = SPooledObjectState.ABANDONED;
 	}
 
 	@Override
 	public void markReturning() {
-		// TODO Auto-generated method stub
-		
+		this.state = SPooledObjectState.RETURNING;
+	}
+	
+	public int compareTo(SPooledObject<T> other) {
+		final long lastReturnTimeDiff = this.lastReturnTime - other.getSLastReturnTime();
+		if(lastReturnTimeDiff == 0){
+			return System.identityHashCode(this) - System.identityHashCode(other);
+		}
+		return (int) Math.min(Math.max(lastReturnTimeDiff, Integer.MIN_VALUE), Integer.MAX_VALUE);
+	}
+
+	@Override
+	public SPooledObjectState getSState() {
+		return state;
 	}
 
 }

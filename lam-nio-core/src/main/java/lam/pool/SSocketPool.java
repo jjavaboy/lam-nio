@@ -20,7 +20,7 @@ public class SSocketPool extends SPool<SSocket> implements Pooling<SSocket>{
 	public SSocketPool(GenericObjectPoolConfig config, PooledObjectFactory<SSocket> factory){
 		super(config, factory);
 	}
-
+	
 	@Override
 	public SSocket getResource() {
 		SSocket s = super.getResource();
