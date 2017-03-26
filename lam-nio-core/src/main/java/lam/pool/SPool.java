@@ -8,6 +8,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import lam.log.Console;
+import lam.pool.support.SGenericObjectPool;
 
 /**
 * <p>
@@ -19,7 +20,8 @@ import lam.log.Console;
 */
 public class SPool<T> implements Closeable{
 	
-	protected GenericObjectPool<T> objectPool;
+	//protected GenericObjectPool<T> objectPool;
+	protected SGenericObjectPool<T> objectPool;
 
 	public SPool(final GenericObjectPoolConfig config, PooledObjectFactory<T> factory){
 		initPool(config, factory);
@@ -48,7 +50,7 @@ public class SPool<T> implements Closeable{
 		if(this.objectPool != null){
 			closeObjectPool();
 		}
-		this.objectPool = new GenericObjectPool<T>(factory, config);
+		this.objectPool = new SGenericObjectPool<T>(factory, config);
 	}
 	
 	public T getResource(){

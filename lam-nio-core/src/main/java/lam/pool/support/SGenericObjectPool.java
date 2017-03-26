@@ -197,6 +197,17 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T>{
 		}
 	}
 	
+	public void clear(){
+		SPooledObject<T> p = idleObjects.pollFirst();
+		while(p != null){
+			try {
+				destroy(p);
+			} catch (Exception e) {
+			}
+			p = idleObjects.pollFirst();
+		}
+	}
+	
 	public static class Builder<T>{
 		
 		//======================attribute with default value==================
