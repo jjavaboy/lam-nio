@@ -63,14 +63,14 @@ public class SSocketFactory extends  SPooledObjectFactory<SSocket> /*implements 
 	public void activateSObject(SPooledObject<SSocket> p) throws Exception {
 		SSocket ssocket = p.getSObject();
 		//To do what?
-		Console.println("activateSObject:SSocket:" + ssocket);
+		//Console.println("activateSObject:SSocket:" + ssocket);
 	}
 
 	@Override
 	public void passivateSObject(SPooledObject<SSocket> p) throws Exception {
 		//passivate object
 		SSocket ssocket = p.getSObject();
-		Console.println("passivateSObject:SSocket:" + ssocket);
+		//Console.println("passivateSObject:SSocket:" + ssocket);
 	}
 	
 	//================implements PooledObjectFactory====================================

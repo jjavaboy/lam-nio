@@ -28,6 +28,14 @@ public abstract class SBaseGenericObjectPool<T>{
 	protected final SPooledObjectFactory<T> factory;
 	
 	/**
+	 * To mark whether the pool is closed. 
+	 */
+	protected volatile boolean close;
+	protected final Object closeLock = new Object();
+	
+	protected final Object evictorLock = new Object();
+	
+	/**
 	 * create object count, which is not destroy.
 	 */
 	protected final AtomicLong createCount = new AtomicLong(0L);

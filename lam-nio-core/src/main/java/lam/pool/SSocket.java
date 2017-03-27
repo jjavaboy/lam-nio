@@ -23,6 +23,8 @@ public class SSocket extends Socket{
 	
 	protected boolean broken;
 	
+	private SSocketPool dataSource;;
+	
 	public SSocket(String host, int port) throws UnknownHostException, IOException{
 		super(host, port);
 		this.host = host;
@@ -66,6 +68,26 @@ public class SSocket extends Socket{
 	
 	public boolean isConnected(){
 		return super.isBound() && !super.isClosed() && super.isConnected() && !super.isInputShutdown() && !super.isOutputShutdown();
+	}
+	
+	public void setDataSource(SSocketPool dataSource) {
+		this.dataSource = dataSource;
+	}
+	
+	public void close(){
+		if(this.dataSource != null){
+			if(this.broken){
+				this.dataSource.returnBrokenResource(this);
+			}else{				
+				this.dataSource.returnResource(this);
+			}
+		}else{
+			try {
+				super.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	@Override

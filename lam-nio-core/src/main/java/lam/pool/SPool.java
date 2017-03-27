@@ -9,6 +9,8 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import lam.log.Console;
 import lam.pool.support.SGenericObjectPool;
+import lam.pool.support.SObjectPoolConfig;
+import lam.pool.support.SPooledObjectFactory;
 
 /**
 * <p>
@@ -23,7 +25,7 @@ public class SPool<T> implements Closeable{
 	//protected GenericObjectPool<T> objectPool;
 	protected SGenericObjectPool<T> objectPool;
 
-	public SPool(final GenericObjectPoolConfig config, PooledObjectFactory<T> factory){
+	public SPool(final SObjectPoolConfig config, SPooledObjectFactory<T> factory){
 		initPool(config, factory);
 	}
 	
@@ -46,11 +48,22 @@ public class SPool<T> implements Closeable{
 		}
 	}
 	
-	public void initPool(final GenericObjectPoolConfig config, PooledObjectFactory<T> factory){
+	public void initPool(final SObjectPoolConfig config, SPooledObjectFactory<T> factory){
 		if(this.objectPool != null){
 			closeObjectPool();
 		}
-		this.objectPool = new SGenericObjectPool<T>(factory, config);
+		//this.objectPool = new SGenericObjectPool<T>(factory, config);
+		this.objectPool = new SGenericObjectPool.Builder<T>()
+				.setBlockWhenExhausted(config.isBlockWhenExhausted())
+				.setLifo(config.isLifo())
+				.setMaxIdle(config.getMaxIdle())
+				.setMaxTotal(config.getMaxTotal())
+				.setMaxWaitMillis(config.getMaxWaitMillis())
+				.setTestOnBorrow(config.isTestOnBorrow())
+				.setTestOnCreate(config.isTestOnCreate())
+				.setTestOnReturn(config.isTestOnReturn())
+				.setFactory(factory)
+				.build();
 	}
 	
 	public T getResource(){
@@ -121,7 +134,7 @@ public class SPool<T> implements Closeable{
 		return this.objectPool.getNumWaiters();
 	}
 	
-	public long getMaxBorrowWaitTimeMillis(){
+	/*public long getMaxBorrowWaitTimeMillis(){
 		if(isPoolInactive()){
 			return -1;
 		}
@@ -133,7 +146,7 @@ public class SPool<T> implements Closeable{
 			return -1;
 		}
 		return this.objectPool.getMeanBorrowWaitTimeMillis();
-	}
+	}*/
 	
 	public boolean isPoolInactive(){
 		return this.objectPool == null || isClosed();

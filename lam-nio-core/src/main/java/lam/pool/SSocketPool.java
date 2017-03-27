@@ -1,8 +1,7 @@
 package lam.pool;
 
-import org.apache.commons.pool2.PooledObjectFactory;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-
+import lam.pool.support.SObjectPoolConfig;
+import lam.pool.support.SPooledObjectFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Protocol;
@@ -17,13 +16,16 @@ import redis.clients.jedis.Protocol;
 */
 public class SSocketPool extends SPool<SSocket> implements Pooling<SSocket>{
 
-	public SSocketPool(GenericObjectPoolConfig config, PooledObjectFactory<SSocket> factory){
+	public SSocketPool(SObjectPoolConfig config, SPooledObjectFactory<SSocket> factory){
 		super(config, factory);
 	}
 	
 	@Override
 	public SSocket getResource() {
 		SSocket s = super.getResource();
+		if(s != null){
+			s.setDataSource(this);
+		}
 		return s;
 	}
 
@@ -42,11 +44,15 @@ public class SSocketPool extends SPool<SSocket> implements Pooling<SSocket>{
 	}
 	
 	public static void main(String[] args){
-		JedisPool jedisPool = new JedisPool(Protocol.DEFAULT_HOST, Protocol.DEFAULT_PORT);
+		/*JedisPool jedisPool = new JedisPool(Protocol.DEFAULT_HOST, Protocol.DEFAULT_PORT);
 		Jedis jedis = jedisPool.getResource();
-		jedisPool.returnResource(jedis);
-		//jedis.close();
-		jedisPool.close();
+		jedis.close();
+		jedisPool.close();*/
+		SObjectPoolConfig config = new SObjectPoolConfig();
+		SSocketPool ssocketPool = new SSocketPool(config, new SSocketFactory("192.168.204.127", 6378));
+		SSocket ssocket = ssocketPool.getResource();
+		ssocket.close();
+		ssocketPool.close();
 	}
 
 }

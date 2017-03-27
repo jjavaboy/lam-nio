@@ -1,9 +1,14 @@
 package lam.pool.support;
 
+import java.io.Closeable;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
 * <p>
@@ -13,15 +18,19 @@ import java.util.concurrent.TimeUnit;
 * @date 2017年3月24日
 * @version 1.0
 */
-public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T>{
+public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements Closeable{
 
 	private final java.util.concurrent.LinkedBlockingDeque<SPooledObject<T>> idleObjects;
 	private final Map<SObjectWrapper<T>, SPooledObject<T>>
 		allObjects = new ConcurrentHashMap<SObjectWrapper<T>, SPooledObject<T>>();
 	
+	private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+	
 	public SGenericObjectPool(Builder<T> builder){
 		super(builder);
 		idleObjects = new java.util.concurrent.LinkedBlockingDeque<SPooledObject<T>>();
+		scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(
+				1, new EvictionThreadFactory(), new EvictionRejectedExecutionHandler());
 		startEvictor(super.timeBetweenEvictorRunsMillis);
 	}
 	
@@ -192,9 +201,43 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T>{
 	 * abandon the excess idle object
 	 */
 	public void startEvictor(long timeBetweenEvictorRunsMillis){
-		if(timeBetweenEvictorRunsMillis > 0){
+		synchronized (evictorLock) {
+			//stop evictor
+			//handle...
 			
+			if(timeBetweenEvictorRunsMillis > 0){
+				scheduledThreadPoolExecutor.scheduleWithFixedDelay(new Runnable(){
+					public void run(){
+						//...
+					}
+				}, timeBetweenEvictorRunsMillis, timeBetweenEvictorRunsMillis, TimeUnit.MILLISECONDS);
+			}
 		}
+	}
+	
+	public void close(){
+		if(isClosed()){
+			return ;
+		}
+		synchronized (closeLock) {
+			//double check
+			if(isClosed()){
+				return ;
+			}
+			super.close = Boolean.TRUE.booleanValue();
+			
+			//Just stop the evictor
+			startEvictor(-1L);
+			
+			clear();
+			
+			//release the threads waiting for the idle object 
+			//do here...
+		}
+	}
+	
+	public boolean isClosed(){
+		return super.close;
 	}
 	
 	public void clear(){
@@ -206,6 +249,79 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T>{
 			}
 			p = idleObjects.pollFirst();
 		}
+	}
+	
+	public int getNumIdle(){
+		return this.idleObjects.size();
+	}
+	
+	public int getNumActive(){
+		return this.allObjects.size() - this.idleObjects.size();
+	}
+	
+	/**
+	 * get thread number waiting for the idle object
+	 */
+	public int getNumWaiters(){
+		//handle here...
+		return -1;
+	}
+	
+	public void addObject() throws Exception{
+		if(factory == null){
+			throw new IllegalStateException("SPooledObjectFactory instance:factory can't be null");
+		}
+		SPooledObject<T> p = create();
+		addIdleObject(p);
+	}
+	
+	public void addIdleObject(SPooledObject<T> p) throws Exception{
+		if(p != null){
+			factory.passivateSObject(p);
+			if(lifo){
+				idleObjects.addFirst(p);
+			}else{
+				idleObjects.addLast(p);
+			}
+		}
+	}
+	
+	//ThreadFactory===================
+	public static class EvictionThreadFactory implements ThreadFactory{
+		
+		private static AtomicLong nFactorys = new AtomicLong(0L);
+		private final AtomicLong nThreads = new AtomicLong(0L);
+		private final ThreadGroup group;
+		private final String namePrefix;
+		
+		public EvictionThreadFactory(){
+			SecurityManager securityManager = System.getSecurityManager();
+			group = securityManager != null ? securityManager.getThreadGroup() : Thread.currentThread().getThreadGroup();
+			namePrefix = String.format("%s-%d-thread-", getClass().getSimpleName(), nFactorys.incrementAndGet());
+		}
+
+		@Override
+		public Thread newThread(Runnable r) {
+			Thread t = new Thread(group, r, namePrefix + nThreads.incrementAndGet(), 0);
+			if(t.isDaemon()){
+				t.setDaemon(false);
+			}
+			if(t.getPriority() != Thread.NORM_PRIORITY){
+				t.setPriority(Thread.NORM_PRIORITY);
+			}
+			return t;
+		}
+		
+	}
+	
+	//RejectedExecutionHnadler===================
+	public class EvictionRejectedExecutionHandler implements java.util.concurrent.RejectedExecutionHandler{
+
+		@Override
+		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+			System.out.println("rejectedExecution Runnable:" + r);
+		}
+		
 	}
 	
 	public static class Builder<T>{
