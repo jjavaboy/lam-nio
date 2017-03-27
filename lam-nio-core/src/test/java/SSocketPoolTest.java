@@ -9,6 +9,7 @@ import lam.log.Console;
 import lam.pool.SSocket;
 import lam.pool.SSocketFactory;
 import lam.pool.SSocketPool;
+import lam.pool.support.SObjectPoolConfig;
 import lam.util.FinalizeUtils;
 
 /**
@@ -33,15 +34,18 @@ public class SSocketPoolTest {
 		config.setTestOnBorrow(Boolean.TRUE.booleanValue());//default value:false
 		config.setTestOnReturn(Boolean.TRUE.booleanValue());//default value:false
 		config.setLifo(Boolean.TRUE.booleanValue());//last in first out,default value:true
-		SSocketFactory ssocketFactory = new SSocketFactory("192.168.20.112", 6379);
-		SSocketPool ssocketPool = new SSocketPool(config, ssocketFactory);
+		
+		SObjectPoolConfig sconfig = new SObjectPoolConfig();
+		SSocketFactory ssocketFactory = new SSocketFactory("192.168.204.127", 6378);
+		SSocketPool ssocketPool = new SSocketPool(sconfig, ssocketFactory);
 		
 		long start = System.currentTimeMillis();
 		
-		for(int i = 0; i < 1; i++){
+		for(int i = 0; i < 500; i++){
 			SSocket ssocket = null;
 			try{
 				ssocket = ssocketPool.getResource();
+				//ssocket = new SSocket("192.168.204.127", 6378);
 				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(ssocket.getOutputStream()));
 				writer.write("get key" + 0 + "\r\n");
 				writer.flush();

@@ -3,12 +3,9 @@ package lam.pool.support;
 import java.io.PrintWriter;
 import java.util.Deque;
 
-import org.apache.commons.pool2.PooledObject;
-import org.apache.commons.pool2.PooledObjectState;
-
 /**
 * <p>
-* TODO
+* pool object
 * </p>
 * @author linanmiao
 * @date 2017年3月22日
@@ -85,12 +82,12 @@ public abstract class SPooledObject<T> /*implements PooledObject<T>*/
 	public boolean endEvictionTest(Deque<PooledObject<T>> idleQueue) {
 		//return endSEvictionTest((Deque<SPooledObject<T>>)idleQueue);
 		return true;
-	}*/
+	}
 	
 	//	@Override
 	public PooledObjectState getState() {
 		// TODO Auto-generated method stub
 		return null;
-	}
+	}*/
 
 }

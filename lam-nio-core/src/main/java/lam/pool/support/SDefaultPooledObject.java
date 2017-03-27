@@ -77,14 +77,23 @@ public class SDefaultPooledObject<T> /*extends SPooledObject<T>*/ extends SPoole
 	}
 
 	@Override
-	public boolean startSEvictionTest() {
-		// TODO Auto-generated method stub
+	public synchronized boolean startSEvictionTest() {
+		if(this.state == SPooledObjectState.IDLE){
+			this.state = SPooledObjectState.EVICTION;
+			return true;
+		}
 		return false;
 	}
 
 	@Override
-	public boolean endSEvictionTest(Deque<SPooledObject<T>> idleQueue) {
-		// TODO Auto-generated method stub
+	public synchronized boolean endSEvictionTest(Deque<SPooledObject<T>> idleQueue) {
+		if(this.state == SPooledObjectState.EVICTION){
+			this.state = SPooledObjectState.IDLE;
+			return true;
+		}else if(this.state == SPooledObjectState.EVICTION_RETURN_TO_HEAD){
+			this.state = SPooledObjectState.IDLE;
+			idleQueue.offerFirst(this);
+		}
 		return false;
 	}
 
@@ -96,6 +105,9 @@ public class SDefaultPooledObject<T> /*extends SPooledObject<T>*/ extends SPoole
 			this.borrowedCount++;
 			this.state = SPooledObjectState.ALLOCATED;
 			return true;
+		}else if(this.state == SPooledObjectState.EVICTION){
+			this.state = SPooledObjectState.EVICTION_RETURN_TO_HEAD;
+			return false;
 		}
 		return false;
 	}

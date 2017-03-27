@@ -202,15 +202,16 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 	 */
 	public void startEvictor(long timeBetweenEvictorRunsMillis){
 		synchronized (evictorLock) {
-			//stop evictor
+			//stop the running evictor
 			//handle...
 			
+			//then start the new evictor
 			if(timeBetweenEvictorRunsMillis > 0){
-				scheduledThreadPoolExecutor.scheduleWithFixedDelay(new Runnable(){
-					public void run(){
-						//...
-					}
-				}, timeBetweenEvictorRunsMillis, timeBetweenEvictorRunsMillis, TimeUnit.MILLISECONDS);
+				scheduledThreadPoolExecutor.scheduleWithFixedDelay(
+						new EvictionRunnable(), 
+						timeBetweenEvictorRunsMillis, 
+						timeBetweenEvictorRunsMillis, 
+						TimeUnit.MILLISECONDS);
 			}
 		}
 	}
@@ -316,10 +317,27 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 	
 	//RejectedExecutionHnadler===================
 	public class EvictionRejectedExecutionHandler implements java.util.concurrent.RejectedExecutionHandler{
+		
+		public EvictionRejectedExecutionHandler(){}
 
 		@Override
 		public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
 			System.out.println("rejectedExecution Runnable:" + r);
+		}
+		
+	}
+	
+	/**
+	 * perform the task of eviction, to abandon the excess idle object.
+	 */
+	//EvictRunnable===================
+	public class EvictionRunnable implements Runnable{
+
+		public EvictionRunnable(){}
+		
+		@Override
+		public void run() {
+			//do task.
 		}
 		
 	}
