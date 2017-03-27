@@ -7,12 +7,23 @@ package lam.queue;
 * @date 2017年3月27日
 * @version 1.0
 */
-public interface LQueue <E>{
+public interface LQueue <E> extends Iterable<E>{
 	
 	/**
 	 * size of queue.
 	 */
 	public int size();
+	
+	public boolean isEmpty();
+	
+	public E get(int index);
+	
+	/**
+	 * remove the elements sorted in the index.
+	 */
+	public boolean remove(int index);
+	
+	public boolean remove(E e);
 	
 	/**
 	 * this method is equivalent to the method linkLast(E e);
