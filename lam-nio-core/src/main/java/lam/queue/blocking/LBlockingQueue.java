@@ -30,6 +30,8 @@ public interface LBlockingQueue<E> extends Iterable<E>{
 	 */
 	public E poll(long timeout, TimeUnit timeUnit) throws InterruptedException;
 	
+	public boolean remove(E e);
+	
 	public int size();
 	
 	public boolean isEmpty();
