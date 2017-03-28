@@ -230,7 +230,7 @@ public class LLinkedQueue<E> implements LQueue<E>{
 					cursor--;
 				}
 				
-				//
+				//-1:reset to the init situlation
 				lastIdx = -1;
 				
 				//reset expectedModifyCount

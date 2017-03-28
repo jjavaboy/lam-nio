@@ -19,7 +19,7 @@ public interface LQueue <E> extends Iterable<E>{
 	public E get(int index);
 	
 	/**
-	 * remove the elements sorted in the index.
+	 * remove the elements queued in the index.
 	 */
 	public boolean remove(int index);
 	
