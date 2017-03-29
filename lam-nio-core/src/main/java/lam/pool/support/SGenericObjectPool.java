@@ -24,13 +24,19 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 	private final Map<SObjectWrapper<T>, SPooledObject<T>>
 		allObjects = new ConcurrentHashMap<SObjectWrapper<T>, SPooledObject<T>>();
 	
-	private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
+	/**
+	 * guarded by evictorLock
+	 */
+	private ScheduledThreadPoolExecutor evictorScheduledThreadPoolExecutor;
+	
+	/**
+	 * guarding the evictor schudle
+	 */
+	protected final Object evictorLock = new Object();
 	
 	public SGenericObjectPool(Builder<T> builder){
 		super(builder);
 		idleObjects = new java.util.concurrent.LinkedBlockingDeque<SPooledObject<T>>();
-		scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(
-				1, new EvictionThreadFactory(), new EvictionRejectedExecutionHandler());
 		startEvictor(super.timeBetweenEvictorRunsMillis);
 	}
 	
@@ -203,11 +209,15 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 	public void startEvictor(long timeBetweenEvictorRunsMillis){
 		synchronized (evictorLock) {
 			//stop the running evictor
-			//handle...
+			if(evictorScheduledThreadPoolExecutor != null){
+				evictorScheduledThreadPoolExecutor.shutdown();
+				evictorScheduledThreadPoolExecutor = null;
+			}
 			
 			//then start the new evictor
 			if(timeBetweenEvictorRunsMillis > 0){
-				scheduledThreadPoolExecutor.scheduleWithFixedDelay(
+				initEvictorSchedule();
+				evictorScheduledThreadPoolExecutor.scheduleWithFixedDelay(
 						new EvictionRunnable(), 
 						timeBetweenEvictorRunsMillis, 
 						timeBetweenEvictorRunsMillis, 
@@ -252,6 +262,13 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 		}
 	}
 	
+	private void ensureIdle(int idleCount, boolean always){
+		if(idleCount < 1 || isClosed()){
+			return ;
+		}
+		
+	}
+	
 	public int getNumIdle(){
 		return this.idleObjects.size();
 	}
@@ -284,6 +301,15 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 			}else{
 				idleObjects.addLast(p);
 			}
+		}
+	}
+	
+	private void initEvictorSchedule(){
+		if(evictorScheduledThreadPoolExecutor == null){
+			evictorScheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(
+					1, new EvictionThreadFactory(), new EvictionRejectedExecutionHandler());
+		}else{
+			throw new IllegalStateException("evictorScheduledThreadPoolExecutor is not null, no need to initialize.");
 		}
 	}
 	
@@ -338,6 +364,8 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 		@Override
 		public void run() {
 			//do task.
+			
+			
 		}
 		
 	}

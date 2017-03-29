@@ -33,8 +33,6 @@ public abstract class SBaseGenericObjectPool<T>{
 	protected volatile boolean close;
 	protected final Object closeLock = new Object();
 	
-	protected final Object evictorLock = new Object();
-	
 	/**
 	 * create object count, which is not destroy.
 	 */
