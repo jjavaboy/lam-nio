@@ -27,6 +27,16 @@ public interface LBlockingDeque<E> extends Iterable<E>{
 	public boolean offerFirst(E e, long timeout, TimeUnit timeUnit)throws InterruptedException;
 	
 	/**
+	 * Throw an IllegalStateException("Deque is full") if the deque is full;
+	 */
+	public boolean addFirst(E e);
+	
+	/**
+	 * Throw an IllegalStateException("Deque is full") if the deque is full;
+	 */
+	public boolean addLast(E e);
+	
+	/**
 	 * This method is equivalent to the method pollFirst()
 	 */
 	public E poll();
@@ -38,6 +48,21 @@ public interface LBlockingDeque<E> extends Iterable<E>{
 	public E pollLast();
 	
 	public E pollLast(long timeout, TimeUnit timeUnit)throws InterruptedException;
+	
+	/**
+	 * This method is equivalent to the method takeFirst().
+	 */
+	public E take()throws InterruptedException;
+	
+	/**
+	 * take and remove the first element of queue, waiting if necessary until an element becomes available.
+	 */
+	public E takeFirst()throws InterruptedException;
+	
+	/**
+	 * take nad remove the last element of queue, waiting if necessary until an element becomes available.
+	 */
+	public E takeLast()throws InterruptedException;
 	
 	public boolean remove(E e);
 	

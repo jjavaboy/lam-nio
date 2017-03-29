@@ -57,11 +57,16 @@ public class SPool<T> implements Closeable{
 				.setBlockWhenExhausted(config.isBlockWhenExhausted())
 				.setLifo(config.isLifo())
 				.setMaxIdle(config.getMaxIdle())
+				.setMinIdle(config.getMinIdle())
 				.setMaxTotal(config.getMaxTotal())
 				.setMaxWaitMillis(config.getMaxWaitMillis())
 				.setTestOnBorrow(config.isTestOnBorrow())
 				.setTestOnCreate(config.isTestOnCreate())
 				.setTestOnReturn(config.isTestOnReturn())
+				.setTimeBetweenEvictorRunsMillis(config.getTimeBetweenEvictorRunsMillis())
+				.setNumTestsPerEvictionRun(config.getNumTestsPerEvictionRun())
+				.setTestWhileIdle(config.isTestWhileIdle())
+				.setMinEvictableIdleTimeMillis(config.getMinEvictableIdleTimeMillis())
 				.setFactory(factory)
 				.build();
 	}

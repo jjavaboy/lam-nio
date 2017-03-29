@@ -2,6 +2,8 @@ package lam.pool.support;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import lam.pool.support.SGenericObjectPool.Builder;
+
 /**
 * <p>
 * abstract class of GenericObjectPool
@@ -17,13 +19,17 @@ public abstract class SBaseGenericObjectPool<T>{
 	
 	protected volatile int maxTotal;
 	protected volatile int maxIdle;
+	protected volatile int minIdle;
 	protected volatile long maxWaitMillis;
 	protected volatile boolean blockWhenExhausted;
 	protected volatile boolean testOnCreate;
 	protected volatile boolean testOnBorrow;
 	protected volatile boolean testOnReturn;
 	protected volatile long timeBetweenEvictorRunsMillis;
+	protected volatile int numTestsPerEvictionRun;
 	protected volatile boolean lifo;
+	protected volatile boolean testWhileIdle;
+	protected volatile long minEvictableIdleTimeMillis;// = 30 * 60 * 1000;//half of an hour
 	
 	protected final SPooledObjectFactory<T> factory;
 	
@@ -46,12 +52,16 @@ public abstract class SBaseGenericObjectPool<T>{
 	public SBaseGenericObjectPool(SGenericObjectPool.Builder<T> builder){
 		setMaxTotal(builder.getMaxTotal());
 		setMaxIdle(builder.getMaxIdle());
+		setMinIdle(builder.getMinIdle());
 		setMaxWaitMillis(builder.getMaxWaitMillis());
 		setBlockWhenExhausted(builder.isBlockWhenExhausted());
 		setTestOnCreate(builder.isTestOnCreate());
 		setTestOnBorrow(builder.isTestOnBorrow());
 		setTestOnReturn(builder.isTestOnReturn());
 		setTimeBetweenEvictorRunsMillis(builder.getTimeBetweenEvictorRunsMillis());
+		setNumTestsPerEvictionRun(builder.getNumTestsPerEvictionRun());
+		setTestWhileIdle(builder.isTestWhileIdle());
+		setMinEvictableIdleTimeMillis(builder.getMinEvictableIdleTimeMillis());
 		setLifo(builder.isLifo());
 		
 		this.factory = builder.getFactory();
@@ -65,6 +75,11 @@ public abstract class SBaseGenericObjectPool<T>{
 	public void setMaxIdle(int maxIdle) {
 		checkNotNegative(maxIdle);
 		this.maxIdle = maxIdle;
+	}
+	
+	public void setMinIdle(int minIdle) {
+		checkNotNegative(minIdle);
+		this.minIdle = minIdle;
 	}
 
 	public void setMaxWaitMillis(long maxWaitMillis) {
@@ -89,6 +104,20 @@ public abstract class SBaseGenericObjectPool<T>{
 
 	public void setTimeBetweenEvictorRunsMillis(long timeBetweenEvictorRunsMillis) {
 		this.timeBetweenEvictorRunsMillis = timeBetweenEvictorRunsMillis;
+	}
+	
+	public void setNumTestsPerEvictionRun(int numTestsPerEvictionRun) {
+		checkNotNegative(numTestsPerEvictionRun);
+		this.numTestsPerEvictionRun = numTestsPerEvictionRun;
+	}
+	
+	public void setTestWhileIdle(boolean testWhileIdle) {
+		this.testWhileIdle = testWhileIdle;
+	}
+	
+	public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
+		checkNotNegative(numTestsPerEvictionRun);
+		this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
 	}
 	
 	public void setLifo(boolean lifo) {

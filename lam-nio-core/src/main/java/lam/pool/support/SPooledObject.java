@@ -3,6 +3,8 @@ package lam.pool.support;
 import java.io.PrintWriter;
 import java.util.Deque;
 
+import lam.queue.LDeque;
+
 /**
 * <p>
 * pool object
@@ -22,7 +24,7 @@ public abstract class SPooledObject<T> /*implements PooledObject<T>*/
 	public abstract long getSLastReturnTime();
 	public abstract long getSLastUsedTime();
 	public abstract boolean startSEvictionTest();
-	public abstract boolean endSEvictionTest(Deque<SPooledObject<T>> idleQueue);
+	public abstract boolean endSEvictionTest(LDeque<SPooledObject<T>> idleQueue);
 	public abstract boolean allocate();
 	public abstract boolean deallocate();
 	public abstract void invalidate();

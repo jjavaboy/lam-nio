@@ -3,6 +3,8 @@ package lam.pool.support;
 import java.io.PrintWriter;
 import java.util.Deque;
 
+import lam.queue.LDeque;
+
 /**
 * <p>
 * default pooled object
@@ -86,13 +88,13 @@ public class SDefaultPooledObject<T> /*extends SPooledObject<T>*/ extends SPoole
 	}
 
 	@Override
-	public synchronized boolean endSEvictionTest(Deque<SPooledObject<T>> idleQueue) {
+	public synchronized boolean endSEvictionTest(LDeque<SPooledObject<T>> idleQueue) {
 		if(this.state == SPooledObjectState.EVICTION){
 			this.state = SPooledObjectState.IDLE;
 			return true;
 		}else if(this.state == SPooledObjectState.EVICTION_RETURN_TO_HEAD){
 			this.state = SPooledObjectState.IDLE;
-			idleQueue.offerFirst(this);
+			idleQueue.addFirst(this);
 		}
 		return false;
 	}

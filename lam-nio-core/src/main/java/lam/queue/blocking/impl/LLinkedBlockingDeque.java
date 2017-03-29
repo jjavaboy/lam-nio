@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import lam.queue.LDeque;
 import lam.queue.blocking.LBlockingDeque;
 
 /**
@@ -15,7 +16,7 @@ import lam.queue.blocking.LBlockingDeque;
 * @date 2017年3月29日
 * @version 1.0
 */
-public class LLinkedBlockingDeque<E> implements LBlockingDeque<E>{
+public class LLinkedBlockingDeque<E> implements LBlockingDeque<E>, LDeque<E>{
 	
 	private volatile LNode<E> first;
 	private volatile LNode<E> last;
@@ -198,6 +199,22 @@ public class LLinkedBlockingDeque<E> implements LBlockingDeque<E>{
 			loc.unlock();
 		}
 	}
+	
+	@Override
+	public boolean addFirst(E e) {
+		if(!offerFirst(e)){
+			throw new IllegalStateException("Deque is full");
+		}
+		return true;
+	}
+	
+	@Override
+	public boolean addLast(E e) {
+		if(!offerLast(e)){
+			throw new IllegalStateException("Deque is full");
+		}
+		return true;
+	}
 
 	@Override
 	public boolean remove(E e) {
@@ -214,6 +231,41 @@ public class LLinkedBlockingDeque<E> implements LBlockingDeque<E>{
 				}
 			}
 			return false;
+		}finally{
+			loc.unlock();
+		}
+	}
+	
+	@Override
+	public E take() throws InterruptedException {
+		return takeFirst();
+	}
+	
+	@Override
+	public E takeFirst() throws InterruptedException {
+		final ReentrantLock loc = lock;
+		loc.lock();
+		try{
+			E e;
+			while((e = unlinkFirst()) != null){
+				notEmpty.await();
+			}
+			return e;
+		}finally{
+			loc.unlock();
+		}
+	}
+	
+	@Override
+	public E takeLast() throws InterruptedException {
+		final ReentrantLock loc = lock;
+		loc.lock();
+		try{
+			E e;
+			while((e = unlinkLast()) != null){
+				notEmpty.await();
+			}
+			return e;
 		}finally{
 			loc.unlock();
 		}
@@ -458,6 +510,36 @@ public class LLinkedBlockingDeque<E> implements LBlockingDeque<E>{
 		}
 
 		
+	}
+
+	@Override
+	public E get(int index) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean remove(int index) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void linkLast(E e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public E unLinkFirst() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean add(E e) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

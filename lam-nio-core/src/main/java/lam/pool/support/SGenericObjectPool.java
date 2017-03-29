@@ -1,6 +1,7 @@
 package lam.pool.support;
 
 import java.io.Closeable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,6 +10,8 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+
+import lam.queue.blocking.LBlockingDeque;
 
 /**
 * <p>
@@ -20,7 +23,8 @@ import java.util.concurrent.atomic.AtomicLong;
 */
 public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements Closeable{
 
-	private final java.util.concurrent.LinkedBlockingDeque<SPooledObject<T>> idleObjects;
+	//private final java.util.concurrent.LinkedBlockingDeque<SPooledObject<T>> idleObjects;
+	private final lam.queue.blocking.impl.LLinkedBlockingDeque<SPooledObject<T>> idleObjects;
 	private final Map<SObjectWrapper<T>, SPooledObject<T>>
 		allObjects = new ConcurrentHashMap<SObjectWrapper<T>, SPooledObject<T>>();
 	
@@ -36,7 +40,8 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 	
 	public SGenericObjectPool(Builder<T> builder){
 		super(builder);
-		idleObjects = new java.util.concurrent.LinkedBlockingDeque<SPooledObject<T>>();
+		//idleObjects = new java.util.concurrent.LinkedBlockingDeque<SPooledObject<T>>();
+		idleObjects = new lam.queue.blocking.impl.LLinkedBlockingDeque<>();
 		startEvictor(super.timeBetweenEvictorRunsMillis);
 	}
 	
@@ -185,6 +190,10 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 		}
 	}
 
+	/**
+	 * @return null if object number in the pool reaches the maxTotal
+	 * @throws SPoolException
+	 */
 	private SPooledObject<T> create() throws SPoolException {
 		long afterCreatedCount = createCount.incrementAndGet();
 		if(afterCreatedCount > maxTotal || afterCreatedCount > Integer.MAX_VALUE){
@@ -226,6 +235,11 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 		}
 	}
 	
+	int getNumTestsPerEvictionRun(){
+		int numTest = numTestsPerEvictionRun;
+		return Math.min(numTest, idleObjects.size());
+	}
+	
 	public void close(){
 		if(isClosed()){
 			return ;
@@ -262,11 +276,21 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 		}
 	}
 	
-	private void ensureIdle(int idleCount, boolean always){
-		if(idleCount < 1 || isClosed()){
+	private void ensureIdle(int idleCount, boolean always) throws Exception{
+		if(idleCount < 1 || isClosed() || (!always && idleObjects.hasTakeWaiters())){
 			return ;
 		}
-		
+		while(idleObjects.size() < idleCount){
+			SPooledObject<T> p = create();
+			if(p == null){
+				break;
+			}
+			if(lifo){
+				idleObjects.addFirst(p);
+			}else{
+				idleObjects.addLast(p);
+			}
+		}
 	}
 	
 	public int getNumIdle(){
@@ -310,6 +334,57 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 					1, new EvictionThreadFactory(), new EvictionRejectedExecutionHandler());
 		}else{
 			throw new IllegalStateException("evictorScheduledThreadPoolExecutor is not null, no need to initialize.");
+		}
+	}
+	
+	private void evict() throws Exception{
+		if(!idleObjects.isEmpty()){
+			synchronized (evictorLock) {
+				int numTest = getNumTestsPerEvictionRun();
+				SEvictionPolicy<SPooledObject<T>> policy = new SDefaultEvictionPolicy();
+				EvictionIterator<SPooledObject<T>> evictionIter = new EvictionIterator<SPooledObject<T>>(idleObjects);
+				for(int i = 0; i < numTest; i++){
+					if(!evictionIter.hasNext()){
+						continue ;
+					}
+					SPooledObject<T> p = null;
+					try{
+						p = evictionIter.next();
+					}catch(Exception e){
+						continue;
+					}
+					
+					if(!p.startSEvictionTest()){
+						continue;
+					}
+					
+					try{
+						boolean evictRs = policy.evict(p);
+						if(evictRs){
+							destroy(p);
+							continue;
+						}
+					}catch(Exception e){
+					}
+					if(testWhileIdle){
+						try{
+							factory.activateSObject(p);
+							if(!factory.validateSObject(p)){
+								destroy(p);
+							}else{
+								factory.passivateSObject(p);
+							}
+						}catch(Exception e){
+							try{
+								destroy(p);
+							}catch(Exception e1){}
+						}
+					}
+					if(!p.endSEvictionTest(idleObjects)){
+						//do something in the furture.
+					}
+				}
+			}
 		}
 	}
 	
@@ -364,8 +439,63 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 		@Override
 		public void run() {
 			//do task.
+			try {
+				evict();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 			
-			
+			try {
+				ensureIdle(minIdle, true);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	//EvictionIterator=================
+	private class EvictionIterator<E> implements Iterator<E>{
+		
+		LBlockingDeque<E> deque;
+		Iterator<E> iter;
+		
+		EvictionIterator(LBlockingDeque<E> deque){
+			this.deque = deque;
+			if(lifo){
+				iter = deque.descendingIterator();
+			}else{
+				iter = deque.iterator();
+			}
+		}
+
+		@Override
+		public boolean hasNext() {
+			return iter.hasNext();
+		}
+
+		@Override
+		public E next() {
+			return iter.next();
+		}
+
+		@Override
+		public void remove() {
+			iter.remove();
+		}
+
+		
+	}
+	
+	//SDefaultEvictionPolicy=============
+	private class SDefaultEvictionPolicy implements SEvictionPolicy<SPooledObject<T>>{
+
+		@Override
+		public boolean evict(SPooledObject<T> p) {
+			if(minEvictableIdleTimeMillis < p.getSIdleTimeMillis() || minIdle < idleObjects.size()){
+				return true;
+			}
+			return false;
 		}
 		
 	}
@@ -376,13 +506,17 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 		
 		private int maxTotal = 8;
 		private int maxIdle = 8;
+		private int minIdle = 0;
 		private long maxWaitMillis = -1;//wait forever
 		private boolean blockWhenExhausted = Boolean.TRUE.booleanValue();
 		private boolean testOnCreate = Boolean.FALSE.booleanValue();
 		private boolean testOnBorrow = Boolean.FALSE.booleanValue();
 		private boolean testOnReturn = Boolean.FALSE.booleanValue();
 		private long timeBetweenEvictorRunsMillis = -1;
+		private int numTestsPerEvictionRun = 3;
 		private boolean lifo = false;
+		private boolean testWhileIdle = Boolean.FALSE.booleanValue();
+		private long minEvictableIdleTimeMillis = 30 * 60 * 1000;//half of an hour
 		
 		private SPooledObjectFactory<T> factory;
 		
@@ -405,6 +539,15 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 			this.maxIdle = maxIdle;
 			return this;
 		}
+
+		public int getMinIdle() {
+			return minIdle;
+		}
+		
+		public Builder<T> setMinIdle(int minIdle) {
+			this.minIdle = minIdle;
+			return this;
+		}
 		
 		public long getMaxWaitMillis() {
 			return maxWaitMillis;
@@ -412,6 +555,15 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 		
 		public Builder<T> setMaxWaitMillis(long maxWaitMillis) {
 			this.maxWaitMillis = maxWaitMillis;
+			return this;
+		}
+		
+		public int getNumTestsPerEvictionRun() {
+			return numTestsPerEvictionRun;
+		}
+		
+		public Builder<T> setNumTestsPerEvictionRun(int numTestsPerEvictionRun) {
+			this.numTestsPerEvictionRun = numTestsPerEvictionRun;
 			return this;
 		}
 		
@@ -467,6 +619,24 @@ public class SGenericObjectPool<T> extends SBaseGenericObjectPool<T> implements 
 		
 		public boolean isLifo() {
 			return lifo;
+		}
+		
+		public Builder<T> setTestWhileIdle(boolean testWhileIdle) {
+			this.testWhileIdle = testWhileIdle;
+			return this;
+		}
+		
+		public boolean isTestWhileIdle() {
+			return testWhileIdle;
+		}
+		
+		public long getMinEvictableIdleTimeMillis() {
+			return minEvictableIdleTimeMillis;
+		}
+		
+		public Builder<T> setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
+			this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+			return this;
 		}
 		
 		public SPooledObjectFactory<T> getFactory() {
