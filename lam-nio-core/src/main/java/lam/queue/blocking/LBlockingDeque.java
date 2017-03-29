@@ -45,6 +45,10 @@ public interface LBlockingDeque<E> extends Iterable<E>{
 	
 	public boolean isEmpty();
 	
+	public boolean hasTakeWaiters();
+	
+	public int getTakeQueueLength();
+	
 	public Iterator<E> descendingIterator();
 	
 }

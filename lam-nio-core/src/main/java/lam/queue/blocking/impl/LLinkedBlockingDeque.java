@@ -235,6 +235,28 @@ public class LLinkedBlockingDeque<E> implements LBlockingDeque<E>{
 		return size() == 0;
 	}
 	
+	@Override
+	public boolean hasTakeWaiters() {
+		final ReentrantLock loc = lock;
+		loc.lock();
+		try{			
+			return loc.hasWaiters(notEmpty);
+		}finally{
+			loc.unlock();
+		}
+	}
+	
+	@Override
+	public int getTakeQueueLength() {
+		final ReentrantLock loc = lock;
+		loc.lock();
+		try{
+			return loc.getWaitQueueLength(notEmpty);
+		}finally{
+			loc.unlock();
+		}
+	}
+	
 	private boolean linkLast(LNode<E> ln){
 		if(count >= capacity){
 			return false;
