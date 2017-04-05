@@ -1,4 +1,4 @@
-package lam.builder;
+package lam.design.pattern.builder;
 
 import com.google.gson.Gson;
 
