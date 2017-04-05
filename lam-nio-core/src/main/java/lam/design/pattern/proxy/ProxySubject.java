@@ -1,5 +1,7 @@
 package lam.design.pattern.proxy;
 
+import java.util.Objects;
+
 import lam.log.Console;
 
 /**
@@ -15,7 +17,7 @@ public class ProxySubject implements Subject{
 	private Subject subject;
 	
 	public ProxySubject(Subject subject){
-		this.subject = subject;
+		this.subject = Objects.requireNonNull(subject, "subject must not be null.");
 	}
 	
 	@Override

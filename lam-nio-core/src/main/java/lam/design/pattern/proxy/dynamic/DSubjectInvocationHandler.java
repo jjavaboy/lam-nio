@@ -1,6 +1,7 @@
 package lam.design.pattern.proxy.dynamic;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import lam.log.Console;
 
@@ -17,7 +18,7 @@ public class DSubjectInvocationHandler implements java.lang.reflect.InvocationHa
 	private Object delegate;
 	
 	public DSubjectInvocationHandler(Object delegate) {
-		this.delegate = delegate;
+		this.delegate = Objects.requireNonNull(delegate, "delegate must not be null.");
 	}
 
 	@Override

@@ -25,12 +25,19 @@ public class DSubjectProxyFactory implements ProxyFactory<DSubject>{
 
 	@Override
 	public DSubject newProxyInstance() {
+		
 		DSubject delegate = new DRealSubject();
 		java.lang.reflect.InvocationHandler invocationHandler = new DSubjectInvocationHandler(delegate);
 		DSubject proxy = (DSubject) java.lang.reflect.Proxy.newProxyInstance(
 				delegate.getClass().getClassLoader(),
 				delegate.getClass().getInterfaces(), 
 				invocationHandler);
+
+		//delegate.getClass().getClassLoader() ==>> sun.misc.Launcher$AppClassLoader
+		
+		//delegate.getClass().getInterfaces() ==>> [lam.design.pattern.proxy.dynamic.DSubject]
+		//because DRealSubject class implements the lam.design.pattern.proxy.dynamic.DSubject interface
+		
 		return proxy;
 	}
 	
