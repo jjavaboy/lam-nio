@@ -16,6 +16,9 @@ public class DSubjectProxyFactory implements ProxyFactory<DSubject>{
 		private static final DSubjectProxyFactory INSTANCE = new DSubjectProxyFactory();
 	}
 	
+	//Constructor can not be called at the outside.
+	private DSubjectProxyFactory(){}
+	
 	public static DSubjectProxyFactory getInstance(){
 		return InstanceHolder.INSTANCE;
 	}

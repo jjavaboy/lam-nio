@@ -14,6 +14,9 @@ public class SubjectProxyFactory implements ProxyFactory<Subject>{
 
 	private static volatile SubjectProxyFactory instance;
 	
+	//Constructor cann't be called at the outside.
+	private SubjectProxyFactory(){}
+	
 	public static SubjectProxyFactory getInstance(){
 		if(instance == null){
 			synchronized (SubjectProxyFactory.class) {
