@@ -1,6 +1,4 @@
-import lam.design.pattern.proxy.RealSubjectFactory;
-import lam.design.pattern.proxy.Subject;
-import lam.design.pattern.proxy.SubjectFactory;
+import lam.design.pattern.proxy.SubjectProxyFactory;
 
 /**
 * <p>
@@ -13,9 +11,7 @@ import lam.design.pattern.proxy.SubjectFactory;
 public class ProxySubjectTest {
 	
 	public static void main(String[] args){
-		SubjectFactory factory = new RealSubjectFactory();
-		Subject subject = factory.createSubject();
-		subject.doWork("I'm argument, lalala.");
+		SubjectProxyFactory.getInstance().newProxyInstance().doWork("I'm argument, lalala.");
 	}
 
 }
