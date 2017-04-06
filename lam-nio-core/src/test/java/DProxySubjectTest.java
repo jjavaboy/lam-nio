@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import lam.design.pattern.proxy.dynamic.DRealSubject;
 import lam.design.pattern.proxy.dynamic.DSubject;
+import lam.design.pattern.proxy.dynamic.DSubject$Proxy1;
 import lam.design.pattern.proxy.dynamic.DSubjectInvocationHandler;
 import lam.design.pattern.proxy.dynamic.DSubjectProxyFactory;
 import lam.util.FinalizeUtils;
@@ -38,6 +39,9 @@ public class DProxySubjectTest {
 		ds.invokeMethod("gogo");
 		
 		writeByteToDisk(classBytes);
+		
+		DSubject$Proxy1 d = new DSubject$Proxy1(h);
+		d.invokeMethod("alalla");
 	}
 	
 	private static void writeByteToDisk(byte[] classBytes) {

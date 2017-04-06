@@ -1,6 +1,7 @@
 package lam.design.pattern.proxy.dynamic;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Objects;
 
 import lam.log.Console;
@@ -29,8 +30,8 @@ public class DSubjectInvocationHandler implements java.lang.reflect.InvocationHa
 		
 		long finish = System.currentTimeMillis();
 		
-		Console.println("Object:%s,method:%s,cost(ms):%d,result:%s", 
-				delegate.getClass().getSimpleName(), method.getName(), finish - start, returnObject);
+		Console.println("Object:%s,method:%s,argument:%s,cost(ms):%d,result:%s", 
+				delegate.getClass().getSimpleName(), method.getName(), Arrays.toString(args), finish - start, returnObject);
 		
 		return returnObject;
 	}
