@@ -87,6 +87,15 @@ public class DProxySubjectTest {
 	}
 	
 	private static class ProxyClassLoader extends ClassLoader{
+		/**
+		 * @param name The expected binary name of the class, or null if not known
+		 * @param b The bytes that make up the class data. The bytes in positions off
+		 * 			 through off+len-1 should have the format of a valid class file as
+		 * 			 defined by The Java™ Virtual Machine Specification.
+		 * @param off The start offset in b of the class data
+		 * @param len The length of the class data
+		 * @return
+		 */
 		public Class<?> defineClass0(String name, byte[] b, int off, int len){
 			return super.defineClass(name, b, off, len);
 		}
