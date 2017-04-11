@@ -13,7 +13,7 @@ import lam.util.concurrent.ThreadFactoryBuilder;
 * @date 2017年4月11日
 * @versio 1.0
 */
-public class DelayRunner {
+public class DelayTaskRunner {
 	
 	private final ScheduledThreadPoolExecutor runner = 
 			new ScheduledThreadPoolExecutor(
