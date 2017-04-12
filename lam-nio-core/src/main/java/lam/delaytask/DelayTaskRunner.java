@@ -70,7 +70,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 	}
 	
 	@Override
-	public void close() throws IOException {
+	public void close() {
 		close = Boolean.TRUE.booleanValue();
 		runner.shutdown();
 		Console.println(getClass().getName() + " close");
