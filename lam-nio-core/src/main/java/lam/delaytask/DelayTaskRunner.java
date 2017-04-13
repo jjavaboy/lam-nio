@@ -75,6 +75,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 	@Override
 	public void close() {
 		close = Boolean.TRUE.booleanValue();
+		TaskWorkPoolFactory.close();
 		runner.shutdown();
 		logger.info(getClass().getName() + " close");
 	}
@@ -146,6 +147,14 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 			logger.info("this object has been closed, cancel the task.");
 			return ;
 		}
+		//Segment segment = nextSegment();
+		int currentIndex = getCurrentIndex();
+		Segment segment = getSegment(currentIndex);
+		if(segment != null){
+			segment.doTask();
+		}else{
+			logger.info(String.format("doTask-index:%d-%s", currentIndex, segment));				
+		}
 	}
 	
 	@Override
@@ -160,14 +169,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 				logger.info("DelayTaskRunner object is closed, so cancel the thread.");
 				return ;
 			}
-			//Segment segment = nextSegment();
-			int currentIndex = getCurrentIndex();
-			Segment segment = getSegment(currentIndex);
-			if(segment != null){
-				segment.doTask();
-			}else{
-				logger.info(String.format("doTask-index:%d-%s", currentIndex, segment));				
-			}
+			doTask();
 		}
 	}
 	

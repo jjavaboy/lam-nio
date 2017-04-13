@@ -2,7 +2,9 @@ package lam.delaytask;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.slf4j.Logger;
@@ -21,9 +23,9 @@ import lam.delaytask.support.Segment;
 */
 public class DelaySegment extends ReentrantLock implements Segment{
 	
-	private static Logger logger = LoggerFactory.getLogger(DelaySegment.class);
-	
 	private static final long serialVersionUID = -857493008603622475L;
+	
+	private static Logger logger = LoggerFactory.getLogger(DelaySegment.class);
 	
 	private final int slot;
 	
@@ -57,12 +59,18 @@ public class DelaySegment extends ReentrantLock implements Segment{
 		}
 		lock();
 		try{
+			final Random r = new Random();
 			Iterator<Task> iter = tasks.iterator();
 			while(iter.hasNext()){
-				Task task = iter.next();
+				final Task task = iter.next();
 				if(task.canDo()){
-					task.doTaskSelf();
 					iter.remove();
+					TaskWorkPoolFactory.submit(new Runnable(){
+						@Override
+						public void run() {							
+							task.doTaskSelf(r.nextInt(150));
+						}
+					});
 				}else{					
 					task.runOneTime();
 				}
@@ -134,9 +142,18 @@ public class DelaySegment extends ReentrantLock implements Segment{
 		}
 
 		@Override
-		public boolean doTaskSelf() {
-			logger.info(String.format("doTask-index:%d-%s", getSegmentSlot(), toString()));
+		public boolean doTaskSelf(long taskTimeMillis) {
+			sleep(taskTimeMillis);
+			logger.info(String.format("doTask-index:%d-%s-taskTimeMillis:%d", getSegmentSlot(), toString(), taskTimeMillis));
 			return true;
+		}
+		
+		private void sleep(long millisecond){
+			try {
+				TimeUnit.MILLISECONDS.sleep(millisecond);
+			} catch (InterruptedException e) {
+				logger.error(String.format("sleeping for %d, but to be interrupted by other thread", millisecond), e);
+			}
 		}
 		
 		@Override

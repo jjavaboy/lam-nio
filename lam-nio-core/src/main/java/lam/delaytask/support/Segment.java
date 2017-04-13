@@ -35,7 +35,7 @@ public interface Segment {
 		
 		void runOneTime();
 		
-		boolean doTaskSelf();
+		boolean doTaskSelf(long taskTimeMillis);
 	}
 
 }
