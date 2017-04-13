@@ -84,7 +84,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 		if(isClose()){
 			throw new IllegalStateException("this object has been closed.");
 		}
-		runner.scheduleAtFixedRate(new DelayThread(), timeInterval, timeInterval, timeUnit);
+		runner.scheduleAtFixedRate(new DelayRunnable(), timeInterval, timeInterval, timeUnit);
 		logger.info(getClass().getName() + " start");
 	}
 
@@ -153,7 +153,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 		return close;
 	}
 	
-	private class DelayThread extends Thread{
+	private class DelayRunnable implements Runnable{
 		@Override
 		public void run() {
 			if(isClose()){
