@@ -24,6 +24,8 @@ public interface Segment {
 		
 		public int getSegmentSlot();
 		
+		int getOriginalCycle();
+		
 		int getCycleNum();
 	
 		/**

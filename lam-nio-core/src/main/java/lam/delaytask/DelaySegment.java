@@ -84,13 +84,16 @@ public class DelaySegment extends ReentrantLock implements Segment{
 		
 		private final int segmentSlot;
 		
-		private volatile int cycleNum;//Gaurded by countLock
+		private final int originalCycle;
+		
+		private volatile int cycleNum;//current cycle number, Gaurded by countLock
 		
 		private final Object countLock = new Object();
 		
-		public DelayTask(final int id, final int cycleNum, final int segmentSlot){
+		public DelayTask(final int id, final int cycle, final int segmentSlot){
 			this.id = id;
-			this.cycleNum = cycleNum;
+			this.originalCycle = cycle;
+			this.cycleNum = this.originalCycle;//initialize current cycle to be original cycle
 			this.segmentSlot = segmentSlot;
 		}
 		
@@ -102,6 +105,11 @@ public class DelaySegment extends ReentrantLock implements Segment{
 		@Override
 		public int getSegmentSlot() {
 			return this.segmentSlot;
+		}
+		
+		@Override
+		public int getOriginalCycle() {
+			return this.originalCycle;
 		}
 
 		@Override
@@ -147,7 +155,7 @@ public class DelaySegment extends ReentrantLock implements Segment{
 		
 		@Override
 		public String toString() {
-			String s = String.format("Task{id:%d, cycleNum:%d, segmentSlot:%d}", this.id, this.cycleNum, this.segmentSlot);
+			String s = String.format("Task{id:%d, cycleNum:%d, segmentSlot:%d, originalCycle:%d}", this.id, this.cycleNum, this.segmentSlot, this.originalCycle);
 			return s;
 		}
 		
