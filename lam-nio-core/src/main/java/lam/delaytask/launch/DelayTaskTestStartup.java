@@ -1,3 +1,5 @@
+package lam.delaytask.launch;
+
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -13,12 +15,12 @@ import lam.util.FinalizeUtils;
 * TODO
 * </p>
 * @author linanmiao
-* @date 2017年4月12日
+* @date 2017年4月13日
 * @version 1.0
 */
-public class DelayTaskTest {
+public class DelayTaskTestStartup {
 	
-	private static Logger logger = LoggerFactory.getLogger(DelayTaskTest.class);
+	private static Logger logger = LoggerFactory.getLogger(DelayTaskTestStartup.class);
 	
 	public static void main(String[] args){
 		final DelayTaskRunner runner = new DelayTaskRunner();
@@ -53,5 +55,4 @@ public class DelayTaskTest {
 			e.printStackTrace();
 		}
 	}
-
 }

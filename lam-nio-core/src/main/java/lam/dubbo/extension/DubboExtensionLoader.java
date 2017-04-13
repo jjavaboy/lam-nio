@@ -15,8 +15,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.sun.xml.internal.txw2.IllegalAnnotationException;
-
 /**
 * <p>
 * 模拟dubbo的扩展类<br/>

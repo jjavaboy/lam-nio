@@ -5,8 +5,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lam.delaytask.support.Segment;
-import lam.log.Console;
 
 /**
 * <p>
@@ -18,6 +20,8 @@ import lam.log.Console;
 * @version 1.0
 */
 public class DelaySegment extends ReentrantLock implements Segment{
+	
+	private static Logger logger = LoggerFactory.getLogger(DelaySegment.class);
 	
 	private static final long serialVersionUID = -857493008603622475L;
 	
@@ -48,7 +52,7 @@ public class DelaySegment extends ReentrantLock implements Segment{
 	@Override
 	public void doTask() {
 		if(tasks.isEmpty()){
-			Console.println("segment in slot %d has not task.", this.slot);
+			logger.info(String.format("segment in slot %d has not task.", this.slot));
 			return ;
 		}
 		lock();
@@ -123,7 +127,7 @@ public class DelaySegment extends ReentrantLock implements Segment{
 
 		@Override
 		public boolean doTaskSelf() {
-			Console.println("doTask-index:%d-%s", getSegmentSlot(), toString());
+			logger.info(String.format("doTask-index:%d-%s", getSegmentSlot(), toString()));
 			return true;
 		}
 		

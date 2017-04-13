@@ -1,15 +1,16 @@
 package lam.delaytask;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lam.delaytask.support.Runner;
 import lam.delaytask.support.Segment;
 import lam.delaytask.support.Segment.Task;
-import lam.log.Console;
 import lam.util.concurrent.ThreadFactoryBuilder;
 import lam.util.support.Startable;
 
@@ -22,6 +23,8 @@ import lam.util.support.Startable;
 * @versio 1.0
 */
 public class DelayTaskRunner implements Runner, Startable, Closeable{
+	
+	private static Logger logger = LoggerFactory.getLogger(DelayTaskRunner.class);
 	
 	private final ScheduledThreadPoolExecutor runner = 
 			new ScheduledThreadPoolExecutor(
@@ -73,7 +76,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 	public void close() {
 		close = Boolean.TRUE.booleanValue();
 		runner.shutdown();
-		Console.println(getClass().getName() + " close");
+		logger.info(getClass().getName() + " close");
 	}
 
 	@Override
@@ -82,17 +85,17 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 			throw new IllegalStateException("this object has been closed.");
 		}
 		runner.scheduleAtFixedRate(new DelayThread(), timeInterval, timeInterval, timeUnit);
-		Console.println(getClass().getName() + " start");
+		logger.info(getClass().getName() + " start");
 	}
 
 	@Override
 	public boolean addTask(final Task task) {
 		if(isClose()){
-			Console.println("this object has been closed, task can not be added any more.");
+			logger.info("this object has been closed, task can not be added any more.");
 			return false;
 		}
 		if(task.getSegmentSlot() < 0 || task.getSegmentSlot() > lastIndex){
-			Console.println("This segment slot(" + task.getSegmentSlot() + ") of task is out of range(0 - " + lastIndex + ")");
+			logger.info("This segment slot(" + task.getSegmentSlot() + ") of task is out of range(0 - " + lastIndex + ")");
 			return false;
 		}
 		if(segments[task.getSegmentSlot()] == null){
@@ -102,7 +105,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 				}
 			}
 		}
-		Console.println("addTask-Segment:slot:%d,%s", task.getSegmentSlot(), task);
+		logger.info(String.format("addTask-Segment:slot:%d,%s", task.getSegmentSlot(), task));
 		return segments[task.getSegmentSlot()].addTask(task);
 	}
 
@@ -140,7 +143,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 	@Override
 	public void doTask() {
 		if(isClose()){
-			Console.println("this object has been closed, cancel the task.");
+			logger.info("this object has been closed, cancel the task.");
 			return ;
 		}
 	}
@@ -154,7 +157,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 		@Override
 		public void run() {
 			if(isClose()){
-				Console.println("DelayTaskRunner object is closed, so cancel the thread.");
+				logger.info("DelayTaskRunner object is closed, so cancel the thread.");
 				return ;
 			}
 			//Segment segment = nextSegment();
@@ -163,7 +166,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 			if(segment != null){
 				segment.doTask();
 			}else{
-				Console.println("doTask-index:%d-%s", currentIndex, segment);				
+				logger.info(String.format("doTask-index:%d-%s", currentIndex, segment));				
 			}
 		}
 	}
