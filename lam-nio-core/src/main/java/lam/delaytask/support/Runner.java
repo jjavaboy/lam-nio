@@ -15,6 +15,8 @@ public interface Runner {
 	
 	public Segment getSegment(int index);
 	
+	public boolean remove(Segment segment);
+	
 	public void doTask();
 	
 	public boolean isClose();

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import lam.delaytask.support.Runner;
 import lam.delaytask.support.Segment;
 import lam.delaytask.support.Segment.Task;
+import lam.util.FinalizeUtils;
 import lam.util.concurrent.ThreadFactoryBuilder;
 import lam.util.support.Startable;
 
@@ -127,6 +128,19 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 		return segments[index];
 	}
 	
+	@Override
+	public boolean remove(Segment segment) {
+		if(isClose()){
+			return false;
+		}
+		synchronized (segmentsLock) {			
+			FinalizeUtils.closeQuietly(segment);
+			segments[segment.getSlot()] = null;
+			logger.info("remove segment in slot:" + segment.getSlot());
+		}
+		return true;
+	}
+	
 	private Segment createSegment(int slot){
 		return new DelaySegment(slot);
 	}
@@ -152,6 +166,9 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 		Segment segment = getSegment(currentIndex);
 		if(segment != null){
 			segment.doTask();
+			if(segment.isEmpty()){
+				remove(segment);
+			}
 		}else{
 			logger.info(String.format("doTask-index:%d-%s", currentIndex, segment));				
 		}

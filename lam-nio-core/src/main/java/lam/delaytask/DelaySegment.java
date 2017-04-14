@@ -29,7 +29,7 @@ public class DelaySegment extends ReentrantLock implements Segment{
 	
 	private final int slot;
 	
-	private Set<Task> tasks;
+	private volatile Set<Task> tasks;
 	
 	public DelaySegment(final int slot){
 		this.slot = slot;
@@ -53,12 +53,16 @@ public class DelaySegment extends ReentrantLock implements Segment{
 
 	@Override
 	public void doTask() {
-		if(tasks.isEmpty()){
+		if(this.isEmpty()){
 			logger.info(String.format("segment in slot %d has not task.", this.slot));
 			return ;
 		}
 		lock();
 		try{
+			if(this.isEmpty()){
+				logger.info(String.format("segment in slot %d has not task.", this.slot));
+				return ;
+			}
 			final Random r = new Random();
 			Iterator<Task> iter = tasks.iterator();
 			while(iter.hasNext()){
@@ -78,6 +82,38 @@ public class DelaySegment extends ReentrantLock implements Segment{
 		}finally{
 			unlock();
 		}
+	}
+	
+	@Override
+	public boolean isEmpty() {
+		return tasks == null || tasks.isEmpty();
+	}
+	
+	@Override
+	public void close(){
+		lock();
+		try{
+			if(tasks != null && !tasks.isEmpty()){
+				tasks.clear();
+				tasks = null;
+				logger.info("close segment:" + toString());
+			}
+		}finally{
+			unlock();
+		}
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(!(obj instanceof DelaySegment)){
+			return false;
+		}
+		return ((DelaySegment)obj).slot == this.slot;
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.slot;
 	}
 	
 	@Override
