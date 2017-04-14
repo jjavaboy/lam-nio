@@ -104,6 +104,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 			synchronized (segmentsLock) {
 				if(segments[task.getSegmentSlot()] == null){
 					segments[task.getSegmentSlot()] = createSegment(task.getSegmentSlot());
+					logger.info("add segment in slot:" + task.getSegmentSlot());
 				}
 			}
 		}
