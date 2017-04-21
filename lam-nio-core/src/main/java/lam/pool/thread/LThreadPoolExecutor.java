@@ -1,11 +1,18 @@
 package lam.pool.thread;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 import java.util.concurrent.locks.ReentrantLock;
@@ -18,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 * @date 2017年4月20日
 * @version 1.0
 */
-public class LThreadPoolExecutor implements Executor{
+public class LThreadPoolExecutor implements ExecutorService, Executor{
 	
 	//=====================================
 	
@@ -70,7 +77,13 @@ public class LThreadPoolExecutor implements Executor{
 		return rs | wc;
 	}
 	
+	private static boolean runStateAtLeast(int c, int s){
+		return c >= s;
+	}
+	
 	//**************************************
+	
+	private static final RuntimePermission shutdownPerm = new RuntimePermission("modifyThread");
 	
 	public LThreadPoolExecutor(int corePoolSize, int maxinumPoolSize, long keepAliveTime, TimeUnit timeUnit,
 			BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, LRejectedExecutionHandler rejectedExecutionHandler){
@@ -122,7 +135,7 @@ public class LThreadPoolExecutor implements Executor{
 		while(true){
 			int c = ctl.get();
 			int rs = runStateOf(c);
-			if(rs >= SHUTDOWN || !(rs == SHUTDOWN && firstTask == null && !workQueue.isEmpty())){
+			if(rs >= SHUTDOWN && !(rs == SHUTDOWN && firstTask == null && !workQueue.isEmpty())){
 				return false;
 			}
 			while(true){
@@ -205,14 +218,19 @@ public class LThreadPoolExecutor implements Executor{
 				if(runStateOf(ctl.get()) >= STOP){
 					cThread.interrupt();
 				}
-				beforeExecute(cThread, task);
-				Throwable t = null;
+				worker.lock();
 				try{
-					task.run();
-				}catch(Throwable t1){
-					t = t1; throw t1;
+					beforeExecute(cThread, task);
+					Throwable t = null;
+					try{
+						task.run();
+					}catch(Throwable t1){
+						t = t1; throw t1;
+					}finally{
+						afterExecute(t, task);
+					}
 				}finally{
-					afterExecute(t, task);
+					worker.unLock();
 				}
 			}
 		}finally{
@@ -278,6 +296,196 @@ public class LThreadPoolExecutor implements Executor{
 		this.allowCoreThreadTimeOut = allowCoreThreadTimeOut;
 	}
 	
+	private void advanceRunState(int targetState) {
+        for (;;) {
+            int c = ctl.get();
+            if (runStateAtLeast(c, targetState) //leave it alone(let it be) if it already at the targetState state 
+            		||
+                ctl.compareAndSet(c, ctlOf(targetState, workCountOf(c)))) //change the state to be targetState
+                break;
+        }
+    }
+	
+	protected void onShutdown(){ }
+	
+	private void interruptIdleWorkers(){
+		interruptIdleWorkers(false);
+	}
+	
+	private void interruptIdleWorkers(boolean onlyOne){
+		final ReentrantLock lock = this.mainLock;
+		lock.lock();
+		try{
+			for(Worker worker : workers){
+				if(!worker.thread.isInterrupted() && worker.tryLock()){//tryLock():retrun true, 
+																	   //it means that worker is idle, maybe it just done a task or not. 
+					try{
+						worker.thread.interrupt();
+					}catch(SecurityException  s){
+						
+					}finally{
+						worker.unLock();
+					}
+				}
+				if(onlyOne){
+					break;
+				}
+			}
+		}finally{
+			lock.unlock();
+		}
+	}
+	
+	private void checkShutdownAccess() {
+        SecurityManager security = System.getSecurityManager();
+        if (security != null) {
+            security.checkPermission(shutdownPerm);
+            final ReentrantLock mainLock = this.mainLock;
+            mainLock.lock();
+            try {
+                for (Worker worker : workers){
+                	try{
+                		//check it whether thread is a system thread, its thread group has a null parent
+                		security.checkAccess(worker.thread);
+                	}catch(SecurityException e){
+                		System.out.println("thread:" + worker.thread + " is a system thread, so called can't access.");
+                		throw e;
+                	}
+                }
+            } finally {
+                mainLock.unlock();
+            }
+        }
+    }
+	
+	/**
+	 * try to set runState to TERMINATED
+	 */
+	final void tryTerminate(){
+		//Just do it
+	}
+	
+	private List<Runnable> drainQueue(){
+		BlockingQueue<Runnable> queue = this.workQueue;
+		List<Runnable> takeList = new ArrayList<Runnable>(queue.size());
+		queue.drainTo(takeList);
+		if(!queue.isEmpty()){
+			for(Runnable r : queue.toArray(new Runnable[0])){
+				queue.remove(r);
+				takeList.add(r);
+			}
+		}
+		return takeList;
+	}
+	
+	/**
+	 * The callers will interrupt all workers, even some workers is doing the task.
+	 */
+	private void interruptWorkers(){
+		final ReentrantLock lock = this.mainLock;
+		lock.lock();
+		try{
+			for(Worker worker : workers){
+				worker.interruptIfStarted();
+			}
+		}finally{
+			lock.unlock();
+		}
+	}
+
+	@Override
+	public void shutdown() {
+		final ReentrantLock lock = this.mainLock;
+		lock.lock();
+		try{
+			checkShutdownAccess();
+			advanceRunState(SHUTDOWN);
+			interruptIdleWorkers();
+			onShutdown();
+		}finally{
+			lock.unlock();
+		}
+		tryTerminate();
+	}
+
+	@Override
+	public List<Runnable> shutdownNow() {
+		List<Runnable> tasks = null;
+		final ReentrantLock lock = this.mainLock;
+		lock.lock();
+		try{
+			checkShutdownAccess();
+			advanceRunState(STOP);
+			interruptWorkers();
+			tasks = drainQueue();
+		}finally{
+			lock.unlock();
+		}
+		tryTerminate();
+		return tasks;
+	}
+
+	@Override
+	public boolean isShutdown() {
+		return runStateOf(ctl.get()) != RUNNING;
+	}
+
+	@Override
+	public boolean isTerminated() {
+		return runStateOf(ctl.get()) >= TERMINATED;
+	}
+
+	@Override
+	public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public <T> Future<T> submit(Callable<T> task) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> Future<T> submit(Runnable task, T result) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Future<?> submit(Runnable task) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+			throws InterruptedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+			throws InterruptedException, ExecutionException, TimeoutException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	//=========================Worker
 	private class Worker extends AbstractQueuedSynchronizer implements Runnable{
 
 		private static final long serialVersionUID = -2788282885856094079L;
@@ -296,6 +504,41 @@ public class LThreadPoolExecutor implements Executor{
 			runWorker(this);
 		}
 		
+		public void lock(){
+			super.acquire(1);
+		}
+		
+		public boolean tryLock(){
+			return super.tryAcquire(1);
+		}
+		
+		public void unLock(){
+			super.release(1);
+		}
+		
+		protected boolean tryAcquire(int unused) {
+            if (compareAndSetState(0, 1)) {
+                setExclusiveOwnerThread(Thread.currentThread());
+                return true;
+            }
+            return false;
+        }
+
+        protected boolean tryRelease(int unused) {
+            setExclusiveOwnerThread(null);
+            setState(0);
+            return true;
+        }
+		
+		public void interruptIfStarted(){
+			Thread t;
+			if(getState() >= 0 && (t = this.thread) != null && !t.isInterrupted()){
+				try{
+					t.interrupt();
+				} catch (SecurityException ignore) {
+	            }
+			}
+		}
 	}
 
 }
