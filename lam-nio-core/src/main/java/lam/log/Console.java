@@ -18,8 +18,12 @@ public class Console {
 
 	private static Gson gson = new Gson();
 	
+	private static String getThreadName(){
+		return Thread.currentThread().getName();
+	}
+	
 	public static void println(String log){
-		out.println(MyLog.timeAppend(log));
+		out.println(MyLog.timeAppend(getThreadName() + " " + log));
 	}
 	
 	public static void println(String format, Object...args){
