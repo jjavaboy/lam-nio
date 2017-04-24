@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -44,6 +45,8 @@ public class LThreadPoolExecutor implements ExecutorService, Executor{
 	private final HashSet<Worker> workers = new HashSet<Worker>();
 	
 	private final ReentrantLock mainLock = new ReentrantLock();
+	
+	private final Condition termination = mainLock.newCondition();
 	
 	private volatile boolean allowCoreThreadTimeOut;
 	
@@ -359,11 +362,39 @@ public class LThreadPoolExecutor implements ExecutorService, Executor{
     }
 	
 	/**
-	 * try to set runState to TERMINATED
+	 * try to set runState to TIDYING, then TERMINATED
 	 */
 	final void tryTerminate(){
 		//Just do it
+		for(;;){
+			int c = ctl.get();
+			if(runStateOf(c) == RUNNING || runStateAtLeast(c, TIDYING) || 
+					(runStateOf(c) == SHUTDOWN && !workQueue.isEmpty())){
+				return ;
+			}
+			if(workCountOf(c) != 0){
+				interruptIdleWorkers(true);
+				return ;
+			}
+			final ReentrantLock lock = this.mainLock;
+			lock.lock();
+			try{
+				if(ctl.compareAndSet(c, ctlOf(TIDYING, 0))){
+					try{
+						terminated();
+					}finally{
+						ctl.set(ctlOf(TERMINATED, 0));
+						termination.signalAll();
+					}
+					return ;
+				}
+			}finally{
+				lock.unlock();
+			}
+		}
 	}
+	
+	protected void terminated(){ }
 	
 	private List<Runnable> drainQueue(){
 		BlockingQueue<Runnable> queue = this.workQueue;
