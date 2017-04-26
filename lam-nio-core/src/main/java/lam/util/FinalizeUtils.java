@@ -17,10 +17,21 @@ public class FinalizeUtils {
 	 * @param closeable
 	 */
 	public static void closeQuietly(Closeable closeable){
+		close(closeable, true);
+	}
+	
+	public static void closeNotQuietly(Closeable closeable){
+		close(closeable, false);
+	}
+	
+	private static void close(Closeable closeable, boolean ignoreException){
 		if(closeable != null){
 			try{
 				closeable.close();
 			}catch(Exception e){
+				if(!ignoreException){
+					e.printStackTrace();
+				}
 			}
 		}
 	}
