@@ -19,8 +19,6 @@ import lam.util.FinalizeUtils;
 * @versio 1.0
 */
 public abstract class LFileLock {
-
-	protected String filename;
 	
 	protected final File file;
 	
