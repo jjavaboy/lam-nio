@@ -45,10 +45,9 @@ public abstract class DistributedExecutor {
 		try {
 			while (retry-- >= 0) {
 				try{
-				if (jedis.setnx(getKey(), getValue()) == 1) {
-					jedis.expire(getKey(), expireSeconds);
-					return execute();
-				}
+					if ("OK".equals(jedis.set(getKey(), getValue(), "NX", "EX", expireSeconds))) {
+						return execute();
+					}
 				}catch(Exception e){
 					e.printStackTrace();
 				}
@@ -68,7 +67,7 @@ public abstract class DistributedExecutor {
 	
 	private String value = "1";
 	
-	private int expireSeconds = 60 * 30; //half of an hour;
+	private int expireSeconds = 60 * 30; //half of an hour by default;
 
 	public String getKey() {
 		return key;
