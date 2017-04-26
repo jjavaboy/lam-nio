@@ -6,3 +6,4 @@ linux 启动脚本/lam-nio-core/src/main/resources/start.sh
 2.delay task=>lam.delaytask, test=>src/test/java/DelayTaskTest.java
 3.expired key-value=>src/main/java/lam/concurrent/ExpiredConcurrentMap.java, test=>src/test/java/ExpiredCucurrentMapTest.java
   simulate redis function:expired key
+4.有穷自动机=>lam/automaton/DeterministicFiniteAutomaton.java, test=>lam/automaton/DeterministicFiniteAutomaton.java
