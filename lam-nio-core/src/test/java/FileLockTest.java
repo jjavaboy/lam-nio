@@ -14,7 +14,7 @@ import lam.concurrent.lock.support.FileOperate;
 public class FileLockTest {
 
 	public static void main(String[] args) {
-		final File file = new File("C:\\Users\\Sky lin\\dubbo\\cache\\lam-dubbo-provider.cache.lock0");
+		final File file = new File("...");
 		for(int i = 0; i < 3; i++){
 			final int j = i;
 			new Thread(){
