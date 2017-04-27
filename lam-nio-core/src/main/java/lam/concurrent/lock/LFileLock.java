@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 
 import lam.concurrent.lock.support.FileOperate;
+import lam.log.Console;
 import lam.util.FinalizeUtils;
 
 /**
@@ -48,6 +50,9 @@ public abstract class LFileLock {
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
+				return false;
+			} catch (OverlappingFileLockException e0){
+				Console.println(this.file.getAbsolutePath() + " has been locked by other thread.");
 				return false;
 			}
 		} catch (FileNotFoundException e) {
