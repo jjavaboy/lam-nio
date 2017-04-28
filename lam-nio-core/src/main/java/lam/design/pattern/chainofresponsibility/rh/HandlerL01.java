@@ -1,7 +1,5 @@
 package lam.design.pattern.chainofresponsibility.rh;
 
-import java.util.Objects;
-
 import lam.design.pattern.chainofresponsibility.rh.AbstractRequest.Level;
 import lam.log.Console;
 
@@ -17,12 +15,6 @@ public class HandlerL01 extends AbstractHandler{
 
 	public HandlerL01() {
 		super(Level.L01);
-	}
-	
-	@Override
-	public void setNext(AbstractHandler next) {
-		Objects.requireNonNull(next, "next handler cann't be null");
-		super.next = next;
 	}
 
 	@Override

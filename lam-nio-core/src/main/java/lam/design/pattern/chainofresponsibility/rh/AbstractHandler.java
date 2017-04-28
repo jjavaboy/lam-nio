@@ -39,7 +39,10 @@ public abstract class AbstractHandler {
 		}
 	}
 	
-	public abstract void setNext(AbstractHandler next);
+	public void setNext(AbstractHandler next){
+		Objects.requireNonNull(next, "next handler cann't be null");
+		this.next = next;
+	}
 	
 	protected abstract void handle(AbstractRequest request);
 
