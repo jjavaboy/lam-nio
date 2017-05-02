@@ -12,6 +12,6 @@ import java.util.List;
 */
 public interface LoadBalance {
 	
-	public Invoker doSelect(List<Invoker> invokers);
+	public Invoker select(List<Invoker> invokers);
 
 }

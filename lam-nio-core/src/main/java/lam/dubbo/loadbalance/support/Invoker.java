@@ -9,6 +9,8 @@ package lam.dubbo.loadbalance.support;
 */
 public interface Invoker {
 	
+	public Class<?> getInvokerClass();
+	
 	/**
 	 * get weight of invoker
 	 */
@@ -18,5 +20,7 @@ public interface Invoker {
 	 * get timestamp of invoker created
 	 */
 	public long getTimestamp();
+	
+	public Object invoke(Invocation invocation);
 
 }

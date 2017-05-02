@@ -19,7 +19,7 @@ public class RandomLoadBalance implements LoadBalance{
 	private final Random random = new Random();
 	
 	@Override
-	public Invoker doSelect(List<Invoker> invokers) {
+	public Invoker select(List<Invoker> invokers) {
 		int totalWeight = 0, len = invokers.size();
 		boolean sameWeight = true;
 		for(int i = 0; i < len; i++){
