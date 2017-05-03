@@ -27,13 +27,13 @@
     <!-- <dubbo:registry address="multicast://224.5.6.7:1234" /> -->
     
     <!-- 使用zookeeper注册服务，如果有多个注册中心，可以使用id区分开来，address=192.168.20.110:2181,192.168.20.111:2181 -->
-    <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.204.127:2181" file="${user.home}/dubbo/cache/lam-dubbo-provider.cache"/>
+    <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.204.79:2181" file="cache\lam-dubbo-provider.cache"/>
  
     <!-- 用dubbo协议在20880端口暴露服务 --> <!-- config in dubbo.properties -->
     <dubbo:protocol name="dubbo" port="20880" threadpool="fixed" threads="100" dispatcher="all" transporter="netty" charset="UTF-8" serialization="hessian2"/>
     
     <!-- 监控中心，provider发送给monitor的调用时间，仅仅包括方法的执行时间，不包括网络时间 -->
-    <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" />
+    <!-- <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" /> -->
     
     <!-- dubbo提供者的全局配置 -->
     <dubbo:provider
@@ -76,7 +76,7 @@
 		owner:服务负责人，用于服务治理，请填写负责人公司邮箱前缀 
 		weight:服务权重 
 		executes:服务提供者每服务每方法最大可并行执行请求数 ，不限制为0
-		actives:每服务消费者每服务每方法最大并发调用数 ，不限制为0
+		actives:每服务消费者每服务每方法最大并发调用数 ，不限制为0	
 		proxy:生成动态代理方式，可选：jdk/javassist
 		cluster:集群方式，可选：failover/failfast/failsafe/failback/forking
 		charset:序列化编码，如UTF-8
