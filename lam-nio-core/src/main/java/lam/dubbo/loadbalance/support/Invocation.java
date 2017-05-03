@@ -9,10 +9,18 @@ package lam.dubbo.loadbalance.support;
 */
 public interface Invocation {
 	
+	public Class<?> getInterface();
+	
 	public String getMethodName();
 	
 	public Class<?>[] getParameterTypes();
 	
 	public Object[] getParameters();
+	
+	/**
+	 * retry times of invoke the service, excluding the first time.
+	 * @return default value is 2
+	 */
+	public int getRetryTimes();
 
 }

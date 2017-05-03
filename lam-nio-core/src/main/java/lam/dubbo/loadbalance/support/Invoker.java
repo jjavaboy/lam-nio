@@ -22,5 +22,7 @@ public interface Invoker {
 	public long getTimestamp();
 	
 	public Object invoke(Invocation invocation);
+	
+	public boolean isAvailable();
 
 }
