@@ -1,7 +1,9 @@
 package lam.dubbo.provider.api.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lam.dubbo.api.LoginService;
-import lam.dubbo.core.DateUtil;
 
 /**
 * <p>
@@ -13,17 +15,17 @@ import lam.dubbo.core.DateUtil;
 */
 public class LoginServiceImpl implements LoginService{
 	
-	private static String className = LoginServiceImpl.class.getName();
+	private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@Override
 	public boolean login(String username) {
-		System.out.println(String.format("%s [%s] - args:%s", DateUtil.now(), className, username));
+		logger.info("%s - args:%s", "login", username);
 		return true;
 	}
 
 	@Override
 	public boolean logout(String username) {
-		System.out.println(String.format("%s [%s] - args:%s", DateUtil.now(), className, username));
+		logger.info("%s - args:%s", "logout", username);
 		return true;
 	}
 

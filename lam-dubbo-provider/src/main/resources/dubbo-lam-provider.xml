@@ -27,7 +27,7 @@
     <!-- <dubbo:registry address="multicast://224.5.6.7:1234" /> -->
     
     <!-- 使用zookeeper注册服务，如果有多个注册中心，可以使用id区分开来，address=192.168.20.110:2181,192.168.20.111:2181 -->
-    <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.204.79:2181" file="cache\lam-dubbo-provider.cache"/>
+    <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.204.79:2181" file="cache/lam-dubbo-provider.cache"/>
  
     <!-- 用dubbo协议在20880端口暴露服务 --> <!-- config in dubbo.properties -->
     <dubbo:protocol name="dubbo" port="20880" threadpool="fixed" threads="100" dispatcher="all" transporter="netty" charset="UTF-8" serialization="hessian2"/>
@@ -51,7 +51,7 @@
 		 loadbalance="random"
 		 token="false"
 		 owner="sky"
-		 weight="1"
+		 weight="100"
 		 executes="0"
 		 actives="0"
 		 proxy="javassist"
@@ -74,7 +74,7 @@
 		token:令牌验证，为空表示不开启，如果为true，表示随机生成动态令牌
 		registry:向指定注册中心注册，在多个注册中心时使用，值为<dubbo:registry>的id属性，多个注册中心ID用逗号分隔，如果不想将该服务注册到任何registry，可将值设为N/A
 		owner:服务负责人，用于服务治理，请填写负责人公司邮箱前缀 
-		weight:服务权重 
+		weight:服务权重 ，默认100
 		executes:服务提供者每服务每方法最大可并行执行请求数 ，不限制为0
 		actives:每服务消费者每服务每方法最大并发调用数 ，不限制为0	
 		proxy:生成动态代理方式，可选：jdk/javassist

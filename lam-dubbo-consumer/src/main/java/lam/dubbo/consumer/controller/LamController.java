@@ -5,6 +5,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lam.dubbo.api.LoginService;
 import lam.dubbo.api.UserService;
 
@@ -17,6 +20,8 @@ import lam.dubbo.api.UserService;
 * @version 1.0
 */
 public class LamController {
+	
+	private static Logger logger = LoggerFactory.getLogger(LamController.class);
 	
 	private LoginService loginService;
 	
@@ -57,7 +62,7 @@ public class LamController {
 			    	String hello = userService.sayHello(username);
 			    	String goodBye = userService.sayGoodBye(username);
 			    	boolean lo = loginService.logout(username);
-			    	System.out.println(String.format("login:%b, %s, %s, logout:%b", li, hello, goodBye, lo));
+			    	logger.info(String.format("login:%b, %s, %s, logout:%b", li, hello, goodBye, lo));
 			    	sleepMilli(800L);
 				}
 			}catch(Exception e){

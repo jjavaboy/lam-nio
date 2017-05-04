@@ -1,5 +1,8 @@
 package lam.dubbo.provider.api.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lam.dubbo.api.UserService;
 import lam.dubbo.core.DateUtil;
 
@@ -13,17 +16,17 @@ import lam.dubbo.core.DateUtil;
 */
 public class UserServiceImpl implements UserService{
 	
-	private static final String className = UserServiceImpl.class.getName();
+	private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
 	@Override
 	public String sayHello(String username) {
-		System.out.println(String.format("%s [%s] - args:%s", DateUtil.now(), className, username));
+		logger.info("%s - args:%s", "sayHello", username);
 		return "hello, " + username + "!";
 	}
 
 	@Override
 	public String sayGoodBye(String username) {
-		System.out.println(String.format("%s [%s] - args:%s", DateUtil.now(), className, username));
+		logger.info("%s - args:%s", "sayGoodBye", username);
 		return "good bye, " + username + "!";
 	}
 
