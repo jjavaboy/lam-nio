@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import lam.dubbo.api.UserService;
-import lam.dubbo.core.DateUtil;
 
 /**
 * <p>
@@ -20,13 +19,13 @@ public class UserServiceImpl implements UserService{
 
 	@Override
 	public String sayHello(String username) {
-		logger.info("%s - args:%s", "sayHello", username);
+		logger.info("{} - args:{}", "sayHello", username);
 		return "hello, " + username + "!";
 	}
 
 	@Override
 	public String sayGoodBye(String username) {
-		logger.info("%s - args:%s", "sayGoodBye", username);
+		logger.info("{} - args:{}", "sayGoodBye", username);
 		return "good bye, " + username + "!";
 	}
 

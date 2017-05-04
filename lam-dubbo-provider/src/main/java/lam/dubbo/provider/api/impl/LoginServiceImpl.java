@@ -15,17 +15,17 @@ import lam.dubbo.api.LoginService;
 */
 public class LoginServiceImpl implements LoginService{
 	
-	private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(LoginServiceImpl.class);
 
 	@Override
 	public boolean login(String username) {
-		logger.info("%s - args:%s", "login", username);
+		logger.info("{} - args:{}", "login", username);
 		return true;
 	}
 
 	@Override
 	public boolean logout(String username) {
-		logger.info("%s - args:%s", "logout", username);
+		logger.info("{} - args:{}", "logout", username);
 		return true;
 	}
 
