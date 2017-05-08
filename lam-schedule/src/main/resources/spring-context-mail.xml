@@ -3,22 +3,38 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 	
+	<bean id="javaMailProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="locations">
+        	<list>
+                <value>classpath:java-mail.properties</value>
+            </list>
+        </property>
+    </bean>
+	
 	<bean id="javaMailSenderImpl" class="org.springframework.mail.javamail.JavaMailSenderImpl">
     	<property name="host" value="smtp.qq.com"/>
     	<property name="username" value=""/>
     	<property name="password" value=""/>
     	<property name="port" value="465"/>
+    	<property name="javaMailProperties" ref="javaMailProperties"/>
 	</bean>
 
 	<!-- this is a template message that we can pre-load with default state -->
 	<bean id="templateMessage" class="org.springframework.mail.SimpleMailMessage">
 	    <property name="from" value=""/>
-	    <property name="subject" value="My first mail"/>
+	    <property name="to" value=""/>
+	    <property name="subject" value="[Midnight Timing]"/>
+	    <property name="text" value="Tick tick...Timing."/>
+	</bean>
+	
+	<bean id="lamMailSenderProxy" class="lam.mail.send.proxy.LamMailSenderProxy">
+		<constructor-arg index="0" ref="lamMailSender"/>
 	</bean>
 	
 	<!-- for test -->
 	<bean class="lam.schedule.launch.LamScheduleEmitter" init-method="emit">
-		<property name="lamMailSender" ref="lamMailSender"/>
+		<property name="lamMailSender" ref="lamMailSenderProxy"/>
+		<property name="templateMessage" ref="templateMessage"/>
 	</bean>
 	
 </beans>
