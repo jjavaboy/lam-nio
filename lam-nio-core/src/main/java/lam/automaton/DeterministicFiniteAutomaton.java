@@ -39,17 +39,16 @@ public class DeterministicFiniteAutomaton {
 				Node node = currentMap.get(s.charAt(idx));
 				if(node == null){
 					node = new Node();
+					node.end = false;
 					currentMap.put(s.charAt(idx), node);
 				}
 				if(idx < s.length() - 1){
-					node.end = false; //It is not end and has next node by default.
 					if(node.next == null){						
 						node.next = new HashMap<Character, Node>(1, 1.0F);
 					}
 					currentMap = node.next; //current map point to the 'next' of node
 				}else{
 					node.end = true;
-					node.next = null;
 					break;					
 				}
 			}
@@ -61,17 +60,14 @@ public class DeterministicFiniteAutomaton {
 			return null;
 		}
 		Set<String> set = new HashSet<String>();
-		for(int idx = 0; idx < str.length(); idx++){			
-			int cnt = has(map, str, idx, str.length() - 1);
-			if(cnt > 0){
-				set.add(str.substring(idx, idx + cnt));
-				idx = idx + cnt - 1;
-			}
+		int lastIndex = str.length() - 1;
+		for(int idx = 0; idx <= lastIndex; idx++){			
+			has(map, set, str, idx, lastIndex);
 		}
 		return set;
 	}
 	
-	private int has(Map<Character, Node> map, String str, int fromIndex, int toIndex){
+	private void has(Map<Character, Node> map, Set<String> set, String str, int fromIndex, int toIndex){
 		if(fromIndex > toIndex){
 			throw new IllegalArgumentException("fromIndex(" + fromIndex + ") is larger than toIndex(" + toIndex + ")");
 		}
@@ -80,17 +76,17 @@ public class DeterministicFiniteAutomaton {
 		for(int idx = fromIndex; idx <= toIndex; idx++){
 			Node node = currentMap.get(str.charAt(idx));
 			if(node == null){
-				hasCnt = 0;
 				break;
 			}
 			hasCnt++;
-			if(node.end){//visit to the end, then break out.
-				break;
+			if(node.end){//visit to the 'end', then take the sensitive into the set.
+				set.add(str.substring(fromIndex, fromIndex + hasCnt));
+				if(node.next == null){//'end' is true and 'next' is null, it means the automaton is in the end really.
+					break;
+				}
 			}
 			currentMap = node.next;
 		}
-		
-		return hasCnt;
 	}
 
 	private class Node{
@@ -129,6 +125,7 @@ public class DeterministicFiniteAutomaton {
 	
 	public static void main(String[] args){
 		String[] str = {
+				"你",
 				"我爱你",
 				"你爱我我我",
 				"我不爱你你",
