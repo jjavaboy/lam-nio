@@ -10,12 +10,29 @@
   <groupId>lam</groupId>
   <artifactId>lam-schedule</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>lam-schedule</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+    <!-- 编译时的编码 -->  
+    <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
   </properties>
   <dependencies>
+  	<dependency>
+  		<groupId>lam</groupId>
+  		<artifactId>lam-nio-core</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>lam.weixin</groupId>
+  		<artifactId>lam-weixin-core</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>lam</groupId>
+	    <artifactId>lam-schedule-api</artifactId>
+	    <version>0.0.1-SNAPSHOT</version>
+  	</dependency>
   	<dependency>
 	    <groupId>log4j</groupId>
 	    <artifactId>log4j</artifactId>
@@ -37,5 +54,45 @@
 		<artifactId>spring-context-support</artifactId>
 		<version>4.0.8.RELEASE</version>
 	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-tx</artifactId>
+		<version>4.0.8.RELEASE</version>
+	</dependency>
+	<dependency>
+         <groupId>org.quartz-scheduler</groupId>
+         <artifactId>quartz</artifactId>
+         <version>2.2.3</version>
+    </dependency>
+	<!-- like base64 encode decode -->
+	<dependency>
+	    <groupId>commons-codec</groupId>
+	    <artifactId>commons-codec</artifactId>
+	    <version>1.7</version>
+	</dependency>
   </dependencies>
+  <name>${project.artifactId}</name>
+  <build>
+  	<plugins>
+  	  <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-assembly-plugin</artifactId>
+	    <version>2.2.1</version>
+	    <configuration>
+	      <descriptors>
+	        <descriptor>src/main/assembly/assembly.xml</descriptor>
+	      </descriptors>
+	    </configuration>
+	    <executions>
+	      <execution>
+	        <id>make-assembly</id>
+	        <phase>package</phase>
+	        <goals>
+	          <goal>single</goal>
+	        </goals>
+	      </execution>
+	    </executions>
+	  </plugin>
+  	</plugins>
+  </build>
 </project>

@@ -1,6 +1,7 @@
 package lam.util;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -32,6 +33,38 @@ public class DateUtil {
 	public static String getCurrentTime(Date date, String format){
 		SimpleDateFormat dateFormat = new SimpleDateFormat(format);
 		return dateFormat.format(date);
+	}
+	
+	public static Date add(Date date, int field, int amount){
+		Calendar calendar = addToCalendar(date, field, amount);
+		return calendar.getTime();
+	}
+	
+	public static Calendar addToCalendar(Date date, int field, int amount){
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.add(field, amount);
+		return calendar;
+	}
+	
+	public static Date set(Date date, int field, int value){
+		Calendar calendar = setToCalendar(date, field, value);
+		return calendar.getTime();
+	}
+	
+	public static Calendar setToCalendar(Date date, int field, int value){
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(date);
+		calendar.set(field, value);
+		return calendar;
+	}
+	
+	public static void main(String[] args) {
+		Date now = new Date();
+		System.out.println(now = DateUtil.set(now, Calendar.HOUR_OF_DAY, 0));
+		System.out.println(now = DateUtil.set(now, Calendar.MINUTE, 0));
+		System.out.println(now = DateUtil.set(now, Calendar.SECOND, 0));
+		System.out.println(now = DateUtil.add(now, Calendar.DATE, 1));
 	}
 
 }

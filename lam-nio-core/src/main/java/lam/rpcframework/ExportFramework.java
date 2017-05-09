@@ -9,6 +9,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lam.rpcframework.support.Exportable;
 import lam.util.FinalizeUtils;
 
@@ -21,6 +24,8 @@ import lam.util.FinalizeUtils;
 * @version 1.0
 */
 public class ExportFramework implements Exportable{
+	
+	private static Logger logger = LoggerFactory.getLogger(ExportFramework.class);
 
 	@Override
 	public void export(final Object object, final int port) throws Exception {
@@ -41,7 +46,7 @@ public class ExportFramework implements Exportable{
 			this.object = object;
 			try {
 				serverSocket = new ServerSocket(port);
-				System.out.println("Export service " + object.getClass().getName() + " on port " + port);
+				logger.info("Export service " + object.getClass().getName() + " on port " + port);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -58,7 +63,7 @@ public class ExportFramework implements Exportable{
 					
 					send(socket, result);
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("error", e);
 				} finally {
 					FinalizeUtils.closeQuietly(socket);
 				}

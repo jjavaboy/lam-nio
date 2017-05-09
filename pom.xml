@@ -17,5 +17,6 @@
     <module>lam-hongbao-service</module>
     <module>lam-zookeeper</module>
     <module>lam-schedule</module>
+    <module>lam-schedule-api</module>
   </modules>
 </project>

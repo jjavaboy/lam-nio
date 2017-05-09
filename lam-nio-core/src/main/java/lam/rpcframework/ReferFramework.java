@@ -9,6 +9,9 @@ import java.net.Socket;
 import java.util.Arrays;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lam.rpcframework.support.Referable;
 import lam.util.FinalizeUtils;
 
@@ -21,6 +24,8 @@ import lam.util.FinalizeUtils;
 * @version 1.0
 */
 public class ReferFramework implements Referable{
+	
+	private static Logger logger = LoggerFactory.getLogger(ReferFramework.class);
 
 	@Override
 	public <T> T refer(final Class<T> interfaceClass, final String host, final int port) throws Exception {
@@ -71,7 +76,7 @@ public class ReferFramework implements Referable{
 				objectOutputStream.writeObject(parameters);                 //parameters
 				objectOutputStream.flush();
 				
-				System.out.println("send==>>method:" + method.getName() 
+				logger.info("send==>>method:" + method.getName() 
 					+ ", parameterTypes:" + Arrays.toString(method.getParameterTypes())
 					+ ", parameters:" + Arrays.toString(parameters));
 			} catch (IOException e) {
@@ -88,7 +93,7 @@ public class ReferFramework implements Referable{
 				objectInputStream = new ObjectInputStream(socket.getInputStream());
 				result = objectInputStream.readObject();
 				
-				System.out.println("receive==>>" + result);
+				logger.info("receive==>>" + result);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
