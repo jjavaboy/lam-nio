@@ -89,7 +89,7 @@
 		<groupId>junit</groupId>
 		<artifactId>junit</artifactId>
 		<version>4.2</version>
-		<!-- <scope>test</scope> -->
+		<scope>test</scope>
     </dependency>
     <!-- hessian serialization -->
     <dependency>
@@ -100,7 +100,7 @@
   </dependencies>
   <name>${project.artifactId}</name>
   <build>
-  	<plugins>
+  	<!-- <plugins>
   	  <plugin>
 	    <groupId>org.apache.maven.plugins</groupId>
 	    <artifactId>maven-assembly-plugin</artifactId>
@@ -120,6 +120,6 @@
 	      </execution>
 	    </executions>
 	  </plugin>
-  	</plugins>
+  	</plugins> -->
   </build>
 </project>

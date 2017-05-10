@@ -1,7 +1,5 @@
 package lam.rocketmq.producer;
 
-import org.junit.Test;
-
 import com.alibaba.rocketmq.client.exception.MQBrokerException;
 import com.alibaba.rocketmq.client.exception.MQClientException;
 import com.alibaba.rocketmq.client.producer.DefaultMQProducer;
@@ -15,7 +13,6 @@ public class MsgProducer {
 		new MsgProducer().produce();
 	}
 	
-	@Test
 	public void produce(){
 		String namesrvAddr = "192.168.204.127:9876";
 		DefaultMQProducer producer = new DefaultMQProducer("Producer");

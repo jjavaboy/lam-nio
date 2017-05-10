@@ -2,8 +2,6 @@ package lam.rocketmq.consumer;
 
 import java.util.List;
 
-import org.junit.Test;
-
 import com.alibaba.rocketmq.client.consumer.DefaultMQPushConsumer;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import com.alibaba.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
@@ -18,7 +16,6 @@ public class MsgPushConsumer {
 		new MsgPushConsumer().consume();
 	}
 	
-	@Test
 	public void consume(){
 		String namesrvAddr = "192.168.204.127:9876";
 		DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("MsgConsumer");
