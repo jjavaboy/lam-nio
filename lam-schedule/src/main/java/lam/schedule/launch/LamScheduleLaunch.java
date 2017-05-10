@@ -1,13 +1,16 @@
 package lam.schedule.launch;
 
+import java.util.Properties;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import lam.mail.send.LamMailSender;
 import lam.rpcframework.ExportFramework;
 import lam.schedule.constant.Constant;
+import lam.schedule.service.ExternalService;
 
 /**
 * <p>
@@ -37,11 +40,13 @@ public class LamScheduleLaunch {
 	}
 	
 	public static void main(String[] args){
-		context = new ClassPathXmlApplicationContext(new String[]{"spring-context.xml"});
+		printSystemProperties();
+		
+		context = new ClassPathXmlApplicationContext(new String[]{"classpath:spring-context.xml"});
 		context.start();
 		logger.info("spring started.");
 		
-		LamMailSender lamMailSenderProxy = context.getBean("lamMailSenderProxy", LamMailSender.class);
+		ExternalService bean = context.getBean("externalService", ExternalService.class);
 		
 		int port = 6666;
 		if(StringUtils.isNotBlank(System.getProperty(Constant.JVM_CM_RPC_PORT))){
@@ -53,7 +58,7 @@ public class LamScheduleLaunch {
 	
 		ExportFramework exportFramework = new ExportFramework();
 		try {
-			exportFramework.export(lamMailSenderProxy, port);
+			exportFramework.export(bean, port);
 		} catch (Exception e1) {
 			logger.error("ExportFramework export fail", e1);
 			System.exit(-1);
@@ -65,6 +70,23 @@ public class LamScheduleLaunch {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private static void printSystemProperties(){
+		Properties sysProperties = System.getProperties();
+		Set<Object> keys = sysProperties.keySet();
+		if(keys == null || keys.isEmpty()){
+			return ;
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append("system properties, 'lam.' prefix key:").append("\r\n");
+		for(Object key : keys){
+			String k = String.valueOf(key);
+			if(k.matches("lam.*")){				
+				sb.append(String.format("-D%s=%s", key, System.getProperty(String.valueOf(key)))).append("\r\n");
+			}
+		}
+		logger.info(sb.toString());
 	}
 
 }

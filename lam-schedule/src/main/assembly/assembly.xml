@@ -11,8 +11,9 @@
 	<!-- <includeBaseDirectory>false</includeBaseDirectory> -->
 	<dependencySets>
 	    <dependencySet>
-	      <useProjectArtifact>true</useProjectArtifact>
+	      <useProjectArtifact>false</useProjectArtifact><!-- 要设置为false,设置为true会将自身也打包成jar，将放到lib目录下 -->
 	      <outputDirectory>lib</outputDirectory>
+	      <scope>runtime</scope><!-- 不设置，会将scope为test也打包，比如junit包 -->
 	    </dependencySet>
 	  </dependencySets>
 	<fileSets>
@@ -22,11 +23,18 @@
         </fileSet>
 		<fileSet>  
             <directory>src/main/resources</directory>  
-            <outputDirectory>/</outputDirectory>  
+            <outputDirectory>/classes</outputDirectory>  
             <!-- <includes>   
                 <include>*.properties</include>   
                 <include>*.xml</include>   
             </includes> -->   
+        </fileSet>
+        <fileSet>  
+            <directory>src/main/assembly</directory>  
+            <outputDirectory>/</outputDirectory>  
+            <includes>   
+                <include>*.sh</include>   
+            </includes>   
         </fileSet>
 	</fileSets>
 </assembly>

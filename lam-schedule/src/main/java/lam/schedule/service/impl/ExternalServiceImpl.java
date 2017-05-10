@@ -20,7 +20,7 @@ import lam.weixin.core.model.BehaveTrace;
 * @date 2017年5月9日
 * @version 1.0
 */
-@Service
+@Service(value="externalService")
 public class ExternalServiceImpl implements ExternalService {
 	
 	@Resource(name="lamMailScheduleProxy")
@@ -28,7 +28,7 @@ public class ExternalServiceImpl implements ExternalService {
 
 	@Override
 	public boolean weixinCheckin(List<BehaveTrace> list) {
-		if(list == null){
+		if(list == null || list.isEmpty()){
 			return false;
 		}
 		for(BehaveTrace behaveTrace : list){
@@ -36,10 +36,11 @@ public class ExternalServiceImpl implements ExternalService {
 				Date now = new Date();
 				Calendar calendar = DateUtil.addToCalendar(now, Calendar.DAY_OF_MONTH, 1);
 				calendar.set(Calendar.SECOND, 0);
+				calendar.set(Calendar.MINUTE, 0);
 				calendar.set(Calendar.HOUR_OF_DAY, 0);
 				now = calendar.getTime();
 				Date fromDate = DateUtil.add(now, Calendar.MINUTE, -5);
-				Date toDate = DateUtil.add(now, Calendar.MINUTE, 5);;
+				Date toDate = DateUtil.add(now, Calendar.MINUTE, 5);
 				supportSchedule.cancelNext(fromDate, toDate);
 			}
 		}
