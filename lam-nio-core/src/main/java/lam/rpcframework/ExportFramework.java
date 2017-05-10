@@ -12,7 +12,13 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+
+import lam.rpcframework.serialize.RpcHessian2Input;
+import lam.rpcframework.serialize.RpcHessian2Output;
 import lam.rpcframework.support.Exportable;
+import lam.rpcframework.support.Invocation;
 import lam.util.FinalizeUtils;
 
 /**
@@ -59,9 +65,10 @@ public class ExportFramework implements Exportable{
 				try {
 					//accept:It will be blocking util an socket client come.
 					socket = serverSocket.accept();
-					Object result = receive(socket);
-					
-					send(socket, result);
+					//Object result = receive(socket);
+					Object result = receive2Hessian(socket);
+					//send(socket, result);
+					send2Hessian(socket, result);
 				} catch (Exception e) {
 					logger.error("error", e);
 				} finally {
@@ -102,6 +109,53 @@ public class ExportFramework implements Exportable{
 				//FinalizeUtils.closeQuietly(objectInputStream);
 			}
 			return result;
+		}
+		
+		private Object receive2Hessian(final Socket socket){
+			Object result = "Error";
+			try {
+				Hessian2Input input = new RpcHessian2Input(socket.getInputStream());
+				Invocation invocation = (Invocation) input.readObject();
+				
+				Throwable t = null;
+				try {
+					Method method = object.getClass().getMethod(invocation.getMethodName(), invocation.getParameterTypes());
+					result = method.invoke(object, invocation.getParameters());
+				} catch (NoSuchMethodException e) {
+					t = e;
+					result = "No such method:" + invocation.getMethodName();
+				} catch (SecurityException e) {
+					t = e;
+					result = e.getMessage();
+				} catch (IllegalAccessException e) {
+					t = e;
+				} catch (IllegalArgumentException e) {
+					t = e;
+					result = "Argument is illegal";
+				} catch (InvocationTargetException e) {
+					t = e;
+				}
+				if(t != null){
+					logger.error("invoke method:" + invocation.getMethodName() + " error.", t);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				//FinalizeUtils.closeQuietly(objectInputStream);
+			}
+			return result;
+		}
+		
+		private void send2Hessian(final Socket socket, Object result){
+			try {
+				Invocation invocation = new RpcResponseInvocation(result);
+				Hessian2Output output = new RpcHessian2Output(socket.getOutputStream());
+				output.writeObject(invocation);
+				output.flush();
+				output.close();
+			} catch (IOException e) {
+				logger.error("error", e);
+			}
 		}
 	
 		private void send(final Socket socket, Object result){

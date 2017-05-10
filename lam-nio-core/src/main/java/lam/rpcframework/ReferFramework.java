@@ -1,8 +1,10 @@
 package lam.rpcframework;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.Socket;
@@ -12,6 +14,12 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+
+import lam.rpcframework.serialize.RpcHessian2Input;
+import lam.rpcframework.serialize.RpcHessian2Output;
+import lam.rpcframework.support.Invocation;
 import lam.rpcframework.support.Referable;
 import lam.util.FinalizeUtils;
 
@@ -57,14 +65,64 @@ public class ReferFramework implements Referable{
 			Socket socket = null;
 			try{
 				socket = new Socket(host, port);
-				send(socket, method, args);
-				Object result = receive(socket);
-				
-				
+				//send(socket, method, args);
+				send2Hessian(socket, proxy, method, args);
+				//Object result = receive(socket);
+				Object result = receive2Hessian(socket);
 				return result;
 			} finally {
 				FinalizeUtils.closeQuietly(socket);
 			}
+		}
+		
+		private void send2Hessian(final Socket socket, Object proxy, final Method method, final Object[] parameters){
+			Class<?> interfa = null;
+			Class<?>[] interfaces = proxy.getClass().getInterfaces();
+			for(Class<?> interfac : interfaces){
+				if(contains(interfac.getMethods(), method)){
+					interfa = interfac;
+					break ;
+				}
+			}
+			Objects.requireNonNull(interfa, "cann't find the interface with method " + method);
+			try {
+				Invocation invocation = new RpcRequestInvocation(
+						interfa.getName(), method.getReturnType(), method.getName(),
+						method.getParameterTypes(), parameters, method.getExceptionTypes());
+				Hessian2Output output = new RpcHessian2Output(socket.getOutputStream());
+				output.writeObject(invocation);
+				output.flush();
+				output.close();
+			} catch (IOException e) {
+				logger.error("error", e);
+			}
+		}
+		
+		private boolean contains(Method[] methods, final Method method){
+			for(Method m : methods){
+				if(m.equals(method)){
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		private Object receive2Hessian(final Socket socket){
+			Object result = null;
+			ObjectInputStream objectInputStream = null;
+			try {
+				Hessian2Input input = new RpcHessian2Input(socket.getInputStream());
+				Invocation invocation = (Invocation) input.readObject();
+				
+				result = invocation != null ? invocation.getResult() : null;
+				
+				logger.info("receive==>>" + result);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				//FinalizeUtils.closeQuietly(objectInputStream);
+			}
+			return result;
 		}
 		
 		private void send(final Socket socket, final Method method, final Object[] parameters){
