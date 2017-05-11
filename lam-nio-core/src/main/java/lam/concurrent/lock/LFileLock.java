@@ -26,6 +26,10 @@ public abstract class LFileLock {
 	
 	protected final FileOperate fileOperate;
 	
+	public LFileLock(String file, FileOperate fileOperate){
+		this(file == null ? null : new File(file), fileOperate);
+	}
+	
 	public LFileLock(File file, FileOperate fileOperate){
 		this.file = file;
 		this.fileOperate = fileOperate;

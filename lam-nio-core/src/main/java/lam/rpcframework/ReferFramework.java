@@ -1,10 +1,8 @@
 package lam.rpcframework;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.Socket;
@@ -109,7 +107,6 @@ public class ReferFramework implements Referable{
 		
 		private Object receive2Hessian(final Socket socket){
 			Object result = null;
-			ObjectInputStream objectInputStream = null;
 			try {
 				Hessian2Input input = new RpcHessian2Input(socket.getInputStream());
 				Invocation invocation = (Invocation) input.readObject();
@@ -118,7 +115,7 @@ public class ReferFramework implements Referable{
 				
 				logger.info("receive==>>" + result);
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error("receive2Hessian error", e);
 			} finally {
 				//FinalizeUtils.closeQuietly(objectInputStream);
 			}
@@ -138,7 +135,7 @@ public class ReferFramework implements Referable{
 					+ ", parameterTypes:" + Arrays.toString(method.getParameterTypes())
 					+ ", parameters:" + Arrays.toString(parameters));
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error("send error", e);
 			} finally {
 				//FinalizeUtils.closeQuietly(objectOutputStream);
 			}
@@ -152,10 +149,8 @@ public class ReferFramework implements Referable{
 				result = objectInputStream.readObject();
 				
 				logger.info("receive==>>" + result);
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				logger.error("receive error", e);
 			} finally {
 				//FinalizeUtils.closeQuietly(objectInputStream);
 			}
