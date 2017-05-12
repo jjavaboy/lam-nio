@@ -50,8 +50,8 @@ startup(){
     else
 	echo "Starting ${APP_MAIN}"
 	echo "command:"
-	echo "${JAVA_HOME}/bin/java ${JAVA_OPTS} -classpath ${CLASSPATH} ${APP_MAIN} > ${APP_LOG}/nohup.log &"
-	${JAVA_HOME}/bin/java ${JAVA_OPTS} -classpath ${CLASSPATH} ${APP_MAIN} > ${APP_LOG}/nohup.log &
+	echo "${JAVA_HOME}/bin/java ${JAVA_OPTS} -classpath ${CLASSPATH} ${APP_MAIN} > /dev/null &"
+	${JAVA_HOME}/bin/java ${JAVA_OPTS} -classpath ${CLASSPATH} ${APP_MAIN} > /dev/null &
         getAppPid
 	if [ ${APP_PID} -ne 0 ]; then
 	    echo "${APP_MAIN} started in pid:${APP_PID}[success]"

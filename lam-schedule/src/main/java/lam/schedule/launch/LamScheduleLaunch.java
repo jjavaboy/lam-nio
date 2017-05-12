@@ -1,5 +1,6 @@
 package lam.schedule.launch;
 
+import java.io.File;
 import java.util.Properties;
 import java.util.Set;
 
@@ -10,7 +11,10 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import lam.rpcframework.ExportFramework;
 import lam.schedule.constant.Constant;
+import lam.schedule.container.ContainerManager;
 import lam.schedule.service.ExternalService;
+import lam.schedule.util.SystemProperties;
+import lam.util.FinalizeUtils;
 
 /**
 * <p>
@@ -28,12 +32,13 @@ public class LamScheduleLaunch {
 	
 	static ExportFramework exportFramework;
 	
+	static ContainerManager containerManager;
+	
 	static{
 		Runtime.getRuntime().addShutdownHook(new Thread(){
 			public void run(){
-				if(context != null){
-					context.close();
-				}
+				FinalizeUtils.closeQuietly(context);
+				FinalizeUtils.closeQuietly(containerManager);
 				logger.info("shutdown hook runs.");
 			}
 		});
@@ -42,6 +47,13 @@ public class LamScheduleLaunch {
 	public static void main(String[] args){
 		printSystemProperties();
 		
+		containerManager = ContainerManager.getInstance();
+		if(StringUtils.isBlank(System.getProperty(Constant.JVM_CM_CONTAINER))){
+			System.setProperty(Constant.JVM_CM_CONTAINER, ContainerManager.Type.FILECACHE.getValue());
+		}
+		String containerValue = System.getProperty(Constant.JVM_CM_CONTAINER);
+		containerManager.loadContainer(containerValue);
+		
 		context = new ClassPathXmlApplicationContext(new String[]{"classpath:spring-context.xml"});
 		context.start();
 		logger.info("spring started.");
@@ -49,11 +61,9 @@ public class LamScheduleLaunch {
 		ExternalService bean = context.getBean("externalService", ExternalService.class);
 		
 		int port = 6666;
-		if(StringUtils.isNotBlank(System.getProperty(Constant.JVM_CM_RPC_PORT))){
-			try{
-				port = Integer.parseInt(System.getProperty(Constant.JVM_CM_RPC_PORT));
-			}catch(NumberFormatException n){
-			}
+		try{
+			port = Integer.parseInt(SystemProperties.getProperty(Constant.JVM_CM_RPC_PORT));
+		}catch(NumberFormatException n){
 		}
 	
 		ExportFramework exportFramework = new ExportFramework();
@@ -82,6 +92,7 @@ public class LamScheduleLaunch {
 		sb.append("system properties, 'lam.' prefix key:").append("\r\n");
 		for(Object key : keys){
 			String k = String.valueOf(key);
+//			sb.append(String.format("-D%s=%s", key, System.getProperty(String.valueOf(key)))).append("\r\n");
 			if(k.matches("lam.*")){				
 				sb.append(String.format("-D%s=%s", key, System.getProperty(String.valueOf(key)))).append("\r\n");
 			}
