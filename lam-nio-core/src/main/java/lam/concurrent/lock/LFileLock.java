@@ -22,32 +22,56 @@ import lam.util.FinalizeUtils;
 */
 public abstract class LFileLock {
 	
+	private static final int DEFAULT_RETRY = 3;
+	
+	protected int retry = DEFAULT_RETRY;//default time
+	
 	protected final File file;
 	
 	protected final FileOperate fileOperate;
 	
+	/**
+	 * retry 3 times by default
+	 */
 	public LFileLock(String file, FileOperate fileOperate){
-		this(file == null ? null : new File(file), fileOperate);
+		this(file, fileOperate, DEFAULT_RETRY);
 	}
 	
+	public LFileLock(String file, FileOperate fileOperate, int retry){
+		this(file == null ? null : new File(file), fileOperate, retry);
+	}
+	
+	/**
+	 * retry 3 times by default
+	 */
 	public LFileLock(File file, FileOperate fileOperate){
+		this(file, fileOperate, DEFAULT_RETRY);
+	}
+	
+	public LFileLock(File file, FileOperate fileOperate, int retry){
 		this.file = file;
 		this.fileOperate = fileOperate;
+		this.retry = retry;
 	}
 	
 	public boolean lockAndRun(){
 		RandomAccessFile randomAccessFile = null;
 		try {
+			if(!this.file.exists()){
+				this.file.createNewFile();
+			}
 			randomAccessFile = new RandomAccessFile(this.file, this.fileOperate.getMode());
 			FileChannel fileChannel = randomAccessFile.getChannel();
 			try {
 				//lock..
 				FileLock fileLock = fileChannel.tryLock();
 				if(fileLock == null){
-					return false;
+					throw new OverlappingFileLockException();
 				}
 				try{
-					return execute();
+					boolean result = false;
+					while(!(result = execute()) && --retry > 1);
+					return result;
 				}finally{
 					//unlock..
 					fileLock.release();
@@ -57,9 +81,12 @@ public abstract class LFileLock {
 				return false;
 			} catch (OverlappingFileLockException e0){
 				Console.println(this.file.getAbsolutePath() + " has been locked by other thread.");
-				return false;
+				throw e0;
 			}
 		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return false;
+		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		} finally {

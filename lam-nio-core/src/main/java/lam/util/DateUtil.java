@@ -1,5 +1,6 @@
 package lam.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -33,6 +34,16 @@ public class DateUtil {
 	public static String getCurrentTime(Date date, String format){
 		SimpleDateFormat dateFormat = new SimpleDateFormat(format);
 		return dateFormat.format(date);
+	}
+	
+	public static Date toDate(String source, String format){
+		SimpleDateFormat dateFormat = new SimpleDateFormat(format);
+		try {
+			return dateFormat.parse(source);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public static Date add(Date date, int field, int amount){
