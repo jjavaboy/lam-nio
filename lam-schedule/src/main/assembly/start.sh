@@ -31,7 +31,9 @@ getAppPid(){
     fi
 }
 
-JAVA_OPTS="-server -Xloggc:${APP_LOG}/gc.log -Dlam.schedule.home=${APP_HOME} -Dlam.schedule.test=false -Dlam.rpc.port=6666"
+JAVA_OPTS="-server -Xloggc:${APP_LOG}/gc.log"
+JAVA_OPTS="${JAVA_OPTS} -Dlam.schedule.home=${APP_HOME} -Dlam.schedule.test=false -Dlam.rpc.port=6666 -Dlam.container=filecache"
+JAVA_OPTS="${JAVA_OPTS} -Dlam.schedule.in.advance.hour=3"
 
 # classpath, including all jar in the "lib" directory
 CLASSPATH="./classes"
