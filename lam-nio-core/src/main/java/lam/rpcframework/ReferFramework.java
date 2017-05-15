@@ -1,5 +1,6 @@
 package lam.rpcframework;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -83,14 +84,15 @@ public class ReferFramework implements Referable{
 				}
 			}
 			Objects.requireNonNull(interfa, "cann't find the interface with method " + method);
-			try {
+			try {ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 				Invocation invocation = new RpcRequestInvocation(
 						interfa.getName(), method.getReturnType(), method.getName(),
 						method.getParameterTypes(), parameters, method.getExceptionTypes());
-				Hessian2Output output = new RpcHessian2Output(socket.getOutputStream());
+				Hessian2Output output = new RpcHessian2Output(byteArrayOutputStream);
 				output.writeObject(invocation);
 				output.flush();
 				output.close();
+				
 			} catch (IOException e) {
 				logger.error("error", e);
 			}
