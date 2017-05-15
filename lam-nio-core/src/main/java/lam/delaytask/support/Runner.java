@@ -13,6 +13,13 @@ public interface Runner {
 	
 	public Segment nextSegment();
 	
+	/**
+	 * transfer second to segment slot of the runner
+	 */
+	public int second2SegmentSlot(int second);
+	
+	public int getCurrentIndex();
+	
 	public Segment getSegment(int index);
 	
 	public boolean remove(Segment segment);

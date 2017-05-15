@@ -122,6 +122,20 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 	}
 	
 	@Override
+	public int second2SegmentSlot(int second) {
+		final int cIndex = currentIndex;
+		if(cIndex + second > lastIndex){//cIndex:1,second:3599==>>slot:1,lastIndex:3600
+			second = (cIndex + 1 + second) % this.segments.length;
+			if(second == 0){
+				return lastIndex;
+			}
+		}else{
+			second = cIndex + second;
+		}
+		return second - 1;
+	}
+	
+	@Override
 	public Segment getSegment(int index) {
 		if(isClose()){
 			throw new IllegalStateException("this object has been closed.");
@@ -146,13 +160,19 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 		return new DelaySegment(slot);
 	}
 	
-	private int getCurrentIndex(){
+	private int getCurrentIndexFitly(){
 		synchronized (indexLock) {
 			currentIndex++;
 			if(currentIndex > lastIndex){
 				currentIndex = firstIndex;
 			}
 			return currentIndex;
+		}
+	}
+	
+	public int getCurrentIndex(){
+		synchronized (indexLock) {			
+			return this.currentIndex < 0 ? 0 : this.currentIndex;
 		}
 	}
 
@@ -163,7 +183,7 @@ public class DelayTaskRunner implements Runner, Startable, Closeable{
 			return ;
 		}
 		//Segment segment = nextSegment();
-		int currentIndex = getCurrentIndex();
+		int currentIndex = getCurrentIndexFitly();
 		Segment segment = getSegment(currentIndex);
 		if(segment != null){
 			segment.doTask();

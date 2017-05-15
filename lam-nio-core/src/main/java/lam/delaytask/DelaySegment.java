@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import lam.delaytask.support.Runner;
 import lam.delaytask.support.Segment;
 
 /**
@@ -134,11 +135,17 @@ public class DelaySegment extends ReentrantLock implements Segment{
 		
 		private final Object countLock = new Object();
 		
-		public DelayTask(final int id, final int cycle, final int segmentSlot){
+		private final int second;
+		
+		private final int createdIndex;
+		
+		public DelayTask(final int id, final int cycle, final int second, Runner runner){
 			this.id = id;
 			this.originalCycle = cycle;
 			this.cycleNum = this.originalCycle;//initialize current cycle to be original cycle
-			this.segmentSlot = segmentSlot;
+			this.second = second;
+			this.segmentSlot = runner.second2SegmentSlot(this.second);
+			this.createdIndex = runner.getCurrentIndex();
 		}
 		
 		@Override
@@ -208,7 +215,8 @@ public class DelaySegment extends ReentrantLock implements Segment{
 		
 		@Override
 		public String toString() {
-			String s = String.format("Task{id:%d, cycleNum:%d, segmentSlot:%d, originalCycle:%d}", this.id, this.cycleNum, this.segmentSlot, this.originalCycle);
+			String s = String.format("Task{id:%d, cycleNum:%d, segmentSlot:%d, originalCycle:%d, second:%d, createdIndex:%d}",
+					this.id, this.cycleNum, this.segmentSlot, this.originalCycle, this.second, this.createdIndex);
 			return s;
 		}
 		

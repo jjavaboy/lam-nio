@@ -42,7 +42,9 @@ public class DelayTaskTestStartup {
 		Random r = new Random();
 		for(int i = 0; i < taskNum; i++){
 			sleep(r.nextInt(800));
-			Segment.Task task = new DelaySegment.DelayTask(i, r.nextInt(3), r.nextInt(3600));
+			int s = r.nextInt(3600);
+			int c = r.nextInt(3);
+			Segment.Task task = new DelaySegment.DelayTask(i, c, s + 3600 * c, runner);
 			runner.addTask(task);
 		}
 		logger.info(taskNum + " task has already been added.");
