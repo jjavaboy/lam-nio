@@ -48,26 +48,23 @@ public class LamScheduleLaunch {
 		printSystemProperties();
 		
 		containerManager = ContainerManager.getInstance();
-		if(StringUtils.isBlank(System.getProperty(Constant.JVM_CM_CONTAINER))){
-			System.setProperty(Constant.JVM_CM_CONTAINER, ContainerManager.Type.FILECACHE.getValue());
+		String containerValue = SystemProperties.getProperty(Constant.JVM_CM_CONTAINER);
+		try{
+			containerManager.loadContainer(containerValue);
+		}catch(Exception e){
+			logger.error("load container fail", e);
+			System.exit(-1);
 		}
-		String containerValue = System.getProperty(Constant.JVM_CM_CONTAINER);
-		containerManager.loadContainer(containerValue);
 		
 		context = new ClassPathXmlApplicationContext(new String[]{"classpath:spring-context.xml"});
 		context.start();
 		logger.info("spring started.");
 		
 		ExternalService bean = context.getBean("externalService", ExternalService.class);
-		
-		int port = 6666;
-		try{
-			port = Integer.parseInt(SystemProperties.getProperty(Constant.JVM_CM_RPC_PORT));
-		}catch(NumberFormatException n){
-		}
-	
+			
 		ExportFramework exportFramework = new ExportFramework();
 		try {
+			int port = SystemProperties.getPropertyInt(Constant.JVM_CM_RPC_PORT);
 			exportFramework.export(bean, port);
 		} catch (Exception e1) {
 			logger.error("ExportFramework export fail", e1);

@@ -49,8 +49,7 @@ public class ContainerManager implements Closeable{
 				logger.info("loadContainer, container:{}, class:{}.", c, lc.getClass().getName());
 				lc.start();
 			}catch(Exception e){
-				logger.error("create container fail", e);
-				throw new IllegalArgumentException("create container fail:" + c);
+				throw new RuntimeException("create container fail:" + c);
 			}
 		}
 	}
