@@ -3,6 +3,7 @@ package lam.schedule.util;
 import java.io.File;
 
 import lam.schedule.constant.Constant;
+import lam.schedule.container.ContainerManager;
 
 /**
 * <p>
@@ -31,7 +32,7 @@ public class SystemProperties {
 		if(Constant.JVM_CM_CACHE_FILE.equals(key)){
 			return System.getProperty("user.home") + File.separator + "lam-schedule.cache.properties";
 		}else if(Constant.JVM_CM_CONTAINER.equals(key)){
-			return "filecache";
+			return ContainerManager.Type.FILECACHE.getValue();
 		}else if(Constant.JVM_CM_RPC_PORT.equals(key)){
 			return "6666";
 		}else if(Constant.JVM_CM_SCHEDULE_IN_ADVANCE_HOUR.equals(key)){
