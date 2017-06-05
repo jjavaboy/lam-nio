@@ -120,6 +120,7 @@ public class LamMailScheduleProxy extends LogSupport implements SupportSchedule{
 		FilecacheContainer c = (FilecacheContainer) ContainerManager.getInstance().get(ContainerManager.Type.FILECACHE);
 		c.set("fromDate", DateUtil.getCurrentTime(fromDate, DATE_FORMATE));
 		c.set("toDate", DateUtil.getCurrentTime(toDate, DATE_FORMATE));
+		supportSchedule.cancelNext(fromDate, toDate);
 	}
 
 }

@@ -38,9 +38,8 @@ public class ExternalServiceImpl implements ExternalService {
 				calendar.set(Calendar.SECOND, 0);
 				calendar.set(Calendar.MINUTE, 0);
 				calendar.set(Calendar.HOUR_OF_DAY, 0);
-				now = calendar.getTime();
-				Date fromDate = DateUtil.add(now, Calendar.MINUTE, -5);
-				Date toDate = DateUtil.add(now, Calendar.MINUTE, 5);
+				Date toDate = DateUtil.add(calendar.getTime(), Calendar.MINUTE, 5);
+				Date fromDate = now;
 				supportSchedule.cancelNext(fromDate, toDate);
 			}
 		}
