@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+package lam.serialization.protobuf;
+option java_package = "lam.serialization.protobuf";
+option java_outer_classname = "HelloProto";
+
+message Hello{
+	required sint32 kk = 1;
+	required sint64 bb = 2;
+	optional int32 gender = 3;
+}

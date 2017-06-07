@@ -1,0 +1,9 @@
+syntax = "proto2";
+
+package lam.serialization.protobuf;
+option java_package = "lam.serialization.protobuf";
+option java_outer_classname = "FooProto";
+
+message Foo{
+	map<int32, string> map_field = 1;
+}
