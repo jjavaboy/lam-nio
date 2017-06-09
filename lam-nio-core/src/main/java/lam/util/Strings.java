@@ -17,4 +17,22 @@ public class Strings extends org.apache.commons.lang3.StringUtils{
 		}
 	}
 	
+	public static boolean allNull(String ...strings){
+		for(String string : strings){
+			if(string == null){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public static boolean existsNull(Object ...objects){
+		for(Object object : objects){
+			if(object == null){
+				return true;
+			}
+		}
+		return false;
+	}
+	
 }
