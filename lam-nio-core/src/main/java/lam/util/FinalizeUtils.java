@@ -1,6 +1,7 @@
 package lam.util;
 
 import java.io.Closeable;
+import java.io.Flushable;
 
 /**
 * <p>
@@ -20,6 +21,12 @@ public class FinalizeUtils {
 		close(closeable, true);
 	}
 	
+	public static void closeQuietly(Closeable ...closeables){
+		for(Closeable closeable : closeables){
+			closeQuietly(closeable);
+		}
+	}
+	
 	public static void closeNotQuietly(Closeable closeable){
 		close(closeable, false);
 	}
@@ -27,6 +34,9 @@ public class FinalizeUtils {
 	private static void close(Closeable closeable, boolean ignoreException){
 		if(closeable != null){
 			try{
+				if(closeable instanceof Flushable){
+					((Flushable) closeable).flush();
+				}
 				closeable.close();
 			}catch(Exception e){
 				if(!ignoreException){
