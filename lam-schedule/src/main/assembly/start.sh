@@ -32,6 +32,7 @@ getAppPid(){
 }
 
 JAVA_OPTS="-server -Xloggc:${APP_LOG}/gc.log -XX:+PrintGCDetails -XX:+PrintGCTimeStamps"
+JAVA_OPTS="${JAVA_OPTS} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${APP_LOG}/gc.hprof"
 JAVA_OPTS="${JAVA_OPTS} -Dlam.schedule.home=${APP_HOME} -Dlam.schedule.test=false -Dlam.rpc.port=6666 -Dlam.container=filecache"
 JAVA_OPTS="${JAVA_OPTS} -Dlam.schedule.in.advance.hour=3"
 
