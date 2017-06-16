@@ -65,10 +65,10 @@ public class ExportFramework implements Exportable{
 				try {
 					//accept:It will be blocking util an socket client come.
 					socket = serverSocket.accept();
-					//Object result = receive(socket);
-					Object result = receive2Hessian(socket);
-					//send(socket, result);
-					send2Hessian(socket, result);
+					Object result = receive(socket);
+					//Object result = receive2Hessian(socket);
+					send(socket, result);
+					//send2Hessian(socket, result);
 				} catch (Exception e) {
 					logger.error("error", e);
 				} finally {

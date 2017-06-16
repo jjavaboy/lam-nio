@@ -64,10 +64,10 @@ public class ReferFramework implements Referable{
 			Socket socket = null;
 			try{
 				socket = new Socket(host, port);
-				//send(socket, method, args);
-				send2Hessian(socket, proxy, method, args);
-				//Object result = receive(socket);
-				Object result = receive2Hessian(socket);
+				send(socket, method, args);
+				//send2Hessian(socket, proxy, method, args);
+				Object result = receive(socket);
+				//Object result = receive2Hessian(socket);
 				return result;
 			} finally {
 				FinalizeUtils.closeQuietly(socket);
