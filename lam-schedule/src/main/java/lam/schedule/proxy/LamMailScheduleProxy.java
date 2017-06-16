@@ -106,7 +106,7 @@ public class LamMailScheduleProxy extends LogSupport implements SupportSchedule{
 		StringBuilder logBuilder = new StringBuilder();
 		logBuilder.append(String.format("cancelNext, param:fromDate:%s, toDate:%s", 
 				DateUtil.getCurrentTime(fromDate, "yyyy-MM-dd HH:mm:ss"), DateUtil.getCurrentTime(toDate, "yyyy-MM-dd HH:mm:ss")));
-		int diffHour = (int) ((fromDate.getTime() - now.getTime()) / (60 * 60 * 1000));
+		int diffHour = (int) ((toDate.getTime() - now.getTime()) / (60 * 60 * 1000));
 		if(diffHour > this.cancelScheduleInAdvanceHour){
 			nullSkip();
 			String s = ", cancel time is in advance " + diffHour + " hour, we won't cancel the schedule, the schedule will be performed as usual.";
