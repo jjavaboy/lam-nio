@@ -14,17 +14,7 @@ public class Foo extends TimeBean{
 	
 	private static final long serialVersionUID = -1284042554731268678L;
 
-	private Integer id;
-	
 	private String username;
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
 
 	public String getUsername() {
 		return username;
