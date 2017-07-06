@@ -1,4 +1,7 @@
 package lam.util;
+
+import java.util.Collection;
+
 /**
 * <p>
 * Strings extends org.apache.commons.lang3.StringUtils
@@ -33,6 +36,10 @@ public class Strings extends org.apache.commons.lang3.StringUtils{
 			}
 		}
 		return false;
+	}
+	
+	public static boolean isNullOrEmpty(Collection<?> collection){
+		return collection == null || collection.isEmpty();
 	}
 	
 }

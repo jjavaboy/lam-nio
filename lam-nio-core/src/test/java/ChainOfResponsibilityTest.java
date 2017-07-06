@@ -1,3 +1,9 @@
+import java.util.ArrayList;
+import java.util.List;
+
+import lam.design.pattern.chainofresponsibility.dubbo.Filter;
+import lam.design.pattern.chainofresponsibility.dubbo.Invoker;
+import lam.design.pattern.chainofresponsibility.dubbo.InvokerBuilder;
 import lam.design.pattern.chainofresponsibility.rh.AbstractHandler;
 import lam.design.pattern.chainofresponsibility.rh.AbstractRequest;
 import lam.design.pattern.chainofresponsibility.rh.HandlerL01;
@@ -18,20 +24,46 @@ import lam.design.pattern.chainofresponsibility.rh.RequestL03;
 public class ChainOfResponsibilityTest {
 	
 	public static void main(String[] args){
-		AbstractHandler handlerL01 = new HandlerL01();
-		AbstractHandler handlerL02 = new HandlerL02();
-		AbstractHandler handlerL03 = new HandlerL03();
+		List<Filter> filters = new ArrayList<Filter>();
+		for(int i = 0; i < 5; i++){
+			final int finalI = i;
+			filters.add(new Filter(){
+				private int i = finalI;
+				@Override
+				public Object invoke(Invoker invoker, Object object) throws Exception {
+					System.out.println(getClass().getName() + ".invoke i:" + this.i);
+					return invoker.invoke(object);
+				}});
+		}
+		Invoker invoker = InvokerBuilder.buildInvokerChain(new DetectorInvoker(), filters);
+		filters.clear();
+		for(int i = 6; i < 11; i++){
+			final int finalI = i;
+			filters.add(new Filter(){
+				private int i = finalI;
+				@Override
+				public Object invoke(Invoker invoker, Object object) throws Exception {
+					Object r = invoker.invoke(object);
+					System.out.println(getClass().getName() + ".invoke i:" + this.i);
+					return r;
+				}});
+		}
+		invoker = InvokerBuilder.buildInvokerChain(invoker, filters);
+		try {
+			System.out.println(invoker.invoke("parameter"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private static class DetectorInvoker implements Invoker{
+
+		@Override
+		public Object invoke(Object param) throws Exception {
+			System.out.println(getClass().getName() + ".invoke service代理类 执行了");
+			return "result of " + param;
+		}
 		
-		handlerL01.setNext(handlerL02);
-		handlerL02.setNext(handlerL03);
-		
-		AbstractRequest requestL01 = new RequestL01();
-		AbstractRequest requestL02 = new RequestL02();
-		AbstractRequest requestL03 = new RequestL03();
-		
-		handlerL01.run(requestL01);
-		handlerL01.run(requestL02);
-		handlerL01.run(requestL03);
 	}
 
 }
