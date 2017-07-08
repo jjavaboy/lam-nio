@@ -33,7 +33,7 @@
     <dubbo:protocol name="dubbo" port="20880" threadpool="fixed" threads="100" dispatcher="all" transporter="netty" charset="UTF-8" serialization="hessian2"/>
     
     <!-- 监控中心，provider发送给monitor的调用时间，仅仅包括方法的执行时间，不包括网络时间 -->
-    <!-- <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" /> -->
+    <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" />
     
     <!-- dubbo提供者的全局配置 -->
     <dubbo:provider
@@ -58,6 +58,7 @@
 		 cluster="failover"
 		 charset="UTF-8"
 		 buffer="8192"
+		 filter="beforeFilter,afterFilter"
     />
 	<!-- 
 		threads:服务线程池大小(固定大小)

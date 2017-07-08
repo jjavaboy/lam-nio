@@ -1,0 +1,2 @@
+afterFilter=lam.dubbo.provider.filter.AfterFilter
+beforeFilter=lam.dubbo.provider.filter.BeforeFilter
