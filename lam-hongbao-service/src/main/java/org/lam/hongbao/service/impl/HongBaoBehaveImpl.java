@@ -11,12 +11,12 @@ import org.lam.hongbao.core.model.HongBaoRecord;
 import org.lam.hongbao.core.service.HongBaoBehave;
 import org.lam.hongbao.core.service.HongBaoRecordService;
 import org.lam.hongbao.core.service.HongBaoService;
-import org.lam.hongbao.service.concurrent.DistributedExecutor;
 import org.lam.hongbao.service.factory.HongBaoFactory;
 import org.lam.redis.client.RedisClient;
 
 import com.google.gson.Gson;
 
+import lam.concurrent.lock.DistributedExecutor;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -79,7 +79,7 @@ public class HongBaoBehaveImpl implements HongBaoBehave{
 				return false;
 			}
 			final long fUserId = userId, fHongbaoId = hongbaoId;
-			boolean take = new DistributedExecutor(CacheKeys.hongbaoTakingKey(hongbaoId, userId)){
+			boolean take = new DistributedExecutor(jedis, CacheKeys.hongbaoTakingKey(hongbaoId, userId)){
 				@Override
 				public boolean execute() {
 					String recordStr = jedis.lpop(CacheKeys.hongbaoQueueUnConsumeKey(fHongbaoId));
