@@ -8,3 +8,5 @@ linux 启动脚本/lam-nio-core/src/main/resources/start.sh
   simulate redis function:expired key
 4.有穷自动机=>lam/automaton/DeterministicFiniteAutomaton.java, test=>lam/automaton/DeterministicFiniteAutomaton.java
 5.LUR cache=>lam/util/LruHashMap.java
+6.分布式锁-基于redis=>lam.concurrent.lock.DistributedExecutor
+7.同一台机器锁-基于文件=>lam.concurrent.lock.LFileLock
