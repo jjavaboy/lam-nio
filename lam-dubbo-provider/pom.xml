@@ -29,6 +29,12 @@
     	<groupId>lam-dubbo</groupId>
   		<artifactId>lam-dubbo-core</artifactId>
   		<version>0.0.1-SNAPSHOT</version>
+  		<exclusions>
+  			<exclusion>
+  				<artifactId>slf4j-api</artifactId>
+  				<groupId>org.slf4j</groupId>
+  			</exclusion>
+  		</exclusions>
     </dependency>
     <!-- SPRING begin -->
 		<dependency>
@@ -125,6 +131,48 @@
 	    <groupId>com.github.sgroschupf</groupId>
 	    <artifactId>zkclient</artifactId>
 	    <version>0.1</version>
+	</dependency>
+	
+	<dependency>
+	    <groupId>com.netflix.hystrix</groupId>
+	    <artifactId>hystrix-core</artifactId>
+	    <version>1.5.8</version><!-- 1.4.26 1.5.8 -->
+	</dependency>
+	<dependency>
+		<groupId>com.netflix.hystrix</groupId>
+		<artifactId>hystrix-metrics-event-stream</artifactId>
+		<version>1.5.8</version><!-- 1.4.26 1.5.8 -->
+	</dependency>
+	<dependency>
+		<groupId>com.netflix.archaius</groupId>
+	  	<artifactId>archaius-core</artifactId>
+	  	<version>0.7.4</version>
+	  	<exclusions>
+	  		<exclusion>
+	  			<artifactId>slf4j-api</artifactId>
+	  			<groupId>org.slf4j</groupId>
+	  		</exclusion>
+	  	</exclusions>
+	</dependency>
+	<dependency>
+		<groupId>org.hdrhistogram</groupId>
+	    <artifactId>HdrHistogram</artifactId>
+	    <version>2.1.6</version>
+	</dependency>
+	<dependency>
+		<groupId>com.google.guava</groupId>
+ 	 	<artifactId>guava</artifactId>
+    	<version>17.0</version>
+	</dependency>
+	<dependency>
+		<groupId>com.fasterxml.jackson.dataformat</groupId>
+	    <artifactId>jackson-dataformat-cbor</artifactId>
+	    <version>2.6.2</version>
+	</dependency>
+	<dependency>
+		<groupId>com.fasterxml.jackson.core</groupId>
+  		<artifactId>jackson-core</artifactId>
+  		<version>2.6.2</version>
 	</dependency>
   </dependencies>
   <name>${project.artifactId}</name>
