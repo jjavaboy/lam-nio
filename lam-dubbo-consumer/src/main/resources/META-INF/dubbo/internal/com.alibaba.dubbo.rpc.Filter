@@ -1,0 +1,1 @@
+fallback=lam.dubbo.consumer.filter.FallbackHystrixFilter

@@ -18,7 +18,7 @@
  
     <!-- dubbo的消息者的全局配置 -->
     <dubbo:consumer 
-    	timeout="1000" 
+    	timeout="10" 
     	retries="2" 
     	loadbalance="random" 
     	async="false" 
@@ -27,6 +27,7 @@
     	owner="lam"
     	actives="0"
     	cluster="failover"
+    	filter="fallback"
     	 />
     <!-- 
     timeout:远程服务调用超时时间(毫秒)
