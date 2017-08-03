@@ -10,10 +10,12 @@
   <groupId>lam-mq</groupId>
   <artifactId>lam-mq</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>lam-mq</name>
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- 编译时的编码 -->  
+    <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+    <spring.version>4.0.8.RELEASE</spring.version>
   </properties>
   <dependencies>
   	<dependency>
@@ -21,5 +23,135 @@
 	  <artifactId>activemq-all</artifactId>
 	  <version>5.13.0</version>
 	</dependency>
+	<dependency>
+		<groupId>lam-dubbo</groupId>
+  		<artifactId>lam-dubbo-api</artifactId>
+  		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	<dependency>
+		<groupId>lam</groupId>
+  		<artifactId>lam-nio-core</artifactId>
+    	<version>0.0.1-SNAPSHOT</version>
+	</dependency>
+	
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-core</artifactId>
+		<version>${spring.version}</version>
+		<exclusions>
+			<exclusion>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+			</exclusion>
+		</exclusions>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-beans</artifactId>
+		<version>${spring.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-context</artifactId>
+		<version>${spring.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-context-support</artifactId>
+		<version>${spring.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-aop</artifactId>
+		<version>${spring.version}</version>
+		<exclusions>
+			<exclusion>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+			</exclusion>
+		</exclusions>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-tx</artifactId>
+		<version>${spring.version}</version>
+	</dependency>
+		
+	<!-- spring orm -->
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-orm</artifactId>
+		<version>${spring.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-jdbc</artifactId>
+		<version>${spring.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-web</artifactId>
+		<version>${spring.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-webmvc</artifactId>
+		<version>${spring.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-oxm</artifactId>
+		<version>${spring.version}</version>
+	</dependency>
+		
+    <dependency>
+		<groupId>com.alibaba</groupId>
+		<artifactId>dubbo</artifactId>
+		<version>2.5.3</version>
+	</dependency>
+	<dependency>
+	    <groupId>org.apache.zookeeper</groupId>
+	    <artifactId>zookeeper</artifactId>
+	    <version>3.3.6</version>
+		<exclusions>
+			<exclusion>
+				<groupId>log4j</groupId>
+  				<artifactId>log4j</artifactId>
+			</exclusion>
+			<exclusion>
+				<groupId>com.sun.jmx</groupId>
+  				<artifactId>jmxri</artifactId>
+			</exclusion>
+		</exclusions>
+	</dependency>
+	<dependency>
+	    <groupId>com.github.sgroschupf</groupId>
+	    <artifactId>zkclient</artifactId>
+	    <version>0.1</version>
+	</dependency>
   </dependencies>
+  <name>${project.artifactId}</name>
+  <build>
+  	<plugins>
+  	  <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-assembly-plugin</artifactId>
+	    <version>2.2.1</version>
+	    <configuration>
+	      <descriptors>
+	        <descriptor>src/main/assembly/assembly.xml</descriptor>
+	      </descriptors>
+	    </configuration>
+	    <executions>
+	      <execution>
+	        <id>make-assembly</id>
+	        <phase>package</phase>
+	        <goals>
+	          <goal>single</goal>
+	        </goals>
+	      </execution>
+	    </executions>
+	  </plugin>
+  	</plugins>
+  </build>
 </project>
