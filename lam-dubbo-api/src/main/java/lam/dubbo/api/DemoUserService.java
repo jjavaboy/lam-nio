@@ -7,7 +7,7 @@ package lam.dubbo.api;
 * @date 2016年10月30日
 * @versio 1.0
 */
-public interface UserService {
+public interface DemoUserService {
 	
 	public String sayHello(String username);
 	

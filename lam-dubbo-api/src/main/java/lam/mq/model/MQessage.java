@@ -17,6 +17,7 @@ public class MQessage implements Serializable{
 	
 	private Integer id;
 	private String Name;
+	private Type type;
 	private String text;
 	private Class<?> clazz;
 	private Date createTime;
@@ -32,6 +33,12 @@ public class MQessage implements Serializable{
 	}
 	public void setName(String name) {
 		Name = name;
+	}
+	public Type getType() {
+		return type;
+	}
+	public void setType(Type type) {
+		this.type = type;
 	}
 	public String getText() {
 		return text;
@@ -50,6 +57,31 @@ public class MQessage implements Serializable{
 	}
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+	
+	public boolean isQueue(){
+		return type == Type.QUEUE;
+	}
+	
+	public boolean isTopic(){
+		return type == Type.TOPIC;
+	}
+	
+	public static enum Type{
+		
+		QUEUE((byte)1),
+		
+		TOPIC((byte)2);
+		
+		private byte value;
+		
+		private Type(byte value){
+			this.value = value;
+		}
+		
+		public byte getValue(){
+			return this.value;
+		}
 	}
 	
 }
