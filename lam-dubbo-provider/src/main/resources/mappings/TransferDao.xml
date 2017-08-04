@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="lam.dubbo.bankb.transfer.dao.TransferDao">
+    
+	<sql id="entityColumns">
+		a.message_id AS messageId,
+		a.from_user_id AS fromUserId,
+		a.from_brand AS fromBrand,
+		a.to_user_id AS toUserId,
+		a.money,
+		a.status,
+		a.create_time AS "createTime",
+		a.update_time AS "updateTime"
+	</sql>
+    
+	<select id="getById" resultType="lam.dubbo.bankb.transfer.model.Transfer">
+		SELECT 
+			<include refid="entityColumns"/>
+		FROM t_bankb_transfer a
+		WHERE a.message_id = #{messageId}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_bankb_transfer(
+			message_id,
+			from_user_id,
+			from_brand,
+			to_user_id,
+			money,
+			status,
+			create_time,
+			update_time
+		) VALUES (
+			#{messageId},
+			#{fromUserId},
+			#{fromBrand},
+			#{toUserId},
+			#{money},
+			#{status},
+			#{createTime},
+			#{updateTime}
+		)
+	</insert>
+	
+	<update id="updateStatus">
+		UPDATE t_bankb_transfer SET
+			status = #{toStatus},
+			update_time = #{updateTime}
+		WHERE message_id = #{messageId} AND status = #{fromStatus}
+	</update>
+	
+</mapper>

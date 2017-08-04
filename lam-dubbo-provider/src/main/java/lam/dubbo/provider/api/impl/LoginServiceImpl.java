@@ -20,7 +20,16 @@ public class LoginServiceImpl implements LoginService{
 	@Override
 	public boolean login(String username) {
 		logger.info("{} - args:{}", "login", username);
+		sleep(1000);
 		return true;
+	}
+	
+	private void sleep(long millisecond){
+		try {
+			Thread.sleep(millisecond);
+		} catch (InterruptedException e) {
+			logger.error("thread sleep InterruptedException", e);
+		}
 	}
 
 	@Override

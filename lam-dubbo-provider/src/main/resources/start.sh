@@ -34,8 +34,8 @@ getAppPid(){
 JAVA_OPTS="-server -Xloggc:${APP_LOG}/gc.log"
 
 # classpath, including all jar in the "lib" directory
-CLASSPATH="${APP_HOME}/classes"
-for APP_JAR in ${APP_HOME}/lib/*.jar;
+CLASSPATH="./classes"
+for APP_JAR in ./lib/*.jar;
 do
     CLASSPATH="${CLASSPATH}:${APP_JAR}"
 done

@@ -17,8 +17,12 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 	
 	<!-- 提供方应用信息，用于计算依赖关系 -->
     <dubbo:application name="lam-dubbo-provider" owner="skylin" />
@@ -33,7 +37,7 @@
     <dubbo:protocol name="dubbo" port="20880" threadpool="fixed" threads="200" dispatcher="all" transporter="netty" charset="UTF-8" serialization="hessian2"/>
     
     <!-- 监控中心，provider发送给monitor的调用时间，仅仅包括方法的执行时间，不包括网络时间 -->
-    <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" />
+    <!-- <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" /> -->
     
     <!-- dubbo提供者的全局配置 -->
     <dubbo:provider
@@ -84,11 +88,92 @@
 		buffer:网络读写缓冲区大小，默认8192，字节
 		iothreads:数量(CPU + 1),IO线程池，接收网络读写中断，以及序列化和反序列化，不处理业务，业务线程池参见threads配置，此线程池和CPU相关，不建议配置。
 	 -->
+	 
+	<!-- 加载配置属性文件 -->
+	<context:property-placeholder ignore-unresolvable="true" location="classpath:jdbc.properties" />
+	 
+	<!-- 数据源配置, 使用 BoneCP 数据库连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close"> 
+	    <!-- 数据源驱动类可不写，Druid默认会自动根据URL识别DriverClass -->
+	    <property name="driverClassName" value="${jdbc.driver}" />
+	    
+		<!-- 基本属性 url、user、password -->
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${jdbc.pool.init}" />
+		<property name="minIdle" value="${jdbc.pool.minIdle}" /> 
+		<property name="maxActive" value="${jdbc.pool.maxActive}" />
+		
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="60000" />
+		
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		
+		<property name="validationQuery" value="${jdbc.testSql}" />
+		<property name="testWhileIdle" value="true" />
+		<property name="testOnBorrow" value="false" />
+		<property name="testOnReturn" value="false" />
+		
+		<!-- 打开PSCache，并且指定每个连接上PSCache的大小（Oracle使用）
+		<property name="poolPreparedStatements" value="true" />
+		<property name="maxPoolPreparedStatementPerConnectionSize" value="20" /> -->
+		
+		<!-- 配置监控统计拦截的filters -->
+	    <property name="filters" value="stat" /> 
+	</bean>
 	
-	<bean id="userService" class="lam.dubbo.provider.api.impl.UserServiceImpl" />
+	<!-- MyBatis begin -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="typeAliasesPackage" value="lam.dubbo"/>
+        <!-- <property name="typeAliasesSuperType" value="com.joysim.common.persistence.BaseEntity"/> -->
+        <property name="mapperLocations" value="classpath:/mappings/*.xml"/>
+		<property name="configLocation" value="classpath:/mybatis-config.xml"></property>
+    </bean>
+    
+    <!-- 扫描basePackage下所有以@MyBatisDao注解的接口 -->
+    <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <property name="basePackage" value="lam.dubbo"/>
+        <property name="annotationClass" value="lam.dubbo.common.MyBatisDao"/>
+    </bean>
+    
+    <!-- 定义事务 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 配置 Annotation 驱动，扫描@Transactional注解的类定义事务  -->
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true"/>
+    <!-- MyBatis end -->
+    
+    <!-- 生成远程服务代理，可以和本地bean一样使用demoService -->
+    <dubbo:reference id="mqService" interface="lam.mq.service.MQService" />
+	
+	<!-- <bean id="userService" class="lam.dubbo.provider.api.impl.UserServiceImpl" /> -->
 	<bean id="loginService" class="lam.dubbo.provider.api.impl.LoginServiceImpl" />
+	<bean id="userService" class="lam.dubbo.banka.user.service.impl.UserServiceImpl">
+		<property name="userDao" ref="userDao"/>
+		<property name="mqService" ref="mqService"/>
+	</bean>
+	<bean id="accountService" class="lam.dubbo.bankb.user.service.impl.AccountServiceImpl">
+		<property name="accountDao" ref="accountDao"/>
+	</bean>
+	<bean id="transferService" class="lam.dubbo.bankb.transfer.service.impl.TransferServiceImpl">
+		<property name="transferDao" ref="transferDao"/>
+		<property name="accountService" ref="accountService"/>
+	</bean>
 	
-	<dubbo:service interface="lam.dubbo.api.UserService" ref="userService" />
+	<!-- <dubbo:service interface="lam.dubbo.api.UserService" ref="userService" /> -->
 	<dubbo:service interface="lam.dubbo.api.LoginService" ref="loginService" />
+	<dubbo:service interface="lam.dubbo.banka.user.service.UserService" ref="userService" />
+	<dubbo:service interface="lam.dubbo.bankb.transfer.service.TransferService" ref="transferService" />
 	
 </beans>

@@ -3,7 +3,7 @@ package lam.dubbo.provider.api.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import lam.dubbo.api.UserService;
+import lam.dubbo.api.DemoUserService;
 
 /**
 * <p>
@@ -13,9 +13,9 @@ import lam.dubbo.api.UserService;
 * @date 2016年10月30日
 * @versio 1.0
 */
-public class UserServiceImpl implements UserService{
+public class DemoUserServiceImpl implements DemoUserService{
 	
-	private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+	private static Logger logger = LoggerFactory.getLogger(DemoUserServiceImpl.class);
 
 	@Override
 	public String sayHello(String username) {

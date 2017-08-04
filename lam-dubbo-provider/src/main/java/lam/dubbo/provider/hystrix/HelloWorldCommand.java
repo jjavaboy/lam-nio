@@ -11,7 +11,6 @@ import com.netflix.hystrix.HystrixCommandKey;
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixThreadPoolKey;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
-import com.netflix.hystrix.HystrixCommand.Setter;
 
 import rx.functions.Action1;
 
@@ -27,6 +26,8 @@ public class HelloWorldCommand extends HystrixCommand<String>{
 	
 	private String name;
 	
+	private static String commandGroupKey = "LAM";
+	
 	public HelloWorldCommand(String name){
 		//设置配置
 		super(createSetter(name));
@@ -35,7 +36,7 @@ public class HelloWorldCommand extends HystrixCommand<String>{
 	
 	private static Setter createSetter(String commandKey){
 		Setter setter = HystrixCommand.Setter
-				.withGroupKey(HystrixCommandGroupKey.Factory.asKey(""))  //组Group的key，一般相同的组，使用相同线程池
+				.withGroupKey(HystrixCommandGroupKey.Factory.asKey(commandGroupKey))  //组Group的key，一般相同的组，使用相同线程池
 				.andCommandKey(HystrixCommandKey.Factory.asKey(commandKey)) //每个Command的key，默认:getClass().getSimpleName();
 				//.andThreadPoolKey(HystrixThreadPoolKey.Factory.asKey("")) //线程池的key，一般来说，相同的组使用相同线程池，不用设置线程池的key，设置组名就行了。
 				.andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter().withCoreSize(20)) //服务线程池数量
@@ -51,6 +52,13 @@ public class HelloWorldCommand extends HystrixCommand<String>{
 		//HystrixCommandProperties的详细配置，可以查看com.netflix.hystrix.HystrixCommandProperties，这个类的相关配置设在在内部类Setter
 		return setter;
 	}
+	
+	/**
+	 * metrics
+	 * Hystrix offers metrics per command key and to very fine granularities (on the order of seconds).
+	 * Hystrix为每个command key提供metrics，并以秒为单位，作为非常好的度量在metrics中统计。
+	 * Hystrix会将metrics的统计信息保存在内存里（in-memory data structures），这样，可以在需要的时候查询。
+	 */
 
 	@Override
 	protected String run() throws Exception {
@@ -122,7 +130,7 @@ public class HelloWorldCommand extends HystrixCommand<String>{
 	private static void fallback(){
 		System.out.println("------------");
 		//配置依赖超时时间: 500ms
-		FallbackCommand fallbackCommand = new FallbackCommand("fallback-hystrix", 500);
+		FallbackCommand fallbackCommand = new FallbackCommand("fallback-hystrix", 500, 800);
 		//run方法sleep 800ms所以会超时，调用getFallback方法 返回结果。
 		String rs = fallbackCommand.execute();
 		System.out.println("result:" + rs);
@@ -145,20 +153,22 @@ public class HelloWorldCommand extends HystrixCommand<String>{
 	
 	static class FallbackCommand extends HystrixCommand<String>{
 		private String name;
+		private int runTimeout;
 		
-		public FallbackCommand(String name, int timeout){
+		public FallbackCommand(String name, int timeout, int runTimeout){
 			//配置依赖超时时间: 500ms, 默认线程池-10个线程
 			super(Setter.withGroupKey(HystrixCommandGroupKey.Factory.asKey("FallbackGroup"))
 					.andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withExecutionTimeoutInMilliseconds(timeout))
 					.andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter().withCoreSize(10)));
 			this.name = name;
+			this.runTimeout = runTimeout;
 		}
 
 		@Override
 		protected String run() throws Exception {
 			//sleep for 800ms
 			//除了HystrixBadRequestException异常之外，所有从run()方法抛出的异常都算作失败，并触发降级getFallback()和断路器逻辑
-			TimeUnit.MILLISECONDS.sleep(800L);
+			TimeUnit.MILLISECONDS.sleep(runTimeout);
 			return String.format("hello:%s, thread:%s", this.name, Thread.currentThread().getName());
 		}
 		

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="lam.dubbo.banka.user.dao.UserDao">
+    
+	<sql id="entityColumns">
+		a.user_id AS userId,
+		a.money,
+		a.create_time AS createTime,
+		a.update_time AS updateTime
+	</sql>
+    
+	<select id="getById" resultType="lam.dubbo.banka.user.model.User">
+		SELECT 
+			<include refid="entityColumns"/>
+		FROM t_banka_user a
+		WHERE a.user_id = #{userId}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_banka_user(
+			user_id,
+			money,
+			create_time,
+			update_time
+		) VALUES (
+			#{userId},
+			#{money},
+			#{createTime},
+			#{updateTime}
+		)
+	</insert>
+	
+	<update id="decreaseUserMoney">
+		UPDATE t_banka_user SET
+			money = money - #{money}
+		WHERE user_id = #{userId} and money &gt;= #{money}
+	</update>
+	
+</mapper>

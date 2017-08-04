@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="lam.dubbo.bankb.user.dao.AccountDao">
+    
+	<sql id="entityColumns">
+		a.user_id AS userId,
+		a.money,
+		a.create_time AS createTime,
+		a.update_time AS updateTime
+	</sql>
+    
+	<select id="getById" resultType="lam.dubbo.bankb.user.model.Account">
+		SELECT 
+			<include refid="entityColumns"/>
+		FROM t_bankb_account a
+		WHERE a.user_id = #{userId}
+	</select>
+	
+	<!-- <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO t_behave_trace(
+			code,
+			`key`,
+			openId,
+			value_d,
+			value_t,
+			day,
+			create_time
+		) VALUES (
+			#{code},
+			#{key},
+			#{openId},
+			#{valueD},
+			#{valueT},
+			#{day},
+			#{createTime}
+		)
+	</insert> -->
+	
+	<update id="addMoney">
+		UPDATE t_bankb_account SET
+			money = money + #{money}
+		WHERE user_id = #{userId}
+	</update>
+	
+</mapper>
