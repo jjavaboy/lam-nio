@@ -8,7 +8,11 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gson.Gson;
+import com.google.protobuf.Type;
 
 import lam.mq.model.MQessage;
 import lam.mq.service.MQService;
@@ -24,10 +28,15 @@ import lam.mq.service.impl.util.ActiveMQHolder;
 */
 public class ActiveMQService implements MQService{
 	
+	private static Logger logger = LoggerFactory.getLogger(ActiveMQService.class);
+	
 	private static Gson gson = new Gson();
 
 	@Override
 	public boolean sendQueue(MQessage mqessage) {
+		if(!mqessage.isQueue())
+			return false;
+		boolean result = false;
 		try {
 			Connection conn = ActiveMQHolder.getInstance().getConnection();
 			Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -38,18 +47,21 @@ public class ActiveMQService implements MQService{
 			conn.start();
 			producer.send(message);
 			conn.close();
-			return true;
+			result = true;
 		} catch (JMSException e) {
-			e.printStackTrace();
+			logger.error("sendQueue error", e);
 		}
-		return false;
+		logger.info(String.format("%s, result:%b", gson.toJson(mqessage), result));
+		return result;
 	}
 
 	@Override
 	public boolean sendTopic(MQessage mqessage) {
-		Connection conn;
+		if(!mqessage.isTopic())
+			return false;
+		boolean result = false;
 		try {
-			conn = ActiveMQHolder.getInstance().getConnection();
+			Connection conn = ActiveMQHolder.getInstance().getConnection();
 			Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Destination desc = session.createTopic(mqessage.getName());
 			MessageProducer producer = session.createProducer(desc);
@@ -58,11 +70,12 @@ public class ActiveMQService implements MQService{
 			conn.start();
 			producer.send(message);
 			conn.close();
-			return true;
+			result = true;
 		} catch (JMSException e) {
-			e.printStackTrace();
+			logger.error("sendTopic error", e);
 		}
-		return false;
+		logger.info(String.format("%s, result:%b", gson.toJson(mqessage), result));
+		return result;
 	}
 
 }

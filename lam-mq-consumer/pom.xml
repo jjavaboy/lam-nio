@@ -7,8 +7,8 @@
     <artifactId>lam-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
-  <groupId>lam-mq</groupId>
-  <artifactId>lam-mq-producer</artifactId>
+  <groupId>lam-mq-consumer</groupId>
+  <artifactId>lam-mq-consumer</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <url>http://maven.apache.org</url>
   <properties>

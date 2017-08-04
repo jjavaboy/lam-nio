@@ -19,6 +19,7 @@
     <module>lam-schedule</module>
     <module>lam-schedule-api</module>
     <module>lam-dao</module>
-    <module>lam-mq</module>
+    <module>lam-mq-producer</module>
+    <module>lam-mq-consumer</module>
   </modules>
 </project>

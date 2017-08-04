@@ -15,7 +15,7 @@ then
 fi
 
 # main class
-APP_MAIN="lam.mq.service.startup.MQProducerStartup"
+APP_MAIN="lam.mq.consumer.startup.MQConsumerStartup"
 
 APP_PID=0
 

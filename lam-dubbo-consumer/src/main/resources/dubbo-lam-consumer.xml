@@ -14,7 +14,7 @@
     <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.204.79:2181" file="cache/lam-dubbo-consumer.cache"/>
     
      <!-- 监控中心 dubbo的monitor-simple模块，consumer发送给monitor的调用时间，包括网络时间和方法执行时间 -->
-    <!-- <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" /> -->
+    <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" />
  
     <!-- dubbo的消息者的全局配置 -->
     <dubbo:consumer 
