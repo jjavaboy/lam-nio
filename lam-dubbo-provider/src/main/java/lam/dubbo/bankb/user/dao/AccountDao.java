@@ -16,6 +16,8 @@ public interface AccountDao {
 	
 	public Account getById(int userId);
 	
+	public int insert(Account account);
+	
 	public int addMoney(Account account);
 
 }

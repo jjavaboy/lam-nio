@@ -1,5 +1,7 @@
 package lam.dubbo.bankb.user.service.impl;
 
+import java.util.Date;
+
 import lam.dubbo.bankb.user.dao.AccountDao;
 import lam.dubbo.bankb.user.model.Account;
 import lam.dubbo.bankb.user.service.AccountService;
@@ -21,10 +23,21 @@ public class AccountServiceImpl implements AccountService{
 	}
 	
 	@Override
+	public Account getById(int userId) {
+		return accountDao.getById(userId);
+	}
+	
+	@Override
+	public boolean insert(Account account) {
+		return accountDao.insert(account) == 1;
+	}
+	
+	@Override
 	public boolean addAccountMoney(Integer userId, double money) {
 		Account account = new Account();
 		account.setUserId(userId);
 		account.setMoney(money);
+		account.setUpdateTime(new Date());
 		return accountDao.addMoney(account) == 1;
 	}
 

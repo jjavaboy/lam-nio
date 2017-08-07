@@ -16,29 +16,24 @@
 		WHERE a.user_id = #{userId}
 	</select>
 	
-	<!-- <insert id="insert" keyProperty="id" useGeneratedKeys="true">
-		INSERT INTO t_behave_trace(
-			code,
-			`key`,
-			openId,
-			value_d,
-			value_t,
-			day,
-			create_time
+	<insert id="insert">
+		INSERT INTO t_bankb_account(
+			user_id,
+			money,
+			create_time,
+			update_time
 		) VALUES (
-			#{code},
-			#{key},
-			#{openId},
-			#{valueD},
-			#{valueT},
-			#{day},
-			#{createTime}
+			#{userId},
+			#{money},
+			#{createTime},
+			#{updateTime}
 		)
-	</insert> -->
+	</insert>
 	
 	<update id="addMoney">
 		UPDATE t_bankb_account SET
-			money = money + #{money}
+			money = money + #{money},
+			update_time = #{updateTime}
 		WHERE user_id = #{userId}
 	</update>
 	

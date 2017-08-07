@@ -62,9 +62,9 @@
 		 cluster="failover"
 		 charset="UTF-8"
 		 buffer="8192"
-		 filter="beforeFilter,afterFilter"
     />
 	<!-- 
+		 filter="beforeFilter,afterFilter"
 		threads:服务线程池大小(固定大小)，查看dubbo源码，默认值200
 		payload:请求及响应数据包大小限制，单位：字节 88388608(=8M) 
 		server:dubbo协议缺省为netty，协议的服务器端实现类型，比如：dubbo协议的mina,netty等，http协议的jetty,servlet等

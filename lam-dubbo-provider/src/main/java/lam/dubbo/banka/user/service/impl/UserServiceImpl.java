@@ -51,17 +51,19 @@ public class UserServiceImpl implements UserService{
 			user.setMoney(0D);
 			user.setCreateTime(new Date());
 			user.setUpdateTime(user.getCreateTime());
-			userDao.insert(user);
+			int rs = userDao.insert(user);
+			logger.info(String.format("insert user:%s, result:%d.", gson.toJson(user), rs));
 		}
 		//1.减去用户的钱
 		User param = new User();
 		param.setUserId(fromUserId);
 		param.setMoney(money);
+		param.setUpdateTime(new Date());
 		int result = userDao.decreaseUserMoney(param);
 		//减失败，则不够钱，直接返回
 		if(result != 1){
 			oldUser = userDao.getById(fromUserId);
-			logger.info(String.format("%s, money not enouth, it need %f at least.", gson.toJson(oldUser), money));
+			logger.info(String.format("user:%s, money not enouth, it need %f at least.", gson.toJson(oldUser), money));
 			return false;
 		}
 		
@@ -78,9 +80,10 @@ public class UserServiceImpl implements UserService{
 		message.setName(Transfer.class.getSimpleName());
 		message.setType(MQessage.Type.QUEUE);
 		message.setText(gson.toJson(transfer));
-		message.setClazz(Transfer.class);
+		//message.setClazz(Transfer.class);
 		
 		boolean rs = mqService.sendQueue(message);
+		logger.info(String.format("sendQueue, message:%s, result:%b.", gson.toJson(message), rs));
 		//发消息不成功，则回滚减钱的第1步
 		if(!rs){
 			//handle here...

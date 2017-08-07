@@ -32,7 +32,8 @@
 	
 	<update id="decreaseUserMoney">
 		UPDATE t_banka_user SET
-			money = money - #{money}
+			money = money - #{money},
+			update_time = #{updateTime}
 		WHERE user_id = #{userId} and money &gt;= #{money}
 	</update>
 	
