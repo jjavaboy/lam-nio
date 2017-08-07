@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import lam.dubbo.bankb.transfer.model.Transfer;
 import lam.dubbo.bankb.transfer.service.TransferService;
 import lam.mq.consumer.util.ActiveMQHolder;
+import lam.mq.model.MQessage;
 import lam.util.support.Startable;
 
 /**
@@ -77,10 +78,11 @@ public class ActiveMQConsumer implements Startable, Closeable{
 			conn.start();
 			while(true){
 				TextMessage message = (TextMessage) consumer.receive();
-				Transfer transfer = gson.fromJson(message.getText(), Transfer.class);
+				MQessage mqessage = gson.fromJson(message.getText(), MQessage.class);
+				Transfer transfer = gson.fromJson(mqessage.getText(), Transfer.class);
 				transfer.setMessageId(message.getJMSMessageID());
 				boolean result = transferService.doTransfer(transfer);
-				logger.info(String.format("consume, message:%s, result:b", gson.toJson(message), result));
+				logger.info(String.format("consume, message:%s, result:%b", gson.toJson(message), result));
 			}
 		} catch (Throwable e) {
 			logger.error("ActiveMQ consumer error", e);

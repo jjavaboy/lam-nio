@@ -1,5 +1,7 @@
 package lam.mq.service.impl;
 
+import java.io.Serializable;
+
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -12,6 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.TypeAdapterFactory;
+import com.google.gson.reflect.TypeToken;
 import com.google.protobuf.Type;
 
 import lam.mq.model.MQessage;
@@ -28,9 +34,38 @@ import lam.mq.service.impl.util.ActiveMQHolder;
 */
 public class ActiveMQService implements MQService{
 	
+	/*public static class PointAdapter extends TypeAdapter {
+	     public Point read(JsonReader reader) throws IOException {
+	       if (reader.peek() == JsonToken.NULL) {
+	         reader.nextNull();
+	         return null;
+	       }
+	       String xy = reader.nextString();
+	       String[] parts = xy.split(",");
+	       int x = Integer.parseInt(parts[0]);
+	       int y = Integer.parseInt(parts[1]);
+	       return new Point(x, y);
+	     }
+	     public void write(JsonWriter writer, Point value) throws IOException {
+	       if (value == null) {
+	         writer.nullValue();
+	         return;
+	       }
+	       String xy = value.getX() + "," + value.getY();
+	       writer.value(xy);
+	     }
+	   }}*/
+	
 	private static Logger logger = LoggerFactory.getLogger(ActiveMQService.class);
 	
-	private static Gson gson = new Gson();
+	private static Gson gson = /*new GsonBuilder().registerTypeAdapter(Serializable.class, typeAdapter)
+			
+			.registerTypeAdapterFactory(new TypeAdapterFactory(){
+		@Override
+		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+			// TODO Auto-generated method stub
+			return null;
+		}}).create();*/ new Gson();
 
 	@Override
 	public boolean sendQueue(MQessage mqessage) {
@@ -51,7 +86,7 @@ public class ActiveMQService implements MQService{
 		} catch (JMSException e) {
 			logger.error("sendQueue error", e);
 		}
-		logger.info(String.format("%s, result:%b", gson.toJson(mqessage), result));
+		logger.info(String.format("sendQueue:%s, result:%b", gson.toJson(mqessage), result));
 		return result;
 	}
 
