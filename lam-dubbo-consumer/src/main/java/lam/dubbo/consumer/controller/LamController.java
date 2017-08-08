@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import lam.dubbo.api.LoginService;
-import lam.dubbo.api.UserService;
+import lam.dubbo.api.DemoUserService;
 
 /**
 * <p>
@@ -25,7 +25,7 @@ public class LamController {
 	
 	private LoginService loginService;
 	
-	private UserService userService;
+	private DemoUserService userService;
 	
 	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(
 			3, 3, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), 
@@ -48,7 +48,7 @@ public class LamController {
 		this.loginService = loginService;
 	}
 	
-	public void setUserService(UserService userService) {
+	public void setUserService(DemoUserService userService) {
 		this.userService = userService;
 	}
 	
@@ -56,14 +56,15 @@ public class LamController {
 		@Override
 		public void run() {
 			try{
-				for(int i = 0; i < 100; i++){
+				for(int i = 0; i < 5; i++){
 					String username = "user_" + i; 
 				    boolean li = loginService.login(username);
-			    	String hello = userService.sayHello(username);
+			    	/*String hello = userService.sayHello(username);
 			    	String goodBye = userService.sayGoodBye(username);
 			    	boolean lo = loginService.logout(username);
-			    	logger.info(String.format("login:%b, %s, %s, logout:%b", li, hello, goodBye, lo));
-			    	sleepMilli(800L);
+			    	logger.info(String.format("login:%b, %s, %s, logout:%b", li, hello, goodBye, lo));*/
+				    logger.info(String.format("login:%b", li));
+			    	sleepMilli(1L);
 				}
 			}catch(Exception e){
 				e.printStackTrace();
