@@ -50,29 +50,17 @@ public class TransferServiceImpl implements TransferService{
 		
 		//2.如果不存在则插入一条记录
 		if(oldTransfer == null){
-			if(transfer.getCreateTime() == null || transfer.getUpdateTime() == null){
-				transfer.setCreateTime(new Date());
-				transfer.setUpdateTime(transfer.getCreateTime());
-			}
-			transfer.setStatus(Transfer.Status.INITIAL.getValue());
-			int result = transferDao.insert(transfer);
-			if(result == 0)
-				oldTransfer = transferDao.getById(transfer.getMessageId());
-			logger.info(String.format("insert Transfer:%s, result:%d.", gson.toJson(transfer), result));
+			boolean result = insert(transfer);
+			logger.info(String.format("insert Transfer:%s, result:%b.", gson.toJson(transfer), result));
 		}
 		
 		//3.同一事务下
 		//更新记录状态
-		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("messageId", transfer.getMessageId());
-		param.put("fromStatus", Transfer.Status.INITIAL.getValue());
-		param.put("toStatus", Transfer.Status.TRANSFED.getValue());
-		param.put("updateTime", new Date());
-		int result = transferDao.updateStatus(param);
+		boolean result = updateStatus(transfer.getMessageId(), Transfer.Status.INITIAL.getValue(), Transfer.Status.TRANSFED.getValue());
 		logger.info(String.format("update transfer status to %d, when messageId:%s and old status:%d, result:%d.", 
-				param.get("toStatus"), param.get("messageId"), param.get("fromStatus"), result));
+				Transfer.Status.INITIAL.getValue(),  Transfer.Status.TRANSFED.getValue(), transfer.getMessageId(), result));
 		//transfer的状态不是'INITIAL'，表示该messageId已经被修改过，直接返回true
-		if(result != 1)
+		if(!result)
 			return true;
 		//修改用户账号加钱
 		Account account = accountService.getById(transfer.getToUserId());
@@ -88,6 +76,27 @@ public class TransferServiceImpl implements TransferService{
 		boolean rs = accountService.addAccountMoney(transfer.getToUserId(), transfer.getMoney());
 		logger.info(String.format("addAccountMoney, toUserId:%d, money:%f, result:%b.", transfer.getToUserId(), transfer.getMoney(), rs));
 		return rs;
+	}
+
+	@Override
+	public boolean insert(Transfer transfer) {
+		if(transfer.getCreateTime() == null || transfer.getUpdateTime() == null){
+			transfer.setCreateTime(new Date());
+			transfer.setUpdateTime(transfer.getCreateTime());
+		}
+		transfer.setStatus(Transfer.Status.INITIAL.getValue());
+		return transferDao.insert(transfer) == 1;
+	}
+
+	@Override
+	public boolean updateStatus(String messageId, byte fromStatus, byte toStatus) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("messageId", messageId);
+		param.put("fromStatus", fromStatus);
+		param.put("toStatus", toString());
+		param.put("updateTime", new Date());
+		int result = transferDao.updateStatus(param);
+		return result == 1;
 	}
 
 }

@@ -1,7 +1,5 @@
 package lam.mq.service.impl;
 
-import java.io.Serializable;
-
 import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
@@ -10,16 +8,16 @@ import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 
+import org.apache.activemq.ActiveMQConnection;
+import org.apache.activemq.RedeliveryPolicy;
+import org.apache.activemq.broker.region.policy.RedeliveryPolicyMap;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapter;
-import com.google.gson.TypeAdapterFactory;
-import com.google.gson.reflect.TypeToken;
-import com.google.protobuf.Type;
 
+import lam.dubbo.bankb.transfer.model.Transfer;
 import lam.mq.model.MQessage;
 import lam.mq.service.MQService;
 import lam.mq.service.impl.util.ActiveMQHolder;
@@ -34,38 +32,32 @@ import lam.mq.service.impl.util.ActiveMQHolder;
 */
 public class ActiveMQService implements MQService{
 	
-	/*public static class PointAdapter extends TypeAdapter {
-	     public Point read(JsonReader reader) throws IOException {
-	       if (reader.peek() == JsonToken.NULL) {
-	         reader.nextNull();
-	         return null;
-	       }
-	       String xy = reader.nextString();
-	       String[] parts = xy.split(",");
-	       int x = Integer.parseInt(parts[0]);
-	       int y = Integer.parseInt(parts[1]);
-	       return new Point(x, y);
-	     }
-	     public void write(JsonWriter writer, Point value) throws IOException {
-	       if (value == null) {
-	         writer.nullValue();
-	         return;
-	       }
-	       String xy = value.getX() + "," + value.getY();
-	       writer.value(xy);
-	     }
-	   }}*/
-	
 	private static Logger logger = LoggerFactory.getLogger(ActiveMQService.class);
 	
-	private static Gson gson = /*new GsonBuilder().registerTypeAdapter(Serializable.class, typeAdapter)
+	private static Gson gson = new Gson();
+	
+	private ActiveMQConnection conn;
+	
+	public ActiveMQService(){
+		try {
+			//文档参考http://activemq.apache.org/redelivery-policy.html
+			conn = ActiveMQHolder.getInstance().createConnection();
 			
-			.registerTypeAdapterFactory(new TypeAdapterFactory(){
-		@Override
-		public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-			// TODO Auto-generated method stub
-			return null;
-		}}).create();*/ new Gson();
+			RedeliveryPolicy queuePolicy = new RedeliveryPolicy();
+			queuePolicy.setInitialRedeliveryDelay(0);
+			queuePolicy.setRedeliveryDelay(1000);
+			queuePolicy.setUseExponentialBackOff(false);
+			queuePolicy.setMaximumRedeliveries(6);
+			
+			//RedeliveryPolicy topicPolicy = new RedeliveryPolicy();
+			
+			RedeliveryPolicyMap redeliveryPolicyMap = new RedeliveryPolicyMap();
+			redeliveryPolicyMap.put(new ActiveMQQueue(Transfer.class.getSimpleName()), queuePolicy);
+			conn.setRedeliveryPolicyMap(redeliveryPolicyMap);
+		} catch (JMSException e) {
+			throw new RuntimeException("create ActiveMQConnection error", e);
+		}
+	}
 
 	@Override
 	public boolean sendQueue(MQessage mqessage) {
@@ -79,6 +71,7 @@ public class ActiveMQService implements MQService{
 			MessageProducer producer = session.createProducer(dest);
 			producer.setDeliveryMode(DeliveryMode.PERSISTENT);
 			Message message = session.createTextMessage(gson.toJson(mqessage));
+			message.setJMSRedelivered(true);
 			conn.start();
 			producer.send(message);
 			conn.close();
@@ -96,12 +89,13 @@ public class ActiveMQService implements MQService{
 			return false;
 		boolean result = false;
 		try {
-			Connection conn = ActiveMQHolder.getInstance().getConnection();
 			Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Destination desc = session.createTopic(mqessage.getName());
 			MessageProducer producer = session.createProducer(desc);
 			producer.setDeliveryMode(DeliveryMode.PERSISTENT);
 			Message message = session.createTextMessage(gson.toJson(mqessage));
+			message.setJMSRedelivered(true);
+			
 			conn.start();
 			producer.send(message);
 			conn.close();

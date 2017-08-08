@@ -13,5 +13,9 @@ import lam.dubbo.bankb.transfer.model.Transfer;
 public interface TransferService {
 	
 	public boolean doTransfer(Transfer transfer);
+	
+	public boolean insert(Transfer transfer);
+	
+	public boolean updateStatus(String messageId, byte fromStatus, byte toStatus);
 
 }

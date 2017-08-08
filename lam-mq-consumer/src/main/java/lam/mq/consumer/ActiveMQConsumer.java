@@ -6,7 +6,9 @@ import java.io.IOException;
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
@@ -76,14 +78,30 @@ public class ActiveMQConsumer implements Startable, Closeable{
 			Destination dest = session.createQueue(queueName);
 			MessageConsumer consumer = session.createConsumer(dest);
 			conn.start();
-			while(true){
+			consumer.setMessageListener(new MessageListener(){
+				@Override
+				public void onMessage(Message message) {
+					if(message instanceof TextMessage){
+						try{
+						TextMessage textMessage = (TextMessage) message;
+						MQessage mqessage = gson.fromJson(textMessage.getText(), MQessage.class);
+						Transfer transfer = gson.fromJson(mqessage.getText(), Transfer.class);
+						transfer.setMessageId(textMessage.getJMSMessageID());
+						boolean result = transferService.doTransfer(transfer);
+						logger.info(String.format("consume, message:%s, result:%b", gson.toJson(message), result));
+						}catch(Exception e){
+							throw new RuntimeException("consume message fail");
+						}
+					}
+				}});
+			/*while(true){
 				TextMessage message = (TextMessage) consumer.receive();
 				MQessage mqessage = gson.fromJson(message.getText(), MQessage.class);
 				Transfer transfer = gson.fromJson(mqessage.getText(), Transfer.class);
 				transfer.setMessageId(message.getJMSMessageID());
 				boolean result = transferService.doTransfer(transfer);
 				logger.info(String.format("consume, message:%s, result:%b", gson.toJson(message), result));
-			}
+			}*/
 		} catch (Throwable e) {
 			logger.error("ActiveMQ consumer error", e);
 		}
