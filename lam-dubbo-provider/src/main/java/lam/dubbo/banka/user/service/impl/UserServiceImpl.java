@@ -44,51 +44,61 @@ public class UserServiceImpl implements UserService{
 	@Transactional
 	@Override
 	public boolean decreaseUserMoneyCrossBank(Integer fromUserId, Integer toUserId, double money) {
-		User oldUser = userDao.getById(fromUserId);
-		if(oldUser == null){
-			User user = new User();
-			user.setUserId(fromUserId);
-			user.setMoney(0D);
-			user.setCreateTime(new Date());
-			user.setUpdateTime(user.getCreateTime());
-			int rs = userDao.insert(user);
-			logger.info(String.format("insert user:%s, result:%d.", gson.toJson(user), rs));
+		StringBuilder sb = new StringBuilder("\nbegin transaction:\n");
+		try{
+			//1.减去用户的钱
+			boolean result = decreaseUserMoneyInnerBank(fromUserId, money);
+			
+			sb.append("descreseUserMoney, userId:").append(fromUserId).append(", money:").append(money).append(", result:").append(result).append('\n');
+
+			if(!result){
+				User oldUser = userDao.getById(fromUserId);
+				sb.append(String.format("user:%s, money not enouth, it need %f at least.", gson.toJson(oldUser), money)).append('\n');
+				return false;
+			}
+			
+			//2.插入消息到队列
+			Transfer transfer = new Transfer();
+			transfer.setFromUserId(fromUserId);
+			transfer.setToUserId(toUserId);
+			transfer.setMoney(money);
+			transfer.setFromBrand("BankA");
+			transfer.setCreateTime(new Date());
+			transfer.setUpdateTime(transfer.getUpdateTime());
+			
+			MQessage message = new MQessage();
+			message.setName(Transfer.class.getSimpleName());
+			message.setType(MQessage.Type.QUEUE);
+			message.setText(gson.toJson(transfer));
+			
+			result = mqService.sendQueue(message);
+			sb.append(String.format("sendQueue, message:%s, result:%b.", gson.toJson(message), result)).append('\n');
+			//发消息不成功，则回滚减钱的第1步
+			if(!result){
+				throw new RuntimeException("sendQueue fail !!");
+			}
+			sb.append("end transaction\n");
+			return result;
+		}catch(Exception e){
+			sb.append("rollback transaction");
+			throw e;
+		}finally{
+			logger.info(sb.toString());
 		}
-		//1.减去用户的钱
+	}
+	
+	private boolean decreaseUserMoneyInnerBank(int userId, double money){
 		User param = new User();
-		param.setUserId(fromUserId);
+		param.setUserId(userId);
 		param.setMoney(money);
 		param.setUpdateTime(new Date());
-		int result = userDao.decreaseUserMoney(param);
-		//减失败，则不够钱，直接返回
-		if(result != 1){
-			oldUser = userDao.getById(fromUserId);
-			logger.info(String.format("user:%s, money not enouth, it need %f at least.", gson.toJson(oldUser), money));
-			return false;
-		}
 		
-		//2.插入消息到队列
-		Transfer transfer = new Transfer();
-		transfer.setFromUserId(fromUserId);
-		transfer.setToUserId(toUserId);
-		transfer.setMoney(money);
-		transfer.setFromBrand("BankA");
-		transfer.setCreateTime(new Date());
-		transfer.setUpdateTime(transfer.getUpdateTime());
-		
-		MQessage message = new MQessage();
-		message.setName(Transfer.class.getSimpleName());
-		message.setType(MQessage.Type.QUEUE);
-		message.setText(gson.toJson(transfer));
-		//message.setClazz(Transfer.class);
-		
-		boolean rs = mqService.sendQueue(message);
-		logger.info(String.format("sendQueue, message:%s, result:%b.", gson.toJson(message), rs));
-		//发消息不成功，则回滚减钱的第1步
-		if(!rs){
-			//handle here...
-		}
-		return rs;
+		return userDao.decreaseUserMoney(param) == 1;
+	}
+
+	@Override
+	public boolean insert(User user) {
+		return userDao.insert(user) == 1;
 	}
 
 }

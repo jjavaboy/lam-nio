@@ -10,3 +10,7 @@ linux 启动脚本/lam-nio-core/src/main/resources/start.sh
 5.LUR cache=>lam/util/LruHashMap.java
 6.分布式锁-基于redis=>lam.concurrent.lock.DistributedExecutor
 7.同一台机器锁-基于文件=>lam.concurrent.lock.LFileLock
+8.分布式事务处理=>
+	A节点=>减钱:lam.dubbo.banka.user.service.impl.UserServiceImpl.decreaseUserMoneyCrossBank(Integer, Integer, double)
+	     A节点会同一事务（减钱和发消息）操作
+	B节点=>监听加钱消息:lam.mq.consumer.ActiveMQConsumer.start()

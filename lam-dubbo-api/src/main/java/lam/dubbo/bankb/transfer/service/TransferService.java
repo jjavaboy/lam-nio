@@ -17,5 +17,7 @@ public interface TransferService {
 	public boolean insert(Transfer transfer);
 	
 	public boolean updateStatus(String messageId, byte fromStatus, byte toStatus);
+	
+	public Transfer getById(String messageId);
 
 }

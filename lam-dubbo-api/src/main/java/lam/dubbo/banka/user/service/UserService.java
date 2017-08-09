@@ -1,4 +1,7 @@
 package lam.dubbo.banka.user.service;
+
+import lam.dubbo.banka.user.model.User;
+
 /**
 * <p>
 * TODO
@@ -10,5 +13,7 @@ package lam.dubbo.banka.user.service;
 public interface UserService {
 	
 	public boolean decreaseUserMoneyCrossBank(Integer fromUserId, Integer toUserId, double money);
+	
+	public boolean insert(User user);
 
 }

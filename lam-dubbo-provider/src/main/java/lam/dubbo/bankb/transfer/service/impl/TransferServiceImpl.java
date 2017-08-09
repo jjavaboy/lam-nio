@@ -13,7 +13,6 @@ import com.google.gson.Gson;
 import lam.dubbo.bankb.transfer.dao.TransferDao;
 import lam.dubbo.bankb.transfer.model.Transfer;
 import lam.dubbo.bankb.transfer.service.TransferService;
-import lam.dubbo.bankb.user.model.Account;
 import lam.dubbo.bankb.user.service.AccountService;
 
 /**
@@ -45,37 +44,33 @@ public class TransferServiceImpl implements TransferService{
 	@Transactional
 	@Override
 	public boolean doTransfer(Transfer transfer) {
-		//1.查询是否存在这条记录
-		Transfer oldTransfer = transferDao.getById(transfer.getMessageId());
-		
-		//2.如果不存在则插入一条记录
-		if(oldTransfer == null){
-			boolean result = insert(transfer);
-			logger.info(String.format("insert Transfer:%s, result:%b.", gson.toJson(transfer), result));
+		StringBuilder sb = new StringBuilder("\nbegin transaction:").append(transfer.getMessageId()).append('\n');
+		try{
+			//1.给账号加钱
+			boolean result = accountService.addAccountMoney(transfer.getToUserId(), transfer.getMoney());
+			
+			sb.append("addAccountMoney").append(", toUserId:").append(transfer.getToUserId()).append(", money:")
+			.append(transfer.getToUserId()).append(", result:").append(result).append('\n');
+			if(!result){
+				return false;
+			}
+			
+			//2.插入转账记录
+			result = insert(transfer);
+			
+			sb.append("insert Transfer:").append(gson.toJson(transfer)).append(", result:").append(result).append('\n');
+			if(!result){
+				throw new RuntimeException("insert Transfer messageId:" + transfer.getMessageId() + " fail!!");
+			}
+			sb.append("end transaction:").append(transfer.getMessageId()).append('\n');
+			return result;
+		}catch(Exception e){
+			sb.append("error").append(e.getMessage()).append('\n')
+			  .append("rollback transaction");
+			throw e;
+		}finally{
+			logger.info(sb.toString());
 		}
-		
-		//3.同一事务下
-		//更新记录状态
-		boolean result = updateStatus(transfer.getMessageId(), Transfer.Status.INITIAL.getValue(), Transfer.Status.TRANSFED.getValue());
-		logger.info(String.format("update transfer status to %d, when messageId:%s and old status:%d, result:%d.", 
-				Transfer.Status.INITIAL.getValue(),  Transfer.Status.TRANSFED.getValue(), transfer.getMessageId(), result));
-		//transfer的状态不是'INITIAL'，表示该messageId已经被修改过，直接返回true
-		if(!result)
-			return true;
-		//修改用户账号加钱
-		Account account = accountService.getById(transfer.getToUserId());
-		if(account == null){
-			account = new Account();
-			account.setUserId(transfer.getToUserId());
-			account.setMoney(0D);
-			account.setCreateTime(new Date());
-			account.setUpdateTime(account.getCreateTime());
-			boolean r = accountService.insert(account);
-			logger.info(String.format("insert Account:%s, result:%b.", gson.toJson(account), r));
-		}
-		boolean rs = accountService.addAccountMoney(transfer.getToUserId(), transfer.getMoney());
-		logger.info(String.format("addAccountMoney, toUserId:%d, money:%f, result:%b.", transfer.getToUserId(), transfer.getMoney(), rs));
-		return rs;
 	}
 
 	@Override
@@ -84,7 +79,7 @@ public class TransferServiceImpl implements TransferService{
 			transfer.setCreateTime(new Date());
 			transfer.setUpdateTime(transfer.getCreateTime());
 		}
-		transfer.setStatus(Transfer.Status.INITIAL.getValue());
+		transfer.setStatus(Transfer.Status.TRANSFED.getValue()); //默认是插入已经转账状态的记录，要么失败，要么成功，插入这步跟修改账号 钱是同一事务的。
 		return transferDao.insert(transfer) == 1;
 	}
 
@@ -97,6 +92,11 @@ public class TransferServiceImpl implements TransferService{
 		param.put("updateTime", new Date());
 		int result = transferDao.updateStatus(param);
 		return result == 1;
+	}
+
+	@Override
+	public Transfer getById(String messageId) {
+		return transferDao.getById(messageId);
 	}
 
 }
