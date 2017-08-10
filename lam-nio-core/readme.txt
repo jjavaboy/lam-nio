@@ -14,3 +14,5 @@ linux 启动脚本/lam-nio-core/src/main/resources/start.sh
 	A节点=>减钱:lam.dubbo.banka.user.service.impl.UserServiceImpl.decreaseUserMoneyCrossBank(Integer, Integer, double)
 	     A节点会同一事务（减钱和发消息）操作
 	B节点=>监听加钱消息:lam.mq.consumer.ActiveMQConsumer.start()
+9.create id=>lam.dao.id.util.IdSequence
+       test=>lam-dao/src/test/java/IdSequenceTest

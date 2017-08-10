@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="lam.dao.id.dao.SequenceDao">
+    
+	<sql id="entityColumns">
+		a.name,
+		a.step,
+		a.old_value AS oldValue,
+		a.new_value AS newValue,
+		a.created_time AS createdTime,
+		a.updated_time AS updatedTime
+	</sql>
+    
+	<select id="getSequence" resultType="lam.dao.id.model.Sequence">
+		SELECT 
+			<include refid="entityColumns"/>
+		FROM t_id_sequence a
+		WHERE a.name = #{name}
+	</select>
+	
+	<insert id="insert">
+		INSERT INTO t_id_sequence(
+			name,
+			step,
+			old_value,
+			new_value,
+			created_time,
+			updated_time
+		) VALUES (
+			#{name},
+			#{step},
+			#{oldValue},
+			#{newValue},
+			#{createdTime},
+			#{updatedTime}
+		)
+	</insert>
+	
+	<update id="updateStep">
+		UPDATE t_id_sequence a SET 
+			a.old_value = a.new_value,
+			a.new_value = a.old_value + a.step,
+			a.updated_time = #{updatedTime}
+		WHERE a.name = #{name} AND a.step = #{step} AND a.old_value = #{oldValue} AND a.new_value = #{newValue}
+	</update>
+</mapper>
