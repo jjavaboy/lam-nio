@@ -23,6 +23,9 @@ public class IdSequence {
 	
 	private Logger logger = LoggerFactory.getLogger(IdSequence.class);
 	
+	/**
+	 * best to be less than 200,
+	 */
 	private int cacheSize;
 	
 	private SequenceService sequenceService;
@@ -76,6 +79,10 @@ public class IdSequence {
 		}
 		
 		return idValue;
+	}
+	
+	public Long nextId(Class<?> clazz){
+		return nextId(clazz.getSimpleName());
 	}
 
 }

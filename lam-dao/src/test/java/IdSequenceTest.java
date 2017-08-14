@@ -80,7 +80,7 @@ public class IdSequenceTest {
 			/*completionService*/executor.submit(new Runnable(){
 				@Override
 				public void run() {
-					long id = IdSequence.getInstance().nextId(Foo.class.getSimpleName());
+					long id = IdSequence.getInstance().nextId(Foo.class);
 					if(idMap.containsKey(id)){
 						logger.info(Thread.currentThread().getName() + "-" + "duplicate id:" + id);
 					}else{
