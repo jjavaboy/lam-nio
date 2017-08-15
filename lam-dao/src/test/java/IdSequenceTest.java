@@ -71,11 +71,12 @@ public class IdSequenceTest {
 		
 		final ConcurrentHashMap<Long, Boolean> idMap = new ConcurrentHashMap<Long, Boolean>();
 		
+		int idCount = 10/*0000*/;
 		/*CompletionService*/ExecutorCompletionService<String> completionService = new ExecutorCompletionService<String>(executor);
 		LinkedBlockingQueue<Future<String>> resultQueue = new LinkedBlockingQueue<Future<String>>();
-		final CountDownLatch latch = new CountDownLatch(100000);
+		final CountDownLatch latch = new CountDownLatch(idCount);
 		long start = System.currentTimeMillis();
-		for(int i = 0; i < 100000; i++){
+		for(int i = 0; i < idCount; i++){
 			resultQueue.offer(
 			/*completionService*/executor.submit(new Runnable(){
 				@Override
@@ -106,7 +107,7 @@ public class IdSequenceTest {
 			logger.error("error", e);
 		}
 		
-		logger.info("Demo id:" + IdSequence.getInstance().nextId(Demo.class.getSimpleName()));
+		logger.info("Demo id:" + IdSequence.getInstance().nextId(Demo.class));
 		
 		System.exit(0);
 	}

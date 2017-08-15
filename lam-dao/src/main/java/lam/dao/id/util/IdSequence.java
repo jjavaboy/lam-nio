@@ -49,7 +49,14 @@ public class IdSequence {
 		return INSTANCE;
 	}
 	
-	public /**synchronized*/ Long nextId(String sequenceName){
+	/**
+	 * <b>
+	 * It's better to use method nextId(Class<?> clazz).
+	 * <b/>
+	 * @param sequenceName
+	 * @return id value
+	 */
+	public Long nextId(String sequenceName){
 		ConcurrentLinkedQueue<Long> idQueue = sequenceQueue.get(sequenceName);
 		if(idQueue == null){
 			//putIfAbsent method ensure synchronized
@@ -82,7 +89,7 @@ public class IdSequence {
 	}
 	
 	public Long nextId(Class<?> clazz){
-		return nextId(clazz.getSimpleName());
+		return nextId(clazz.getName());
 	}
 
 }
