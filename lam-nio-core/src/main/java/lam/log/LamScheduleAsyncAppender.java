@@ -68,6 +68,7 @@ public class LamScheduleAsyncAppender extends AsyncAppender implements AppenderA
 				new ThreadFactoryBuilder().setThreadNamePrefix("LamSchedule").build(),
 				new ScheduleRejectedHandle());
 		scheduleExecutor.scheduleAtFixedRate(new Dispatcher(), 0, period, timeUnit);
+		set.add(this);
 	}
 	
 	@Override
@@ -82,7 +83,7 @@ public class LamScheduleAsyncAppender extends AsyncAppender implements AppenderA
 		if(shutdown)
 			return ;
 		shutdown = true;
-		System.out.println(getName() + " is closing.");
+		System.out.println(getClass().getName() + " is closing.");
 		super.close();
 		
 		scheduleExecutor.shutdown();
@@ -94,7 +95,7 @@ public class LamScheduleAsyncAppender extends AsyncAppender implements AppenderA
 			appender = (Appender) e.nextElement();
 			appender.close();
 		}
-		System.out.println(getName() + " is closed.");
+		System.out.println(getClass().getName() + " is closed.");
 	}
 	
 	private class Dispatcher implements Runnable{

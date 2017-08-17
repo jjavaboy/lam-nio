@@ -39,9 +39,9 @@
      -->
     <root>
         <priority value="info" />
-        <appender-ref ref="stdout" />
+        <!-- <appender-ref ref="stdout" /> -->
         <!-- <appender-ref ref="fileout" /> -->
-        <!-- <appender-ref ref="async" /> -->
+        <appender-ref ref="async" />
     </root>
 
 </log4j:configuration>
