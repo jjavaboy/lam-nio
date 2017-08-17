@@ -16,3 +16,5 @@ linux 启动脚本/lam-nio-core/src/main/resources/start.sh
 	B节点=>监听加钱消息:lam.mq.consumer.ActiveMQConsumer.start()
 9.create id=>lam.dao.id.util.IdSequence
        test=>lam-dao/src/test/java/IdSequenceTest
+10.async log4j=>lam.log.LamScheduleAsyncAppender
+	      test=>lam-dao/src/test/java/IdSequenceTest
