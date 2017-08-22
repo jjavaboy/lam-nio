@@ -73,7 +73,7 @@ public class ActiveMQConsumer implements Startable, Closeable{
 	public void start() {
 		logger.info("ActiveMQ consumer start");
 		try {
-			conn = ActiveMQHolder.getInstance().getConnection();
+			conn = ActiveMQHolder.getInstance().createConnection();
 			Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			Destination dest = session.createQueue(queueName);
 			MessageConsumer consumer = session.createConsumer(dest);

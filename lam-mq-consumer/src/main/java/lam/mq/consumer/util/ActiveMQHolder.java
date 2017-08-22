@@ -3,10 +3,9 @@ package lam.mq.consumer.util;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 
+import org.apache.activemq.ActiveMQConnection;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 /**
@@ -19,7 +18,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 */
 public class ActiveMQHolder {
 	
-	private ConnectionFactory factory;
+	private ActiveMQConnectionFactory factory;
 	
 	private ActiveMQHolder(){
 		init();
@@ -33,8 +32,8 @@ public class ActiveMQHolder {
 		}
 	}
 	
-	public Connection getConnection() throws JMSException{
-		return factory.createConnection();
+	public ActiveMQConnection createConnection() throws JMSException{
+		return (ActiveMQConnection) factory.createConnection();
 	}
 	
 	public static ActiveMQHolder getInstance(){
