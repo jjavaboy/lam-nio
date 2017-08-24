@@ -1,19 +1,13 @@
-package lam.mq.consumer.util;
+package org.lam.zookeeper.registry;
 
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 
-import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.I0Itec.zkclient.ZkConnection;
 import org.I0Itec.zkclient.exception.ZkMarshallingError;
-import org.I0Itec.zkclient.exception.ZkNodeExistsException;
 import org.I0Itec.zkclient.serialize.ZkSerializer;
-import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import lam.util.Strings;
 
 /**
 * <p>
@@ -29,10 +23,10 @@ public class ZkHolder {
 	
 	private static volatile ZkHolder INSTANCE;
 	
-	private ZkClient zkClient;
+	//private ZkClient zkClient;
 	
 	private ZkHolder(){
-		zkClient = new ZkClient(buildDefaultZkConnection(), Integer.MAX_VALUE, buildDefaultZkSerializer());
+		//zkClient = new ZkClient(buildDefaultZkConnection(), Integer.MAX_VALUE, buildDefaultZkSerializer());
 	}
 	
 	public static ZkHolder getInstance(){
@@ -46,8 +40,8 @@ public class ZkHolder {
 		return INSTANCE;
 	}
 	
-	public ZkClient getZkClient(){
-		return zkClient;
+	public ZkClient createZkClient(){
+		return new ZkClient(buildDefaultZkConnection(), Integer.MAX_VALUE, buildDefaultZkSerializer());
 	}
 	
 	private ZkConnection buildDefaultZkConnection(){

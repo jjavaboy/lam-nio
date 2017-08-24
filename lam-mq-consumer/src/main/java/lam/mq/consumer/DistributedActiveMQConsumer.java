@@ -1,8 +1,6 @@
 package lam.mq.consumer;
 
 import java.io.Closeable;
-import java.io.IOException;
-import java.util.List;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -11,20 +9,16 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Session;
 
-import org.I0Itec.zkclient.IZkChildListener;
-import org.I0Itec.zkclient.ZkClient;
-import org.I0Itec.zkclient.exception.ZkNodeExistsException;
 import org.apache.activemq.ActiveMQConnection;
-import org.apache.zookeeper.CreateMode;
+import org.lam.zookeeper.registry.ZookeeperLRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.dubbo.common.utils.NetUtils;
 import com.google.gson.Gson;
 
+import lam.distribution.LRegistry;
 import lam.mq.consumer.util.ActiveMQHolder;
-import lam.mq.consumer.util.ZkHolder;
-import lam.util.Strings;
+import lam.util.FinalizeUtils;
 import lam.util.support.Startable;
 
 /**
@@ -41,22 +35,16 @@ public class DistributedActiveMQConsumer implements Startable, Closeable{
 	
 	private static Gson gson = new Gson();
 	
-	//zookeeper父路径path
-	private static final String ZK_PARENT_PATH = "/zk_test/consumer";
-	
-	//zookeeper消费者的path
-	private static final String ZK_SUB_PATH = "/ActiveMQ";
-	
 	private String queueName = "consumer_distribution";
 	
-	private ZkClient zkClient;
+	private LRegistry registry;
 	
 	private ActiveMQConnection conn;
 	
 	public DistributedActiveMQConsumer(){
 		try {
-			zkClient = ZkHolder.getInstance().getZkClient();
 			conn = ActiveMQHolder.getInstance().createConnection();
+			registry = new ZookeeperLRegistry("/zk_test/consumer", "/ActiveMQ");
 		} catch (JMSException e) {
 			logger.error("ActiveMQ create connection error", e);
 		}
@@ -72,20 +60,18 @@ public class DistributedActiveMQConsumer implements Startable, Closeable{
 				logger.error("close connection of ActiveMQ error", e);
 			}
 		}
-		if(zkClient != null){
-			zkClient.close();
-			logger.info("ZkClient closed");
+		if(registry != null){
+			FinalizeUtils.closeNotQuietly(registry);
 		}
 	}
 
 	@Override
 	public void start() {
-		String ip = NetUtils.getLocalHost();
-		boolean success = tryCreatePath(ZK_PARENT_PATH, ZK_SUB_PATH, ip);
+		boolean success = registry.doRegistry();
 		if(success){
 			listen();
 		}
-		subscribeChildChange(ZK_PARENT_PATH, ZK_SUB_PATH, ip);
+		registry.subcribe(new DefaultNotifyListener(this));
 	}
 	
 	private void listen(){
@@ -105,45 +91,18 @@ public class DistributedActiveMQConsumer implements Startable, Closeable{
 		}
 	}
 	
-	/**
-	 * 创建zk路径，创建成功，则获得队列的消费权
-	 */
-	public boolean tryCreatePath(String parentPath, String subPath, String data){
-		String path = parentPath + subPath;
-		boolean nodeExists = false;
-		logger.info("create path:" + path + " with data:" + data);
-		try{
-			path = zkClient.create(path, data, CreateMode.EPHEMERAL);
-		}catch(Exception e){
-			if(e instanceof ZkNodeExistsException){
-				nodeExists = true;
-			}
+	private static class DefaultNotifyListener implements LRegistry.NotifyListener{
+		
+		private DistributedActiveMQConsumer consumer;
+		
+		DefaultNotifyListener(DistributedActiveMQConsumer consumer){
+			this.consumer = consumer;
 		}
-		if(!nodeExists){			
-			logger.info("path: " + path + " not exists, create successful");
-		}else{
-			boolean returnNullIfPathNotExists = true;
-			String oldData = zkClient.readData(path, returnNullIfPathNotExists);
-			logger.info("path: " + path + " has exists, create failed, data:" + oldData);
+
+		@Override
+		public void listen() {
+			consumer.listen();
 		}
-		return !nodeExists;
-	}
-	
-	/**
-	 * 订阅父路径下的子列表，列表有变化，说明消费端可能是退出。
-	 */
-	public void subscribeChildChange(String parentPath, final String subPath, final String data){
-		zkClient.subscribeChildChanges(parentPath, new IZkChildListener(){
-			@Override
-			public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
-				logger.info(String.format("child change: parentPath:%s , childs:%s", parentPath, currentChilds));
-				if(Strings.isNullOrEmpty(currentChilds)){
-					boolean success = tryCreatePath(parentPath, subPath, data);
-					if(success){
-						listen();
-					}
-				}
-			}});
 		
 	}
 

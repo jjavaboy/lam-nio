@@ -33,6 +33,11 @@
   		<artifactId>lam-nio-core</artifactId>
     	<version>0.0.1-SNAPSHOT</version>
 	</dependency>
+	<dependency>
+		<groupId>org.lam.zookeeper</groupId>
+		<artifactId>lam-zookeeper</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
 	
 	<dependency>
 		<groupId>org.springframework</groupId>
