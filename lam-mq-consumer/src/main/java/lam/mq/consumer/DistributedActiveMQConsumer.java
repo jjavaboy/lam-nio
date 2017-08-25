@@ -29,7 +29,7 @@ import lam.util.support.Startable;
 * @date 2017年8月22日
 * @version 1.0
 */
-public class DistributedActiveMQConsumer implements Startable, Closeable{
+public class DistributedActiveMQConsumer implements LRegistry.NotifyListener, Startable, Closeable{
 	
 	private static Logger logger = LoggerFactory.getLogger(DistributedActiveMQConsumer.class.getSimpleName());
 	
@@ -71,10 +71,11 @@ public class DistributedActiveMQConsumer implements Startable, Closeable{
 		if(success){
 			listen();
 		}
-		registry.subcribe(new DefaultNotifyListener(this));
+		registry.subcribe(this);
 	}
 	
-	private void listen(){
+	@Override
+	public void listen(){
 		logger.info("start to listen on queue name:" + queueName);
 		try {
 			Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
@@ -89,21 +90,6 @@ public class DistributedActiveMQConsumer implements Startable, Closeable{
 		} catch (JMSException e) {
 			logger.error("ActiveMQ start to listen to queue " + queueName + " error.", e);
 		}
-	}
-	
-	private static class DefaultNotifyListener implements LRegistry.NotifyListener{
-		
-		private DistributedActiveMQConsumer consumer;
-		
-		DefaultNotifyListener(DistributedActiveMQConsumer consumer){
-			this.consumer = consumer;
-		}
-
-		@Override
-		public void listen() {
-			consumer.listen();
-		}
-		
 	}
 
 }
