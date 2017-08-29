@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.util.Properties;
 
@@ -39,6 +40,21 @@ public class FileUtil {
 			FinalizeUtils.closeQuietly(outputStreamWriter);
 		}
 		return false;
+	}
+	
+	public static Properties getProperties(String filename){
+		Properties p = new Properties();
+		InputStream inputStream = null;
+		try {
+			inputStream = FileUtil.class.getResourceAsStream(filename);
+			p.load(inputStream);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			if(inputStream != null)
+				FinalizeUtils.closeQuietly(inputStream);
+		}
+		return p;
 	}
 
 }
