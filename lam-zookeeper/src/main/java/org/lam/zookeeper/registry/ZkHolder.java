@@ -45,8 +45,8 @@ public class ZkHolder {
 	}
 	
 	private ZkConnection buildDefaultZkConnection(){
-		String zkServers = ConfigCastle.getZookeeperProperties("zookeeper.url");
-		int sessionTimeOut = ConfigCastle.getZookeeperInt("zookeeper.timeout");
+		String zkServers = ConfigCastle.getInstance().getValue("zookeeper.url");
+		int sessionTimeOut = ConfigCastle.getInstance().getIntValue("zookeeper.timeout");
 		ZkConnection zkConnection = new ZkConnection(zkServers, sessionTimeOut);
 		return zkConnection;
 	}

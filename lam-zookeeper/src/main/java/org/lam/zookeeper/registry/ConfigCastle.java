@@ -1,8 +1,5 @@
 package org.lam.zookeeper.registry;
 
-import java.util.Objects;
-import java.util.Properties;
-
 import lam.util.SConfigCastle;
 
 /**
@@ -13,20 +10,21 @@ import lam.util.SConfigCastle;
 * @date 2017年8月29日
 * @version 1.0
 */
-public class ConfigCastle {
+public class ConfigCastle extends SConfigCastle{
 	
 	private static final String ZOOKEEPER_FILE = "zookeeper.properties";
 	
-	public static String getZookeeperProperties(String key){
-		Properties p = SConfigCastle.getProperties(ZOOKEEPER_FILE);
-		Objects.requireNonNull(p, ZOOKEEPER_FILE + " is null");
-		return SConfigCastle.getValue(p, key);
+	private static class InstanceHolder{
+		private static ConfigCastle INSTANCE = new ConfigCastle();
 	}
 	
-	public static int getZookeeperInt(String key){
-		String value = getZookeeperProperties(key);
-		
-		return Integer.parseInt(value);
+	public static ConfigCastle getInstance(){
+		return InstanceHolder.INSTANCE;
+	}
+	
+	@Override
+	public String getFile() {
+		return ZOOKEEPER_FILE;
 	}
 
 }
