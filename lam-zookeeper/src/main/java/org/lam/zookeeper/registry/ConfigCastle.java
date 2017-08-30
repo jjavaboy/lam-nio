@@ -24,9 +24,7 @@ public class ConfigCastle {
 	}
 	
 	public static int getZookeeperInt(String key){
-		Properties p = SConfigCastle.getProperties(ZOOKEEPER_FILE);
-		Objects.requireNonNull(p, ZOOKEEPER_FILE + " is null");
-		String value = SConfigCastle.getValue(p, key);
+		String value = getZookeeperProperties(key);
 		
 		return Integer.parseInt(value);
 	}

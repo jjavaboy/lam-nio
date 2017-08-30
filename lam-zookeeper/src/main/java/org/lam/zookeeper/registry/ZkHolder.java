@@ -59,7 +59,7 @@ public class ZkHolder {
 				try {
 					return ((String)data).getBytes(charsetName);
 				} catch (UnsupportedEncodingException e) {
-					logger.error("un support encoding " + charsetName, e);
+					logger.error("unsupport encoding " + charsetName, e);
 					return null;
 				}
 			}
@@ -69,7 +69,7 @@ public class ZkHolder {
 				try {
 					return new String(bytes, charsetName);
 				} catch (UnsupportedEncodingException e) {
-					logger.error("un support encoding " + charsetName, e);
+					logger.error("unsupport encoding " + charsetName, e);
 					return null;
 				}
 			}
