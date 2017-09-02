@@ -12,7 +12,7 @@ import lam.util.SConfigCastle;
 */
 public class ConfigCastle extends SConfigCastle{
 	
-	private static final String ZOOKEEPER_FILE = "zookeeper.properties";
+	private final String[] CONFIG_FILES = {"zookeeper.properties"};
 	
 	private static class InstanceHolder{
 		private static ConfigCastle INSTANCE = new ConfigCastle();
@@ -23,8 +23,8 @@ public class ConfigCastle extends SConfigCastle{
 	}
 	
 	@Override
-	public String getFile() {
-		return ZOOKEEPER_FILE;
+	public String[] getPropertyFiles() {
+		return CONFIG_FILES;
 	}
 
 }

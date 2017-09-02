@@ -17,7 +17,7 @@ public abstract class SConfigCastle {
 	
 	private static final ConcurrentMap<String, Properties> CONFIG = new ConcurrentHashMap<String, Properties>();
 	
-	public abstract String getFile();
+	public abstract String[] getPropertyFiles();
 	
 	public Properties getProperties(String filename){
 		Properties p = CONFIG.get(filename);
@@ -38,9 +38,19 @@ public abstract class SConfigCastle {
 		if(Strings.isNoneBlank(value))
 			return value;
 		
-		Properties p = getProperties(getFile());
-		Objects.requireNonNull(p, "file " + getFile() + " maybe not exists.");
-		return p.getProperty(key);
+		return getProperty(key);
+	}
+	
+	protected String getProperty(String key){
+		Properties p = null;
+		for(String file : getPropertyFiles()){			
+			p = getProperties(file);
+			Objects.requireNonNull(p, "file " + file + " maybe not exists.");
+			if(p.getProperty(key) != null){
+				return p.getProperty(key);
+			}
+		}
+		return null;
 	}
 	
 	public int getIntValue(String key){
