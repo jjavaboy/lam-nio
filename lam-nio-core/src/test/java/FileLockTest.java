@@ -2,6 +2,7 @@ import java.io.File;
 
 import lam.concurrent.lock.LFileLock;
 import lam.concurrent.lock.support.FileOperate;
+import lam.log.Console;
 
 /**
 * <p>
@@ -26,7 +27,9 @@ public class FileLockTest {
 								try {
 									Thread.sleep(1000L);
 								} catch (InterruptedException e) {
+									Console.println(getName() + " thread has been innterrupted.");
 									e.printStackTrace();
+									return false;
 								}
 								return true;
 							}

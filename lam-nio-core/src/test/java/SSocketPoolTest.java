@@ -2,15 +2,18 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
+import lam.design.pattern.builder.LamGo;
 import lam.log.Console;
 import lam.pool.SSocket;
 import lam.pool.SSocketFactory;
 import lam.pool.SSocketPool;
 import lam.pool.support.SObjectPoolConfig;
 import lam.util.FinalizeUtils;
+import redis.clients.jedis.JedisPool;
 
 /**
 * <p>
@@ -70,6 +73,14 @@ public class SSocketPoolTest {
 		
 		Console.println("cost(ms):" + (System.currentTimeMillis() - start));
 		ssocketPool.close();
+		
+		LamGo lamGo = new LamGo.Builder()
+				.setId(1)
+				.setNickname("a")
+				.setUsername("b")
+				.setAddress("c")
+				.setCreateDate(new Date())
+				.get();
 	}
 
 }
