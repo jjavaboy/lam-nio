@@ -71,7 +71,7 @@ public class IdSequenceTest {
 		
 		final ConcurrentHashMap<Long, Boolean> idMap = new ConcurrentHashMap<Long, Boolean>();
 		
-		int idCount = 10/*0000*/;
+		int idCount = 100000;
 		/*CompletionService*/ExecutorCompletionService<String> completionService = new ExecutorCompletionService<String>(executor);
 		LinkedBlockingQueue<Future<String>> resultQueue = new LinkedBlockingQueue<Future<String>>();
 		final CountDownLatch latch = new CountDownLatch(idCount);
@@ -86,7 +86,7 @@ public class IdSequenceTest {
 						logger.info(Thread.currentThread().getName() + "-" + "duplicate id:" + id);
 					}else{
 						idMap.put(id, false);
-						//logger.info(Thread.currentThread().getName() + "-" + "unique id:" + id);
+						logger.info(Thread.currentThread().getName() + "-" + "unique id:" + id);
 					}
 					latch.countDown();
 				}

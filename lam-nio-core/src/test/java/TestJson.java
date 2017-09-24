@@ -13,6 +13,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.google.common.util.concurrent.RateLimiter;
 import com.google.gson.Gson;
 
 import lam.log.Console;
@@ -32,28 +33,86 @@ import lam.util.concurrent.ThreadFactoryBuilder;
 * @date 2016年10月9日
 * @versio 1.0
 */
-public class TestJson {
-
+public class TestJson implements Cloneable{
+	
+	private int id;
+	
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		// TODO Auto-generated method stub
+		return super.clone();
+	}
+	
+	/**
+	 * public interface Future<V> {
+	 * 
+	 * boolean cancel(boolean mayInterruptIfRunning);
+	 * 
+	 * boolean isCancelled();
+	 * 
+	 * boolean isDone();
+	 * 
+	 * V get() throws InterruptedException, ExecutionException;
+	 * 
+	 * V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException;
+	 * 
+	 * }
+	 */
+	
 	public static void main(String[] args) {
-		String str = "1a 03 08 96 01";
-		int i = Integer.parseInt("1a", 16);
-		System.out.println(Integer.toBinaryString(i));
+		RateLimiter rateLimiter = RateLimiter.create(5);
+		//sleepWithUninterrupt(2000L);
+		System.out.println(rateLimiter.acquire(10));
+		sleepWithUninterrupt(2000L);
+		System.out.println(rateLimiter.acquire(10));
+	}
+	
+	private static void sleepWithUninterrupt(long millisecond){
+		boolean isInterrupted = false;
+		long remainSleepTime = millisecond;
+		long start = System.currentTimeMillis();
+		try{
+			while(true){
+				try {
+					//If [millisecond] less than or equal to zero, do not sleep at all.
+					TimeUnit.MILLISECONDS.sleep(remainSleepTime); //do not use : Thread.sleep(millisecond);
+					return ;
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+					isInterrupted = true;
+					remainSleepTime = System.currentTimeMillis() - start;
+				}
+			}
+		}finally{
+			if(isInterrupted){
+				Thread.currentThread().interrupt();
+			}
+		}
 	}
 	
 	static ThreadLocal<String> threadName = new ThreadLocal<String>();
 	
-	private static class User{
-		private int age;
-		private String name;
+	enum SingleEnum{
+		INSTANCE;
 		
-		@Override
-		public boolean equals(Object obj) {
-			if(obj == null || !(obj instanceof User)){
-				return false;
+		private Single single;
+		
+		private SingleEnum(){
+			single = new Single();
+		}
+		
+		public Single getSigngle(){
+			return INSTANCE.single;
+		}
+
+		class Single{
+			private Single(){}
+			
+			public void doSomething(){
+				System.out.println("我是谁-hashCode:" + System.identityHashCode(this));			
 			}
-			User u = (User)obj;
-			return age == u.age && (name == u.name || (name != null && name.equals(u.name)));
 		}
 	}
+	
 
 }

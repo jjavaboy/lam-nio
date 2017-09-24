@@ -19,3 +19,4 @@ linux 启动脚本/lam-nio-core/src/main/resources/start.sh
 10.async log4j=>lam.log.LamScheduleAsyncAppender
 	      test=>lam-dao/src/test/java/IdSequenceTest
 11.zookeeper，队列的消费者集群，只有一个消费者在消费，其他消费者在stand by.=>lam.mq.consumer.DistributedActiveMQConsumer
+12.Consistent hash，一致性哈希，lam-nio-core/src/main/java/lam.distribution.ConsistentHash

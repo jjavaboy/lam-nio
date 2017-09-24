@@ -35,9 +35,9 @@ public abstract class SConfigCastle {
 	 */
 	public String getValue(String key){
 		String value = System.getProperty(key);
-		if(Strings.isNoneBlank(value))
+		if(Strings.isNotBlank(value))
 			return value;
-		
+
 		return getProperty(key);
 	}
 	

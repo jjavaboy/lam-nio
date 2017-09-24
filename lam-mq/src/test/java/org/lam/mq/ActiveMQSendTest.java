@@ -23,13 +23,21 @@ import org.apache.activemq.command.ActiveMQQueue;
 
 public class ActiveMQSendTest {
     public static void main( String[] args ) throws JMSException, URISyntaxException{
-    	sendQueue();
+    	for(int i = 0; i < 100; i++){
+    		sendQueue("consumer_distribution");
+    		
+    		try {
+				Thread.sleep(700);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+    	}
     	//receiveQueue();
     	//sendTopic();
     	//receiveTopic();
     }
     
-    private static void sendQueue() throws JMSException, URISyntaxException{
+    private static void sendQueue(String queueName) throws JMSException, URISyntaxException{
     	final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(new URI("tcp://192.168.204.79:61616"));
     	final ActiveMQConnection conn = (ActiveMQConnection) factory.createConnection();
     	
@@ -43,7 +51,7 @@ public class ActiveMQSendTest {
     	queuePolicy.setMaximumRedeliveries(6);
     	
     	RedeliveryPolicyMap redeliveryPolicyMap = new RedeliveryPolicyMap();
-    	redeliveryPolicyMap.put(new ActiveMQQueue("FirstQueue"), queuePolicy);
+    	redeliveryPolicyMap.put(new ActiveMQQueue(queueName), queuePolicy);
     	
     	//设置消息消费失败后的重试策略
     	conn.setRedeliveryPolicyMap(redeliveryPolicyMap);
@@ -51,11 +59,11 @@ public class ActiveMQSendTest {
     	long timeSecond = System.currentTimeMillis() / 1000;
     	
     	final Session session = conn.createSession(false, Session.AUTO_ACKNOWLEDGE);
-    	final Destination dest = session.createQueue("FirstQueue");
+    	final Destination dest = session.createQueue(queueName);
     	final MessageProducer producer = session.createProducer(dest);
     	producer.setDeliveryMode(DeliveryMode.PERSISTENT);
     	final TextMessage message = session.createTextMessage("Message of FirstQueue in " + timeSecond);
-    	message.setJMSMessageID(String.format("%s-%d", "FirstQueue", timeSecond));
+    	message.setJMSMessageID(String.format("%s-%d", queueName, timeSecond));
     	message.setJMSRedelivered(Boolean.TRUE.booleanValue());
     	
     	producer.send(message);
