@@ -52,5 +52,7 @@ public class HashNode {
 		return true;
 	}
 	
-
+	public String toString(){
+		return host + ":" + port;
+	}
 }

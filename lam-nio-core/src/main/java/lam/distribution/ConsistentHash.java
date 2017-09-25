@@ -1,5 +1,7 @@
 package lam.distribution;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -15,6 +17,8 @@ import java.util.concurrent.locks.ReentrantLock;
 * @version 1.0
 */
 public class ConsistentHash implements Hashing{
+	
+	private MD5Hash md5Hash = new MD5Hash();
 	
 	/**
 	 * key实现java.lang.Comparable，或者构造函数传参java.lang.Comparable。<br/>
@@ -39,7 +43,8 @@ public class ConsistentHash implements Hashing{
 	public boolean add(HashNode node) {
 		lock.lock();
 		try{
-			nodeTree.put(node.hashCode(), node);
+			int hashCode = md5Hash.hash(node.toString());
+			nodeTree.put(hashCode, node);
 			return true;
 		}finally{
 			lock.unlock();
@@ -50,7 +55,8 @@ public class ConsistentHash implements Hashing{
 	public boolean remove(HashNode node) {
 		lock.lock();
 		try{
-			return nodeTree.remove(node.hashCode()) != null;
+			int hashCode = md5Hash.hash(node.toString());
+			return nodeTree.remove(hashCode) != null;
 		}finally{
 			lock.unlock();
 		}
@@ -70,6 +76,30 @@ public class ConsistentHash implements Hashing{
 			}
 		}
 		return node.getValue();
+	}
+	
+	private static class MD5Hash{
+		MessageDigest instance;
+
+		public MD5Hash() {
+			try {
+				instance = MessageDigest.getInstance("MD5");
+			} catch (NoSuchAlgorithmException e) {
+			}
+		}
+		
+		int hash(String key) {
+			instance.reset();
+			instance.update(key.getBytes());
+			byte[] digest = instance.digest();
+
+			int h = 0;
+			for (int i = 0; i < 4; i++) {
+				h <<= 8;
+				h |= ((int) digest[i]) & 0xFF;
+			}
+			return h;
+		}
 	}
 
 }
