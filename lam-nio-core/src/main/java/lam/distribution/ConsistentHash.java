@@ -2,7 +2,6 @@ package lam.distribution;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
@@ -24,12 +23,22 @@ public class ConsistentHash implements Hashing{
 	 * key实现java.lang.Comparable，或者构造函数传参java.lang.Comparable。<br/>
 	 * nodeTree will be guarded by lock
 	 */
-	private /*SortedMap*/TreeMap<Integer, HashNode> nodeTree = new TreeMap<Integer, HashNode>();
+	private /*SortedMap*/TreeMap<Long, HashNode> nodeTree = new TreeMap<Long, HashNode>();
 	
 	private Lock lock  = new ReentrantLock();
 	
+	//dubbo loadbalance module code: this.replicaNumber = url.getMethodParameter(methodName, "hash.nodes", 160);
+	//or jedis code: redis.clients.util.Sharded.initialize(List<S>), replicaNumber is also 160. 
+	private int replicaNumber; /*  = 160 */ 
+	
 	public ConsistentHash(HashNode... nodes){
-		for(HashNode node : nodes){
+		//default value: 160
+		this(160, nodes);
+	}
+	
+	public ConsistentHash(int replicaNumber, HashNode... nodes){
+		this.replicaNumber = replicaNumber;
+		for (HashNode node : nodes) {
 			add(node);
 		}
 	}
@@ -43,8 +52,10 @@ public class ConsistentHash implements Hashing{
 	public boolean add(HashNode node) {
 		lock.lock();
 		try{
-			int hashCode = md5Hash.hash(node.toString());
-			nodeTree.put(hashCode, node);
+			for (int i = 0; i < replicaNumber; i++) {
+				long hashCode = md5Hash.hash(node.toString() + i);
+				nodeTree.put(hashCode, node);
+			}
 			return true;
 		}finally{
 			lock.unlock();
@@ -55,27 +66,29 @@ public class ConsistentHash implements Hashing{
 	public boolean remove(HashNode node) {
 		lock.lock();
 		try{
-			int hashCode = md5Hash.hash(node.toString());
-			return nodeTree.remove(hashCode) != null;
+			for (int i = 0; i < replicaNumber; i++) {
+				long hashCode = md5Hash.hash(node.toString() + i);
+				nodeTree.remove(hashCode);
+			}
+			return true;
 		}finally{
 			lock.unlock();
 		}
 	}
 	
-	private HashNode route(int hashCode){
-		Map.Entry<Integer, HashNode> node = nodeTree.higherEntry(hashCode);
-		if(node == null){
-			lock.lock();
-			try{
-				node = nodeTree.higherEntry(hashCode);
-				if(node == null){
-					node = nodeTree.firstEntry();
-				}
-			}finally{
-				lock.unlock();
-			}
+	private HashNode route(long hashCode){
+		if (nodeTree.containsKey(hashCode)) {
+			return nodeTree.get(hashCode);
 		}
-		return node.getValue();
+		long key;
+		//TreeMap.tailMap(Long fromKey): Returns a view of the portion of this map whose keys are greater than or equal to fromKey.
+		SortedMap<Long, HashNode> greaterMap = nodeTree.tailMap(hashCode);
+		if (greaterMap.isEmpty()) {
+			key = nodeTree.firstKey();
+		} else {
+			key = greaterMap.firstKey();
+		}
+		return nodeTree.get(key);
 	}
 	
 	private static class MD5Hash{
@@ -88,16 +101,18 @@ public class ConsistentHash implements Hashing{
 			}
 		}
 		
-		int hash(String key) {
+		//look for: redis.clients.util.Hashing.MD5.hash(byte[])
+		long hash(String key) {
 			instance.reset();
 			instance.update(key.getBytes());
 			byte[] digest = instance.digest();
-
-			int h = 0;
-			for (int i = 0; i < 4; i++) {
-				h <<= 8;
-				h |= ((int) digest[i]) & 0xFF;
-			}
+			
+			long h = 0;
+			h = ((long)(digest[3] & 0xFF) << 24) |
+				((long)(digest[2] & 0xFF) << 16) |
+				((long)(digest[1] & 0xFF) << 8)  |
+				((long)(digest[0] & 0xFF));
+			
 			return h;
 		}
 	}
