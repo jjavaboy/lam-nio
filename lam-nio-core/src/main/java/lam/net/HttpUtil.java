@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -16,6 +17,7 @@ import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 /**
@@ -36,7 +38,7 @@ public class HttpUtil {
 			try {
 				response = httpClient.execute(request);
 				HttpEntity entity = response.getEntity();
-				System.out.println(EntityUtils.toString(entity, Charset.forName("utf-8")));
+				System.out.println(EntityUtils.toString(entity, Consts.UTF_8));//HTTP.UTF_8 Deprecated =>Consts.UTF-8
 				EntityUtils.consume(entity);
 			} finally {
 				//HttpClientUtils.closeQuietly(response);
@@ -47,7 +49,11 @@ public class HttpUtil {
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 			nvps.add(new BasicNameValuePair("a", "av"));
 			nvps.add(new BasicNameValuePair("b", "bv"));
-			UrlEncodedFormEntity entity0 = new UrlEncodedFormEntity(nvps);
+			//entity即是请求实体的意思，POST请求才有请求实体，GET请求没有请求实体。
+			//entity将参数nvps转换成a=av&b=bv的格式
+			//将生成http头部信息: Header(name: value)的实现对象BasicHeader：
+			//Content-Type: application/x-www-form-urlencoded; charset=UTF-8 
+			UrlEncodedFormEntity entity0 = new UrlEncodedFormEntity(nvps, Consts.UTF_8);
 			request0.setEntity(entity0);
 			
 			CloseableHttpResponse response0 = null;
