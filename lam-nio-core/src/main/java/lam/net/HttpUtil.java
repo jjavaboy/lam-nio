@@ -1,6 +1,7 @@
 package lam.net;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,7 @@ public class HttpUtil {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = null;
 		try {
-			HttpGet request = new HttpGet("http://www.baidu.com");
+			HttpGet request = new HttpGet(URI.create("http://www.baidu.com"));
 			try {
 				response = httpClient.execute(request);
 				HttpEntity entity = response.getEntity();
@@ -45,7 +46,7 @@ public class HttpUtil {
 				response.close();
 			}
 			
-			HttpPost request0 = new HttpPost("http://www.baidu.com");
+			HttpPost request0 = new HttpPost(URI.create("http://www.baidu.com"));
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 			nvps.add(new BasicNameValuePair("a", "av"));
 			nvps.add(new BasicNameValuePair("b", "bv"));
@@ -60,7 +61,7 @@ public class HttpUtil {
 			try {
 				response0 = httpClient.execute(request0);
 				HttpEntity entity1 = response.getEntity();
-				System.out.println(EntityUtils.toString(entity1, Charset.forName("utf-8")));
+				System.out.println(EntityUtils.toString(entity1, Consts.UTF_8));
 				EntityUtils.consume(entity1);
 			} catch (ClientProtocolException e) {
 				e.printStackTrace();
