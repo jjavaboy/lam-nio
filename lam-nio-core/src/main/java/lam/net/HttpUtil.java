@@ -18,7 +18,9 @@ import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
 /**
@@ -35,9 +37,11 @@ public class HttpUtil {
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = null;
 		try {
+			//method: Get
 			HttpGet request = new HttpGet(URI.create("http://www.baidu.com"));
 			try {
-				response = httpClient.execute(request);
+				HttpContext httpContext = new BasicHttpContext();//null;
+				response = httpClient.execute(request, httpContext);
 				HttpEntity entity = response.getEntity();
 				System.out.println(EntityUtils.toString(entity, Consts.UTF_8));//HTTP.UTF_8 Deprecated =>Consts.UTF-8
 				EntityUtils.consume(entity);
@@ -46,6 +50,7 @@ public class HttpUtil {
 				response.close();
 			}
 			
+			//method: Post
 			HttpPost request0 = new HttpPost(URI.create("http://www.baidu.com"));
 			List<NameValuePair> nvps = new ArrayList<NameValuePair>();
 			nvps.add(new BasicNameValuePair("a", "av"));
