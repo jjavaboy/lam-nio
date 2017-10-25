@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -15,8 +16,10 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
@@ -34,14 +37,28 @@ import org.apache.http.util.EntityUtils;
 public class HttpUtil {
 	
 	public static void main(String[] args){
+		//Create an HttpClient with the ThreadSafeClientConnManager.
+		//This connection manager must be used if more than one thread will be using the the HttpClient.
+		/*
+		PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager();
+		connectionManager.setMaxTotal(100);
+		
+		CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).build();
+		*/
+		
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = null;
 		try {
 			//method: Get
 			HttpGet request = new HttpGet(URI.create("http://www.baidu.com"));
 			try {
+				HttpHost target = null;
+				final URI requestURI = request.getURI();
+				if (requestURI.isAbsolute()) {
+					target = URIUtils.extractHost(requestURI);
+				}
 				HttpContext httpContext = new BasicHttpContext();//null;
-				response = httpClient.execute(request, httpContext);
+				response = httpClient.execute(target, request, httpContext);
 				HttpEntity entity = response.getEntity();
 				System.out.println(EntityUtils.toString(entity, Consts.UTF_8));//HTTP.UTF_8 Deprecated =>Consts.UTF-8
 				EntityUtils.consume(entity);
