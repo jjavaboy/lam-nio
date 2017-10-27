@@ -2,6 +2,8 @@ package lam.util;
 
 import java.util.Collection;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
 * <p>
 * Strings extends org.apache.commons.lang3.StringUtils
@@ -36,6 +38,10 @@ public class Strings extends org.apache.commons.lang3.StringUtils{
 			}
 		}
 		return false;
+	}
+	
+	public static String trimToEmpty(Object obj){
+		return obj != null ? StringUtils.trimToEmpty(obj.toString()) : StringUtils.EMPTY;
 	}
 	
 	public static boolean isNullOrEmpty(Collection<?> collection){
