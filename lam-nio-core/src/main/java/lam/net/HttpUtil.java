@@ -11,10 +11,12 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -51,6 +53,14 @@ public class HttpUtil {
 		try {
 			//method: Get
 			HttpGet request = new HttpGet(URI.create("http://www.baidu.com"));
+			int timeout = 1000 * 10;
+			//建造者模式
+			RequestConfig config = RequestConfig.custom()
+					.setConnectionRequestTimeout(timeout)
+					.setConnectTimeout(timeout)
+					.setSocketTimeout(timeout)
+					.build();
+			request.setConfig(config);
 			try {
 				HttpHost target = null;
 				final URI requestURI = request.getURI();
@@ -58,7 +68,8 @@ public class HttpUtil {
 					target = URIUtils.extractHost(requestURI);
 				}
 				HttpContext httpContext = new BasicHttpContext();//null;
-				response = httpClient.execute(target, request, httpContext);
+				HttpClientContext context = HttpClientContext.adapt(httpContext);
+				response = httpClient.execute(target, request, /*httpContext*/context);
 				HttpEntity entity = response.getEntity();
 				System.out.println(EntityUtils.toString(entity, Consts.UTF_8));//HTTP.UTF_8 Deprecated =>Consts.UTF-8
 				EntityUtils.consume(entity);

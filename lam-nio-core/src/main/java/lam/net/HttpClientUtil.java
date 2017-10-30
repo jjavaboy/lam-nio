@@ -2,6 +2,7 @@ package lam.net;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.ConnectTimeoutException;
@@ -38,6 +40,7 @@ import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultServiceUnavailableRetryStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
@@ -58,7 +61,7 @@ public class HttpClientUtil {
 
     static final int timeOut = 10 * 1000;
 
-    private static CloseableHttpClient httpClient = null;
+    private static volatile CloseableHttpClient httpClient = null;
 
     private final static Object syncLock = new Object();
 
@@ -88,17 +91,11 @@ public class HttpClientUtil {
      * @create 2015年12月18日
      */
     public static CloseableHttpClient getHttpClient(String url) {
-        String hostname = url.split("/")[2];
-        int port = 80;
-        if (hostname.contains(":")) {
-            String[] arr = hostname.split(":");
-            hostname = arr[0];
-            port = Integer.parseInt(arr[1]);
-        }
         if (httpClient == null) {
             synchronized (syncLock) {
                 if (httpClient == null) {
-                    httpClient = createHttpClient(200, 40, 100, hostname, port);
+                	URI uri = URI.create(url); //new URI(url);
+                    httpClient = createHttpClient(200, 40, 100, uri);
                 }
             }
         }
@@ -112,29 +109,29 @@ public class HttpClientUtil {
      * @author SHANHY
      * @create 2015年12月18日
      */
-    public static CloseableHttpClient createHttpClient(int maxTotal,
-            int maxPerRoute, int maxRoute, String hostname, int port) {
-        ConnectionSocketFactory plainsf = PlainConnectionSocketFactory
-                .getSocketFactory();
-        LayeredConnectionSocketFactory sslsf = SSLConnectionSocketFactory
-                .getSocketFactory();
-        Registry<ConnectionSocketFactory> registry = RegistryBuilder
-                .<ConnectionSocketFactory> create().register("http", plainsf)
+    public static CloseableHttpClient createHttpClient(int maxTotal, int maxPerRoute, int maxRoute, URI uri) {
+        ConnectionSocketFactory plainsf = PlainConnectionSocketFactory.getSocketFactory();
+        LayeredConnectionSocketFactory sslsf = SSLConnectionSocketFactory.getSocketFactory();
+        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory> create()
+                .register("http", plainsf)
                 .register("https", sslsf).build();
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(
-                registry);
+        PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(registry);
         // 将最大连接数增加
-        cm.setMaxTotal(maxTotal);
+        connManager.setMaxTotal(maxTotal);
         // 将每个路由基础的连接增加
-        cm.setDefaultMaxPerRoute(maxPerRoute);
-        HttpHost httpHost = new HttpHost(hostname, port);
+        connManager.setDefaultMaxPerRoute(maxPerRoute);
+        //HttpHost httpHost = new HttpHost(hostname, port);
+        HttpHost target = null;
+        if (uri.isAbsolute()) {
+        	target = URIUtils.extractHost(uri);
+        }
         // 将目标主机的最大连接数增加
-        cm.setMaxPerRoute(new HttpRoute(httpHost), maxRoute);
+        connManager.setMaxPerRoute(new HttpRoute(target), maxRoute);
 
         // 请求重试处理
         HttpRequestRetryHandler httpRequestRetryHandler = new HttpRequestRetryHandler() {
-            public boolean retryRequest(IOException exception,
-                    int executionCount, HttpContext context) {
+        	
+            public boolean retryRequest(IOException exception,int executionCount, HttpContext context) {
                 if (executionCount >= 5) {// 如果已经重试了5次，就放弃
                     return false;
                 }
@@ -157,8 +154,7 @@ public class HttpClientUtil {
                     return false;
                 }
 
-                HttpClientContext clientContext = HttpClientContext
-                        .adapt(context);
+                HttpClientContext clientContext = HttpClientContext.adapt(context);
                 HttpRequest request = clientContext.getRequest();
                 // 如果请求是幂等的，就再次尝试
                 if (!(request instanceof HttpEntityEnclosingRequest)) {
@@ -169,14 +165,16 @@ public class HttpClientUtil {
         };
 
         CloseableHttpClient httpClient = HttpClients.custom()
-                .setConnectionManager(cm)
-                .setRetryHandler(httpRequestRetryHandler).build();
+                .setConnectionManager(connManager)
+                .setRetryHandler(httpRequestRetryHandler)
+                //返回状态503，服务不可用，重试1次，间隔1秒。
+                .setServiceUnavailableRetryStrategy(new DefaultServiceUnavailableRetryStrategy(1, 1000))
+                .build();
 
         return httpClient;
     }
 
-    private static void setPostParams(HttpPost httpost,
-            Map<String, Object> params) {
+    private static void setPostParams(HttpPost httpost, Map<String, Object> params) {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         Set<String> keySet = params.keySet();
         for (String key : keySet) {
@@ -231,9 +229,14 @@ public class HttpClientUtil {
         HttpGet httpget = new HttpGet(url);
         config(httpget);
         CloseableHttpResponse response = null;
+        URI uri = httpget.getURI();
+        HttpHost httpHost = null;
+        if (uri.isAbsolute()) {
+        	httpHost = URIUtils.extractHost(uri);
+        }
+        HttpClientContext context = HttpClientContext.create();
         try {
-            response = getHttpClient(url).execute(httpget,
-                    HttpClientContext.create());
+            response = getHttpClient(url).execute(httpHost, httpget, context);
             HttpEntity entity = response.getEntity();
             String result = EntityUtils.toString(entity, Consts.UTF_8);
             EntityUtils.consume(entity);
@@ -290,7 +293,7 @@ public class HttpClientUtil {
             ExecutorService executors = Executors.newFixedThreadPool(pagecount);
             CountDownLatch countDownLatch = new CountDownLatch(pagecount);
             for (int i = 0; i < pagecount; i++) {
-                HttpGet httpget = new HttpGet(urisToGet[i]);
+                HttpGet httpget = new HttpGet(URI.create(urisToGet[i]));
                 config(httpget);
                 // 启动线程抓取
                 executors
@@ -310,10 +313,10 @@ public class HttpClientUtil {
     }
 
     static class GetRunnable implements Runnable {
-        private CountDownLatch countDownLatch;
+        private final CountDownLatch countDownLatch;
         private String url;
 
-        public GetRunnable(String url, CountDownLatch countDownLatch) {
+        public GetRunnable(String url, final CountDownLatch countDownLatch) {
             this.url = url;
             this.countDownLatch = countDownLatch;
         }
