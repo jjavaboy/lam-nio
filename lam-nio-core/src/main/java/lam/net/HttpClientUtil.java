@@ -22,6 +22,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.NameValuePair;
 import org.apache.http.NoHttpResponseException;
+import org.apache.http.client.BackoffManager;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -39,11 +40,15 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.AIMDBackoffManager;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultBackoffStrategy;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.DefaultServiceUnavailableRetryStrategy;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.pool.ConnPoolControl;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
@@ -79,7 +84,9 @@ public class HttpClientUtil {
         // 配置请求的超时设置
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectionRequestTimeout(timeOut)
-                .setConnectTimeout(timeOut).setSocketTimeout(timeOut).build();
+                .setConnectTimeout(timeOut)
+                .setSocketTimeout(timeOut)
+                .build();
         httpRequestBase.setConfig(requestConfig);
     }
 
@@ -130,7 +137,7 @@ public class HttpClientUtil {
 
         // 请求重试处理
         HttpRequestRetryHandler httpRequestRetryHandler = new HttpRequestRetryHandler() {
-        	
+
             public boolean retryRequest(IOException exception,int executionCount, HttpContext context) {
                 if (executionCount >= 5) {// 如果已经重试了5次，就放弃
                     return false;
@@ -166,9 +173,17 @@ public class HttpClientUtil {
 
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setConnectionManager(connManager)
+                //失败重试
                 .setRetryHandler(httpRequestRetryHandler)
+                //重定向
+                .setRedirectStrategy(DefaultRedirectStrategy.INSTANCE)
                 //返回状态503，服务不可用，重试1次，间隔1秒。
                 .setServiceUnavailableRetryStrategy(new DefaultServiceUnavailableRetryStrategy(1, 1000))
+                //连接降级处理管理类 A (A和B一起使用)
+                //.setBackoffManager(new AIMDBackoffManager(final ConnPoolControl<HttpRoute> connPerRoute))
+                .setBackoffManager(new AIMDBackoffManager(connManager))
+                //连接降级策略 B (A和B一起使用)
+                .setConnectionBackoffStrategy(new DefaultBackoffStrategy())
                 .build();
 
         return httpClient;
