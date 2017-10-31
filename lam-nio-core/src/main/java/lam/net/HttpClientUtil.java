@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
@@ -184,6 +185,11 @@ public class HttpClientUtil {
                 .setBackoffManager(new AIMDBackoffManager(connManager))
                 //连接降级策略 B (A和B一起使用)
                 .setConnectionBackoffStrategy(new DefaultBackoffStrategy())
+                //默认是false，表示connManager不是共享的，只是专用于创建的该httpClient，那么httpClient被close掉时，connManager也会被close掉。
+                .setConnectionManagerShared(Boolean.FALSE.booleanValue())
+                //逐出过期/空闲连接，清除过期/空闲连接，10秒执行一次清理任务（清除过期连接，清除大于10秒没使用的空闲连接）
+                .evictExpiredConnections()
+                .evictIdleConnections(10L, TimeUnit.SECONDS)
                 .build();
 
         return httpClient;
@@ -311,8 +317,7 @@ public class HttpClientUtil {
                 HttpGet httpget = new HttpGet(URI.create(urisToGet[i]));
                 config(httpget);
                 // 启动线程抓取
-                executors
-                        .execute(new GetRunnable(urisToGet[i], countDownLatch));
+                executors.execute(new GetRunnable(urisToGet[i], countDownLatch));
             }
             countDownLatch.await();
             executors.shutdown();
