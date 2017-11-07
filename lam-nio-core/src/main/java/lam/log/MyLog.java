@@ -1,5 +1,7 @@
 package lam.log;
 
+import com.google.gson.Gson;
+
 import lam.util.DateUtil;
 
 /**
@@ -15,5 +17,19 @@ public class MyLog {
 	public static String timeAppend(String log){
 		return String.format("%s:%s", DateUtil.getCurrentTimeSSS(), log);
 	}
-
+	
+	private static String getMethodName() {
+		Gson gson = new Gson();
+		StackTraceElement[] stackTraces = Thread.currentThread().getStackTrace();
+		for (StackTraceElement stackTrace : stackTraces) {			
+			System.out.println(gson.toJson(stackTrace));
+		}
+		return "";
+	}
+	
+	public static StackTraceElement getCurrentStackTraceElement() {
+		StackTraceElement[] stackTraces = Thread.currentThread().getStackTrace();
+		return stackTraces[2];
+	}
+	
 }
