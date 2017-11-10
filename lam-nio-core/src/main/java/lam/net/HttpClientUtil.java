@@ -135,6 +135,8 @@ public class HttpClientUtil {
         }
         // 将目标主机的最大连接数增加
         connManager.setMaxPerRoute(new HttpRoute(target), maxRoute);
+        // 连接空闲后10秒进行较验是否可用（这动作是在获取连接时才进行较验），默认值为0，则不较验。
+        connManager.setValidateAfterInactivity(10000);
 
         // 请求重试处理
         HttpRequestRetryHandler httpRequestRetryHandler = new HttpRequestRetryHandler() {
@@ -172,6 +174,13 @@ public class HttpClientUtil {
             }
         };
 
+        //连接失败后降级处理器
+        //AIMD:additive increase,multiplicative decrease(加法增加，倍数减少的算法)
+        AIMDBackoffManager backoffManager = new AIMDBackoffManager(connManager);
+        backoffManager.setCooldownMillis(5 * 1000L); //默认降级或者升级冷却期5秒
+        backoffManager.setBackoffFactor(0.5D); //默认降级因子0.5
+        backoffManager.setPerHostConnectionCap(maxPerRoute); //每个HttpRoute可以升级到的最大连接数，默认是2
+        
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setConnectionManager(connManager)
                 //失败重试
@@ -182,7 +191,7 @@ public class HttpClientUtil {
                 .setServiceUnavailableRetryStrategy(new DefaultServiceUnavailableRetryStrategy(1, 1000))
                 //连接降级处理管理类 A (A和B一起使用)
                 //.setBackoffManager(new AIMDBackoffManager(final ConnPoolControl<HttpRoute> connPerRoute))
-                .setBackoffManager(new AIMDBackoffManager(connManager))
+                .setBackoffManager(backoffManager)
                 //连接降级策略 B (A和B一起使用)
                 .setConnectionBackoffStrategy(new DefaultBackoffStrategy())
                 //默认是false，表示connManager不是共享的，只是专用于创建的该httpClient，那么httpClient被close掉时，connManager也会被close掉。
