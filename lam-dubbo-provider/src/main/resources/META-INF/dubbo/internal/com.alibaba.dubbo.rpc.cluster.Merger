@@ -1,0 +1,2 @@
+#分组聚合结果扩展
+myMerger = lam.dubbo.provider.api.impl.MyMerger

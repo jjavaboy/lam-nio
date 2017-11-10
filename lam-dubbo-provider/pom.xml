@@ -211,6 +211,12 @@
 	    <artifactId>gson</artifactId>
 	    <version>2.5</version>
 	</dependency>
+	
+	<dependency>
+		<groupId>lam</groupId>
+		<artifactId>lam-nio-core</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</dependency>
   </dependencies>
   <name>${project.artifactId}</name>
   <build>
