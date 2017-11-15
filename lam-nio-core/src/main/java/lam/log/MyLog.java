@@ -14,7 +14,7 @@ import lam.util.DateUtil;
 */
 public class MyLog {
 	
-	public static String timeAppend(String log){
+	public static String timeBefore(String log){
 		return String.format("%s:%s", DateUtil.getCurrentTimeSSS(), log);
 	}
 	

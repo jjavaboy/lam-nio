@@ -30,30 +30,32 @@ public class Console {
 	
 	public static void println(String log){
 		StackTraceElement stackTrace = getUpStackTraceElement();
-		StringBuilder logBuilder = new StringBuilder();
-		logBuilder.append(LEVEL_INFO).append("(").append(stackTrace.getLineNumber()).append(") ").append(getThreadName()).append(" ")
-			.append(stackTrace.getClassName()).append(".").append(stackTrace.getMethodName()).append(" ").append(log);
-		out.println(MyLog.timeAppend(logBuilder.toString()));
+		log = formLogWithStackInfo(log, stackTrace);
+		outPrintln(MyLog.timeBefore(log));
 	}
 	
 	public static void println(String format, Object...args){
-		println(String.format(format, args));
+		StackTraceElement stackTrace = getUpStackTraceElement();
+		String log = formLogWithStackInfo(String.format(format, args), stackTrace);
+		outPrintln(MyLog.timeBefore(log));
 	}
 	
 	public static void println(Object object){
-		println(nvl(object));
+		StackTraceElement stackTrace = getUpStackTraceElement();
+		String log = formLogWithStackInfo(nvl(object), stackTrace);
+		outPrintln(MyLog.timeBefore(log));
 	}
 	
 	public static void print(String log){
 		StackTraceElement stackTrace = getUpStackTraceElement();
-		StringBuilder logBuilder = new StringBuilder();
-		logBuilder.append(LEVEL_INFO).append("(").append(stackTrace.getLineNumber()).append(") ").append(getThreadName()).append(" ")
-			.append(stackTrace.getClassName()).append(".").append(stackTrace.getMethodName()).append(" ").append(log);
-		out.print(MyLog.timeAppend(logBuilder.toString()));
+		log = formLogWithStackInfo(log, stackTrace);
+		outPrint(MyLog.timeBefore(log));
 	}
 	
 	public static void print(Object object){
-		print(nvl(object));
+		StackTraceElement stackTrace = getUpStackTraceElement();
+		String log = formLogWithStackInfo(nvl(object), stackTrace);
+		print(nvl(MyLog.timeBefore(log)));
 	}
 	
 	public static void error(Exception e){
@@ -62,6 +64,21 @@ public class Console {
 	
 	public static String nvl(Object object){
 		return object == null ? "null" : gson.toJson(object);
+	}
+	
+	private static String formLogWithStackInfo(String log, StackTraceElement stackTrace) {
+		StringBuilder logBuilder = new StringBuilder();
+		logBuilder.append(LEVEL_INFO).append("(").append(stackTrace.getLineNumber()).append(") ").append(getThreadName()).append(" ")
+			.append(stackTrace.getClassName()).append(".").append(stackTrace.getMethodName()).append(" ").append(log);
+		return logBuilder.toString();
+	}
+	
+	private static void outPrintln(String log) {
+		out.println(log);
+	}
+	
+	private static void outPrint(String log) {
+		out.print(log);
 	}
 	
 	public static StackTraceElement getCurrentStackTraceElement() {
