@@ -15,6 +15,11 @@ import lam.util.concurrent.ThreadFactoryBuilder;
 * <p>
 * CLH:Craig，Landin and Hagersten
 * </p>
+* <p>
+* 参考: 
+* http://blog.csdn.net/aesop_wubo/article/details/7533186<br/>
+* http://blog.csdn.net/chenssy/article/details/50432195<br/>
+* </p>
 * @author linanmiao
 * @date 2017年11月20日
 * @version 1.0
@@ -69,7 +74,7 @@ public class CLHLock implements LLock{
 	
 	public static void main(String[] args) {
 		ThreadPoolExecutor executor = new ThreadPoolExecutor(
-				10, 
+				20, 
 				20, 
 				0, 
 				TimeUnit.MILLISECONDS, 
