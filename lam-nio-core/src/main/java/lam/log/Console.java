@@ -6,7 +6,7 @@ import com.google.gson.Gson;
 
 /**
 * <p>
-* 
+* Set system property "lam.log.isAsyn" to be "true", then log worker will be asyn mode.
 * </p>
 * @author linanmiao
 * @date 2017年2月7日
@@ -14,7 +14,7 @@ import com.google.gson.Gson;
 */
 public class Console {
 	
-	private static PrintStream out = System.out;
+	//private static PrintStream out = System.out;
 	
 	private static final String LEVEL_DEBUG = "DEBUG";
 	
@@ -24,6 +24,20 @@ public class Console {
 
 	private static Gson gson = new Gson();
 	
+	private LAppender appender;
+	
+	private Console(){
+		appender = new LamLAppender();
+	}
+	
+	private static class ConsoleHolder {
+		private static Console INSTANCE = new Console();
+	}
+	
+	public static Console getInstance() {
+		return ConsoleHolder.INSTANCE;
+	}
+	
 	private static String getThreadName(){
 		return Thread.currentThread().getName();
 	}
@@ -31,38 +45,40 @@ public class Console {
 	public static void println(String log){
 		StackTraceElement stackTrace = getUpStackTraceElement();
 		log = formLogWithStackInfo(log, stackTrace);
-		outPrintln(MyLog.timeBefore(log));
+		getInstance().appender.append(appendLineSeparator(MyLog.timeBefore(log)));
 	}
 	
 	public static void println(String format, Object...args){
 		StackTraceElement stackTrace = getUpStackTraceElement();
 		String log = formLogWithStackInfo(String.format(format, args), stackTrace);
-		outPrintln(MyLog.timeBefore(log));
+		getInstance().appender.append(appendLineSeparator(MyLog.timeBefore(log)));
 	}
 	
 	public static void println(Object object){
 		StackTraceElement stackTrace = getUpStackTraceElement();
 		String log = formLogWithStackInfo(nvl(object), stackTrace);
-		outPrintln(MyLog.timeBefore(log));
+		getInstance().appender.append(appendLineSeparator(MyLog.timeBefore(log)));
 	}
 	
 	public static void print(String log){
 		StackTraceElement stackTrace = getUpStackTraceElement();
 		log = formLogWithStackInfo(log, stackTrace);
-		outPrint(MyLog.timeBefore(log));
+		getInstance().appender.append(MyLog.timeBefore(log));
 	}
 	
 	public static void print(Object object){
 		StackTraceElement stackTrace = getUpStackTraceElement();
 		String log = formLogWithStackInfo(nvl(object), stackTrace);
-		print(nvl(MyLog.timeBefore(log)));
+		getInstance().appender.append(MyLog.timeBefore(log));
 	}
 	
 	public static void error(Exception e){
-		out.println(e.getMessage());
+		StackTraceElement stackTrace = getUpStackTraceElement();
+		String log = formLogWithStackInfo(e.getMessage(), stackTrace);
+		getInstance().appender.append(appendLineSeparator(MyLog.timeBefore(log)));
 	}
 	
-	public static String nvl(Object object){
+	private static String nvl(Object object){
 		return object == null ? "null" : gson.toJson(object);
 	}
 	
@@ -73,13 +89,17 @@ public class Console {
 		return logBuilder.toString();
 	}
 	
-	private static void outPrintln(String log) {
+	private static String appendLineSeparator(String str) {
+		return str + System.lineSeparator();
+	}
+	
+	/*private static void outPrintln(String log) {
 		out.println(log);
 	}
 	
 	private static void outPrint(String log) {
 		out.print(log);
-	}
+	}*/
 	
 	public static StackTraceElement getCurrentStackTraceElement() {
 		StackTraceElement[] stackTraces = Thread.currentThread().getStackTrace();
