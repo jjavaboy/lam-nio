@@ -50,32 +50,43 @@ public class CLHLock implements LLock{
 	public void lock() {
 		QNode qnode = myNode.get(); //当前线程创建一个节点QNode
 		qnode.locked = Boolean.TRUE.booleanValue(); //当前线程需要获得锁
-		QNode pred = tail.getAndSet(qnode); //当前线程的节点设置到队尾，取到前趋节点QNode pred
-		myPred.set(pred);
-		while (pred.locked) ;
+		QNode pred = tail.getAndSet(qnode); //取到前趋节点QNode pred，然后设置当前线程的节点到队尾
+		myPred.set(pred); //设置当前线程的前趋节点QNode pred
+		while (pred.locked){} //一直循环直到前趋节点pred释放锁（pred.locked为false）
 	}
 
 	@Override
 	public void unlock() {
-		QNode qnode = myNode.get();
-		qnode.locked = Boolean.FALSE.booleanValue();
-		myNode.set(myPred.get());
+		QNode qnode = myNode.get(); //当前线程锁的QNode节点
+		qnode.locked = Boolean.FALSE.booleanValue(); //设置当前线程释放锁的状态
+		//myNode.set(myPred.get());
+		myNode.remove(); //解除myNode绑定在当前线程上，即使下次当前线程再次需要获得锁时则再创建一个QNode。
 	}
 	
 	private class QNode{
 		volatile boolean locked;
+		
+		final String name = Thread.currentThread().getName() + "-QNode";
 		
 		QNode(){}
 		
 		QNode(boolean locked) {
 			this.locked = locked;
 		}
+
+		@Override
+		public String toString() {
+			return "QNode{locked:" + locked + ", name:" + name + "}";
+		}
+		
 	}
 	
+	//test below=================================
 	public static void main(String[] args) {
+		System.setProperty("lam.log.isAsyn", Boolean.FALSE.toString());
 		ThreadPoolExecutor executor = new ThreadPoolExecutor(
-				20, 
-				20, 
+				2, 
+				4, 
 				0, 
 				TimeUnit.MILLISECONDS, 
 				new LinkedBlockingQueue<Runnable>(),
@@ -86,15 +97,16 @@ public class CLHLock implements LLock{
 		for (int i = 0; i < executor.getMaximumPoolSize(); i++) {
 			executor.execute(new Runnable(){
 				public void run() {
-					Threads.sleepWithUninterrupt(r.nextInt(300));
+					Threads.sleepWithUninterrupt(r.nextInt(10));
 					Console.println(counter.incrementAndGet());
 				};
 			});
 		}
+		
 	}
 	
 	private static class Counter {
-		private int count;
+		private volatile int count;
 		
 		LLock lock = new CLHLock();
 		
