@@ -32,6 +32,8 @@ getAppPid(){
 }
 
 JAVA_OPTS="-server -Xloggc:${APP_LOG}/gc.log"
+# stop dubbo gracefully
+JAVA_OPTS="${JAVA_OPTS} -Ddubbo.shutdown.hook=true"
 
 # classpath, including all jar in the "lib" directory
 CLASSPATH="./classes"
