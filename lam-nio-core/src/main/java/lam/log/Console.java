@@ -1,8 +1,12 @@
 package lam.log;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.PrintStream;
 
 import com.google.gson.Gson;
+
+import lam.util.FinalizeUtils;
 
 /**
 * <p>
@@ -12,7 +16,7 @@ import com.google.gson.Gson;
 * @date 2017年2月7日
 * @versio 1.0
 */
-public class Console {
+public class Console implements Closeable{
 	
 	//private static PrintStream out = System.out;
 	
@@ -28,6 +32,13 @@ public class Console {
 	
 	private Console(){
 		appender = new LamLAppender();
+	}
+
+	@Override
+	public void close() {
+		if (appender != null) {
+			FinalizeUtils.closeNotQuietly(appender);
+		}
 	}
 	
 	private static class ConsoleHolder {

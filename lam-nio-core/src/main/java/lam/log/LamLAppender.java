@@ -36,6 +36,12 @@ public class LamLAppender implements LAppender, Closeable{
 	public LamLAppender() {
 		this.isAsyn = SystemProperties.getPropertyBoolean("lam.log.isAsyn");
 		this.out = System.out;
+		if (this.isAsyn) {
+			initAsynInfo();
+		}
+	}
+	
+	private void initAsynInfo() {
 		this.logQueue = new LinkedBlockingQueue<String>();
 		this.logScheduler = new ScheduledThreadPoolExecutor(
 				1,
@@ -50,7 +56,7 @@ public class LamLAppender implements LAppender, Closeable{
 					print(list.get(i));
 				}
 			}
-		}, 0, 10, TimeUnit.MILLISECONDS);
+		}, 0, 10, TimeUnit.MILLISECONDS);		
 	}
 	
 	private void print(String s) {

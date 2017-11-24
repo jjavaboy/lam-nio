@@ -1,4 +1,7 @@
 package lam.log;
+
+import java.io.Closeable;
+
 /**
 * <p>
 * TODO
@@ -7,7 +10,7 @@ package lam.log;
 * @date 2017年11月21日
 * @version 1.0
 */
-public interface LAppender {
+public interface LAppender extends Closeable{
 	
 	public LAppender append(String log);
 	
