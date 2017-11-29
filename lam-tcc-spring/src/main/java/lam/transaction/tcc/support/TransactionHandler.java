@@ -18,8 +18,14 @@ public interface TransactionHandler {
 	
 	public Object tryIt(ProceedingJoinPoint pjp, TransactionTarget transactionTarget);
 	
+	/**
+	 * commit method should satisfy idempotency.
+	 */
 	public void commit(ProceedingJoinPoint pjp, TransactionTarget transactionTarget);
 	
+	/**
+	 * cancel method should satisfy idempotency.
+	 */
 	public void cancel(ProceedingJoinPoint pjp, TransactionTarget transactionTarget);
 	
 	public void finish();
