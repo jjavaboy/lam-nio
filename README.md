@@ -14,3 +14,6 @@ Some functions needs to be improved below:
 The Program needs to deal with the situation of slave node failure.
 
 Fit the slave node failure bug.
+
+#2017-11-29
+add tcc transaction module with spring aspect.

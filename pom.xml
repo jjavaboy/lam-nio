@@ -21,5 +21,6 @@
     <module>lam-dao</module>
     <module>lam-mq-producer</module>
     <module>lam-mq-consumer</module>
+    <module>lam-tcc-spring</module>
   </modules>
 </project>
