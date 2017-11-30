@@ -28,6 +28,12 @@ public class RedisClient implements Closeable{
 	
 	private int timeout = 5000;//2000:Protocol.DEFAULT_TIMEOUT;
 	
+	private int maxTotal = GenericObjectPoolConfig.DEFAULT_MAX_TOTAL;
+	
+	private int maxIdle = GenericObjectPoolConfig.DEFAULT_MAX_IDLE;
+	
+	private int minIdle = GenericObjectPoolConfig.DEFAULT_MIN_IDLE;
+	
 	public RedisClient(){
 		init();
 	}
@@ -39,11 +45,21 @@ public class RedisClient implements Closeable{
 		init();
 	}
 	
+	public RedisClient(String host, int port, String password, int maxTotal, int maxIdle, int minIdle) {
+		this.host = host;
+		this.port = port;
+		this.password = password;
+		this.maxTotal = maxTotal;
+		this.maxIdle = maxIdle;
+		this.minIdle = minIdle;
+		init();
+	}
+	
 	private void init(){
 		final GenericObjectPoolConfig poolConfig = new GenericObjectPoolConfig();
-		poolConfig.setMaxTotal(GenericObjectPoolConfig.DEFAULT_MAX_TOTAL);
-		poolConfig.setMaxIdle(GenericObjectPoolConfig.DEFAULT_MAX_IDLE);
-		poolConfig.setMinIdle(GenericObjectPoolConfig.DEFAULT_MIN_IDLE);
+		poolConfig.setMaxTotal(maxTotal);
+		poolConfig.setMaxIdle(maxIdle);
+		poolConfig.setMinIdle(minIdle);
 		poolConfig.setMaxWaitMillis(60000);//(millisecond)wait for one minute
 		poolConfig.setBlockWhenExhausted(true);
 		poolConfig.setTestOnBorrow(true);
