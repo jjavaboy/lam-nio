@@ -10,6 +10,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import lam.log.Console;
 
 /**
 * <p>
@@ -31,7 +32,8 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter{
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		InetSocketAddress inetSocketAddress =  (InetSocketAddress) ctx.channel().remoteAddress();
-		logger.info("channelActive, {}:{}", inetSocketAddress.getHostName(), inetSocketAddress.getPort());
+		//logger.info("channelActive, {}:{}", inetSocketAddress.getHostName(), inetSocketAddress.getPort());
+		Console.println("channelActive, %s:%d", inetSocketAddress.getHostName(), inetSocketAddress.getPort());
 	}
 	
 	@Override
@@ -49,7 +51,8 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter{
 		ByteBuf responseByteBuf = Unpooled.copiedBuffer(response.getBytes());
 		ctx.writeAndFlush(responseByteBuf);
 
-		logger.info("channelRead, receive==>>{}, send==>>{}", request, response);
+		//logger.info("channelRead, receive==>>{}, send==>>{}", request, response);
+		Console.println("channelRead, receive==>>%s, send==>>%s", request, response);
 	}
 	
 	@Override
@@ -61,12 +64,14 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter{
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
 		InetSocketAddress inetSocketAddress =  (InetSocketAddress) ctx.channel().remoteAddress();
-		logger.info("channelInactive, {}:{}", inetSocketAddress.getHostName(), inetSocketAddress.getPort());
+		//logger.info("channelInactive, {}:{}", inetSocketAddress.getHostName(), inetSocketAddress.getPort());
+		Console.println("channelInactive, %s:%d", inetSocketAddress.getHostName(), inetSocketAddress.getPort());
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-		logger.error("exceptionCaught error==>>", cause);
+		//logger.error("exceptionCaught error==>>", cause);
+		Console.println("exceptionCaught error==>>%s", cause.getMessage());
 		ctx.close();
 	}
 	

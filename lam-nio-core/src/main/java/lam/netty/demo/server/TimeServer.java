@@ -11,6 +11,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import lam.log.Console;
 
 /**
  * <p>
@@ -41,7 +42,8 @@ public class TimeServer {
 			// bind port
 			ChannelFuture channelFuture = serverBootstrap.bind(port).sync();
 
-			logger.info("listen at port:" + port);
+			//logger.info("listen at port:" + port);
+			Console.println("listen at port: %d", port);
 
 			// wait for close
 			channelFuture.channel().closeFuture().sync();
@@ -64,7 +66,8 @@ public class TimeServer {
 			try{
 				port = Integer.parseInt(args[0]);
 			}catch(NumberFormatException e){
-				logger.error("main error==>>", e);
+				//logger.error("main error==>>", e);
+				Console.println("main error==>>%s", e.getMessage());
 			}
 		}
 		new TimeServer().bind(port);

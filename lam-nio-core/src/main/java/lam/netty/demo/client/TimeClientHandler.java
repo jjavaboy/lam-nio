@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import lam.log.Console;
 
 /**
 * <p>
@@ -30,7 +31,8 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter{
 		byteBuf.writeBytes(bytes);
 		ctx.writeAndFlush(byteBuf);
 		
-		logger.info("channelActive, send==>>" + request);
+		//logger.info("channelActive, send==>>" + request);
+		Console.println("channelActive, send==>>" + request);
 	}
 	
 	@Override
@@ -39,7 +41,8 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter{
 		byte[] bytes = new byte[byteBuf.readableBytes()];
 		byteBuf.readBytes(bytes);
 		String response = new String(bytes, "utf-8");
-		logger.info("channelRead, receive==>>" + response);
+		//logger.info("channelRead, receive==>>" + response);
+		Console.println("channelRead, receive==>>" + response);
 		
 		//the example just for test
 		//this ChannelHandler uses only once, close it when get the response.
@@ -53,7 +56,8 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter{
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable t) throws Exception {
-		logger.error("exceptionCaught, error==>>", t);
+		//logger.error("exceptionCaught, error==>>", t);
+		Console.println("exceptionCaught, error==>>%s", t.getMessage());
 		ctx.close();
 	}
 

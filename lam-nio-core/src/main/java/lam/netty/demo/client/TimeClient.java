@@ -11,6 +11,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import lam.log.Console;
 
 /**
 * <p>
@@ -36,7 +37,8 @@ public class TimeClient {
 			
 			ChannelFuture channelFuture = bootstrap.connect(host, port).sync();
 			
-			logger.info("connect to {}:{}", host, port);
+			//logger.info("connect to {}:{}", host, port);
+			Console.println("connect to %s:%d", host, port);
 		
 			channelFuture.channel().closeFuture().sync();
 		}finally{
@@ -59,7 +61,8 @@ public class TimeClient {
 			try{
 				port = Integer.parseInt(args[1]);
 			}catch(NumberFormatException e){
-				logger.error("main error", e);
+				//logger.error("main error", e);
+				Console.println("main error:%d", e.getMessage());
 			}
 		}
 		new TimeClient().connect(host, port);;
