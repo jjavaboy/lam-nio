@@ -6,14 +6,16 @@ import lam.transaction.tcc.model.TransactionTarget;
 
 /**
 * <p>
-* TODO
+* To define the process of tcc.
 * </p>
 * @author linanmiao
 * @date 2017年11月29日
 * @version 1.0
 */
 public interface TransactionHandler {
-	
+	/**
+	 * Begin method of tcc.
+	 */
 	public void begin();
 	
 	public Object tryIt(ProceedingJoinPoint pjp, TransactionTarget transactionTarget);
@@ -28,6 +30,9 @@ public interface TransactionHandler {
 	 */
 	public void cancel(ProceedingJoinPoint pjp, TransactionTarget transactionTarget);
 	
+	/**
+	 * Finish method of tcc, even occurs exception.
+	 */
 	public void finish();
 
 }
