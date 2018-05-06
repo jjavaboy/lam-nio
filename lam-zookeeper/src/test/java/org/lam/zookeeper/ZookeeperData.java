@@ -12,6 +12,7 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 
 import lam.log.Console;
+import lam.util.Threads;
 
 /**
 * <p>
@@ -27,8 +28,11 @@ public class ZookeeperData implements Watcher{
 	private static ZooKeeper zk;
 	
 	public static void main(String[] args) throws IOException, InterruptedException, KeeperException{
-		zk = new ZooKeeper("192.168.20.111:2181", 5000, new ZookeeperData());
+		ZookeeperData defaultWatcher = new ZookeeperData();
+		zk = new ZooKeeper("192.168.20.111:2181", 5000, defaultWatcher);
+		zk.register(defaultWatcher);
 		connectLatch.await();
+		
 		
 		String path = "/mynode";
 		Stat stat = new Stat();
@@ -41,7 +45,10 @@ public class ZookeeperData implements Watcher{
 		byte[] bytes2 = zk.getData(path, true, stat2);
 		Console.println(new String(bytes2));
 		
-		sleep(Integer.MAX_VALUE);
+		byte[] b = zk.getData(path, true, stat);
+		stat = zk.setData(path, "I am new Data".getBytes(), stat.getAversion());
+		
+		Threads.sleepWithUninterrupt(Integer.MAX_VALUE);
 	}
 	
 	@Override
