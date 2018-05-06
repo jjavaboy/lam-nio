@@ -2,6 +2,8 @@ package lam.serialization.protobuf.protostuff;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import io.protostuff.Exclude;
+
 /**
 * <p>
 * TODO
@@ -14,6 +16,8 @@ public class MyFoo {
 	
 	private static final AtomicLong OBJECT_ID_POOL = new AtomicLong(0); 
 	
+	//protostuff排队序列化的属性
+	@Exclude
 	private final long objectId;
 	
 	private int id;

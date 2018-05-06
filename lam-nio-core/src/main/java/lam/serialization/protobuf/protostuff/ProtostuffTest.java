@@ -21,6 +21,8 @@ public class ProtostuffTest {
 		foo.setId(2);
 		foo.setName("sky");
 		
+		Console.println(foo);
+		
 		Schema<MyFoo> fooSchema = RuntimeSchema.getSchema(MyFoo.class);
 		
 		LinkedBuffer buffer = LinkedBuffer.allocate(512);
@@ -33,8 +35,6 @@ public class ProtostuffTest {
 		}
 		
 		MyFoo deseriFoo = fooSchema.newMessage();
-		
-		Console.println(deseriFoo);
 
 		ProtostuffIOUtil.mergeFrom(bytes, deseriFoo, fooSchema);
 		
