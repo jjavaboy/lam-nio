@@ -1,5 +1,6 @@
 package lam.net;
 
+import java.io.Console;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -9,8 +10,10 @@ import java.util.List;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -48,11 +51,13 @@ public class HttpUtil {
 		CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(connManager).build();
 		*/
 		
+		String url = "http://www.baidu.com";
+		
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse response = null;
 		try {
 			//method: Get
-			HttpGet request = new HttpGet(URI.create("http://www.baidu.com"));
+			HttpGet request = new HttpGet(URI.create(url));
 			int timeout = 1000 * 10;
 			//建造者模式
 			RequestConfig config = RequestConfig.custom()
@@ -77,6 +82,25 @@ public class HttpUtil {
 				//HttpClientUtils.closeQuietly(response);
 				response.close();
 			}
+			
+			//define a ResponseHandler below:
+			HttpHost target0 = null;
+			URI requestURI0 = request.getURI();
+			if (requestURI0.isAbsolute()) {
+				target0 = URIUtils.extractHost(requestURI0);
+			} else {
+				target0 = HttpHost.create(url);
+			}
+			HttpContext httpContext0 = new BasicHttpContext();
+			HttpClientContext context0 = HttpClientContext.adapt(httpContext0);
+			String result = httpClient.execute(target0, request, new ResponseHandler<String>() {
+				@Override
+				public String handleResponse(HttpResponse response) throws ClientProtocolException, IOException {
+					HttpEntity entity = response.getEntity();
+					return EntityUtils.toString(entity, Consts.UTF_8);
+				}}, context0);
+			lam.log.Console.print(result);
+			
 			
 			//method: Post
 			HttpPost request0 = new HttpPost(URI.create("http://www.baidu.com"));
