@@ -25,14 +25,19 @@ public class WaitingThread {
 	}
 	
 	public static void main(String[] args) {
-		executor.execute(new InnerThread());
-		executor.execute(new InnerThread());
+		Object lock = new Object();
+		executor.execute(new InnerWaitThread(lock));
+		executor.execute(new InnerNotifyThread(lock));
 	}
 	
-	static class InnerThread implements Runnable {
+	static class InnerWaitThread implements Runnable {
 		
-		private static Object lock = new Object();
+		private Object lock;
 
+		InnerWaitThread(Object lock) {
+			this.lock = lock;
+		}
+		
 		@Override
 		public void run() {
 			synchronized (lock) {
@@ -43,6 +48,33 @@ public class WaitingThread {
 				}
 			}
 			
+		}
+		
+	}
+	
+	static class InnerNotifyThread implements Runnable {
+
+		private Object lock;
+		
+		InnerNotifyThread(Object lock) {
+			this.lock = lock;
+		}
+		
+		@Override
+		public void run() {
+			synchronized (lock) {
+					try {
+						Thread.sleep(Integer.MAX_VALUE);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} finally {
+						try {						
+							lock.notifyAll();
+						} catch (IllegalMonitorStateException e) {
+							e.printStackTrace();
+						}
+					}
+			}
 		}
 		
 	}
