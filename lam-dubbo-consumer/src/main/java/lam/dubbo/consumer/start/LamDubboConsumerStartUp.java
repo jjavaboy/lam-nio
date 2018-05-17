@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import lam.dubbo.api.DemoUserService;
+
 /**
 * <p>
 * consumer main class
@@ -15,9 +17,12 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class LamDubboConsumerStartUp {
 	
 	public static void main(String[] args){
-		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"dubbo-lam-consumer.xml"});
+		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"dubbo-lam-consumer-single.xml"});
         context.start();
 
+        DemoUserService demoUserService = context.getBean("demoUserService", lam.dubbo.api.DemoUserService.class);
+        String result = demoUserService.sayHello("sky");
+        System.out.println(result);
         try {
 			System.in.read();
 		} catch (IOException e) {
