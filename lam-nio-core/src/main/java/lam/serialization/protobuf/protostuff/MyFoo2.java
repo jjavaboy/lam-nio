@@ -12,7 +12,7 @@ import io.protostuff.Exclude;
 * @date 2018年5月6日
 * @versio 1.0
 */
-public class MyFoo extends SuperFoo{
+public class MyFoo2 extends SuperFoo{
 	
 	private static final AtomicLong OBJECT_ID_POOL = new AtomicLong(0);
 	
@@ -20,11 +20,11 @@ public class MyFoo extends SuperFoo{
 	@Exclude
 	private final long objectId;
 	
-	private int id;
+	//private int id;
 	
 	private String name;
 	
-	public MyFoo() {
+	public MyFoo2() {
 		this.objectId = OBJECT_ID_POOL.getAndIncrement();
 	}
 	
@@ -32,13 +32,13 @@ public class MyFoo extends SuperFoo{
 		return objectId;
 	}
 
-	public int getId() {
+	/*public int getId() {
 		return id;
 	}
 
 	public void setId(int id) {
 		this.id = id;
-	}
+	}*/
 
 	public String getName() {
 		return name;
