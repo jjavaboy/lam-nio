@@ -29,15 +29,15 @@ public class ObjectUtil {
 		mapField(from.getClass(), fromFieldMap);
 		
 		Field[] toFields = to.getClass().getDeclaredFields();
-		cloneField(from, fromFieldMap, to, toFields);
+		cloneField(from, fromFieldMap, to, to.getClass(), toFields);
 
 	}
 	
-	private static void cloneField(Object from, Map<String, Field> fromFieldMap, Object to, Field[] toFields) {
+	private static void cloneField(Object from, Map<String, Field> fromFieldMap, Object to, Class<?> toClass, Field[] toFields) {
 
 		for (Field field : toFields) {
 			if (Modifier.isStatic(field.getModifiers()) ||
-				Modifier.isFinal(field.getModifiers()) ||
+				/*Modifier.isFinal(field.getModifiers()) ||*/
 				Modifier.isTransient(field.getModifiers())) {
 				continue ;
 			}
@@ -69,10 +69,10 @@ public class ObjectUtil {
 		}
 		
 		//clone super class fields
-		Class<?> superClass = to.getClass().getSuperclass();
+		Class<?> superClass = toClass.getSuperclass();
 		if (superClass != null && superClass != Object.class) {
 			Field[] superFileds = superClass.getDeclaredFields();
-			cloneField(from, fromFieldMap, to, superFileds);
+			cloneField(from, fromFieldMap, to, superClass, superFileds);
 		}
 	}
 	
@@ -89,7 +89,7 @@ public class ObjectUtil {
 		        Modifier.VOLATILE;
 			 */
 			if (Modifier.isStatic(field.getModifiers()) || 
-				Modifier.isFinal(field.getModifiers()) || 
+				/*Modifier.isFinal(field.getModifiers()) || */
 				Modifier.isTransient(field.getModifiers())) {
 				continue ;
 			}
@@ -105,6 +105,8 @@ public class ObjectUtil {
 	
 	public static void main(String[] args) {
 		Gson gson = new Gson();
+		
+		MyFoo myFoo = new MyFoo();
 		
 		MyFoo myFoo0 = new MyFoo();
 		myFoo0.setId(1);
