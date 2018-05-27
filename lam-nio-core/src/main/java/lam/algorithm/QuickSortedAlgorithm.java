@@ -5,7 +5,7 @@ import lam.util.Gsons;
 
 /**
 * <p>
-* take time:O(nlogn)
+* take time:O(nlgn)
 * </p>
 * @author linanmiao
 * @date 2018年5月26日
