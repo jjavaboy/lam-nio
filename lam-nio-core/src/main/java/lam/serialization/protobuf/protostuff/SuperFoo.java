@@ -9,7 +9,7 @@ package lam.serialization.protobuf.protostuff;
 */
 public class SuperFoo {
 	
-	private int id;
+	/*private int id;
 	
 	public void setId(int id) {
 		this.id = id;
@@ -17,6 +17,6 @@ public class SuperFoo {
 	
 	public int getId() {
 		return id;
-	}
+	}*/
 
 }

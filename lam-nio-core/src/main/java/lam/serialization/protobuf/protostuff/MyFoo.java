@@ -3,6 +3,7 @@ package lam.serialization.protobuf.protostuff;
 import java.util.concurrent.atomic.AtomicLong;
 
 import io.protostuff.Exclude;
+import io.protostuff.Tag;
 
 /**
 * <p>
@@ -20,8 +21,14 @@ public class MyFoo extends SuperFoo{
 	@Exclude
 	private final long objectId;
 	
+	//protostuff排除序列化的属性
+	@Deprecated
+	private long oldId;
+	
+	@Tag(value = 1, alias = "id")
 	private int id;
 	
+	@Tag(value = 2, alias = "name")
 	private String name;
 	
 	public MyFoo() {

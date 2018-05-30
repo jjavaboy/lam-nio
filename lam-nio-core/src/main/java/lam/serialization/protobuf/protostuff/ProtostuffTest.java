@@ -17,6 +17,13 @@ import lam.log.Console;
 public class ProtostuffTest {
 	
 	public static void main(String[] args) {
+		//default: -Dprotostuff.runtime.allow_null_array_element=false
+		System.setProperty("protostuff.runtime.allow_null_array_element", Boolean.TRUE.toString());
+		
+		//protostuff uses io.protostuff.runtime.DefaultIdStrategy in default 
+		//if system do not configure protostuff.runtime.id_strategy_factory,
+		//otherwise, protostuff will use custom id_strategy_factory to create IdStrategy.	
+		
 		MyFoo foo = new MyFoo();
 		foo.setId(2);
 		foo.setName("sky");
@@ -25,7 +32,7 @@ public class ProtostuffTest {
 		
 		Schema<MyFoo> fooSchema = RuntimeSchema.getSchema(MyFoo.class);
 		
-		LinkedBuffer buffer = LinkedBuffer.allocate(512);
+		LinkedBuffer buffer = LinkedBuffer.allocate(128);
 		
 		byte[] bytes;
 		try {
