@@ -1,5 +1,6 @@
 package lam.serialization.protobuf.protostuff;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import io.protostuff.Exclude;
@@ -31,6 +32,15 @@ public class MyFoo extends SuperFoo{
 	@Tag(value = 2, alias = "name")
 	private String name;
 	
+	@Tag(value = 3)
+	private List<Integer> list;
+	
+	@Tag(value = 4)
+	private int[] ints;
+	
+	@Tag(value = 5)
+	private String[] strArray;
+	
 	public MyFoo() {
 		this.objectId = OBJECT_ID_POOL.getAndIncrement();
 	}
@@ -53,6 +63,30 @@ public class MyFoo extends SuperFoo{
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public void setList(List<Integer> list) {
+		this.list = list;
+	}
+	
+	public List<Integer> getList() {
+		return list;
+	}
+	
+	public void setInts(int[] ints) {
+		this.ints = ints;
+	}
+	
+	public int[] getInts() {
+		return ints;
+	}
+	
+	public void setStrArray(String[] strArray) {
+		this.strArray = strArray;
+	}
+	
+	public String[] getStrArray() {
+		return strArray;
 	}
 	
 }

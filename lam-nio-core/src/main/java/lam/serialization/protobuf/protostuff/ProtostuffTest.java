@@ -1,5 +1,8 @@
 package lam.serialization.protobuf.protostuff;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
@@ -22,17 +25,26 @@ public class ProtostuffTest {
 		
 		//protostuff uses io.protostuff.runtime.DefaultIdStrategy in default 
 		//if system do not configure protostuff.runtime.id_strategy_factory,
-		//otherwise, protostuff will use custom id_strategy_factory to create IdStrategy.	
+		//otherwise, protostuff will use custom id_strategy_factory to create IdStrategy.
+		
+		//use reflection, value of system variable protostuff.runtime.use_sun_misc_unsafe is true in default.
+		System.setProperty("protostuff.runtime.use_sun_misc_unsafe", Boolean.FALSE.toString());
 		
 		MyFoo foo = new MyFoo();
 		foo.setId(2);
 		foo.setName("sky");
+		List<Integer> list = new ArrayList<Integer>();
+		list.add(1);
+		list.add(null);
+		foo.setList(list);
+		foo.setInts(new int[]{1, 2});
+		foo.setStrArray(new String[]{"ab", null});
 		
 		Console.println(foo);
 		
 		Schema<MyFoo> fooSchema = RuntimeSchema.getSchema(MyFoo.class);
 		
-		LinkedBuffer buffer = LinkedBuffer.allocate(128);
+		LinkedBuffer buffer = LinkedBuffer.allocate(512);
 		
 		byte[] bytes;
 		try {
@@ -46,6 +58,7 @@ public class ProtostuffTest {
 		ProtostuffIOUtil.mergeFrom(bytes, deseriFoo, fooSchema);
 		
 		Console.println(deseriFoo);
+
 	}
 
 }
