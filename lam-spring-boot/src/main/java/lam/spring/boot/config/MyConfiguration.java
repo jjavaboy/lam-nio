@@ -1,6 +1,7 @@
 package lam.spring.boot.config;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.boot.autoconfigure.web.HttpMessageConverters;
@@ -13,8 +14,12 @@ import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+import org.springframework.web.servlet.view.JstlView;
 
 import lam.spring.boot.model.MyThing;
 import lam.spring.boot.model.MyThing1;
@@ -33,12 +38,39 @@ public class MyConfiguration extends WebMvcConfigurerAdapter{
 	@Override
 	public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 		System.out.println(MyConfiguration.class.getName() + "-configureMessageConverters()");
+		//json:
+		MappingJackson2HttpMessageConverter mappingJacksonHttpMessageConverter = new MappingJackson2HttpMessageConverter();
+		List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
+		supportedMediaTypes.add(MediaType.parseMediaType("application/json;charset=UTF-8"));
+		supportedMediaTypes.add(MediaType.parseMediaType("text/html;charset=UTF-8"));
+		//or use like below:
+		//supportedMediaTypes.addAll(MediaType.parseMediaTypes("application/json;charset=UTF-8,text/html;charset=UTF-8"));
+		mappingJacksonHttpMessageConverter.setSupportedMediaTypes(supportedMediaTypes);
+		converters.add(mappingJacksonHttpMessageConverter);
+		
+		//string:
+		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
+		List<MediaType> supportedMediaTypes1 = new ArrayList<MediaType>();
+		supportedMediaTypes1.add(MediaType.parseMediaType("application/json;charset=UTF-8"));
+		supportedMediaTypes1.add(MediaType.parseMediaType("text/html;charset=UTF-8"));
+		stringHttpMessageConverter.setSupportedMediaTypes(supportedMediaTypes1);
+		converters.add(stringHttpMessageConverter);
+		
 		super.configureMessageConverters(converters);
 	}
 	
 	@Override
 	public void configureViewResolvers(ViewResolverRegistry registry) {
 		System.out.println(MyConfiguration.class.getName() + "-configureViewResolvers()");
+		
+		InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
+		viewResolver.setViewClass(org.springframework.web.servlet.view.JstlView.class);
+		viewResolver.setPrefix("/WEB-INF/jsp/");
+		viewResolver.setSuffix(".jsp");
+		viewResolver.setOrder(2);
+		
+		registry.viewResolver(viewResolver);
+		
 		super.configureViewResolvers(registry);
 	}
 	
