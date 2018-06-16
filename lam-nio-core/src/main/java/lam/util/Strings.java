@@ -24,7 +24,7 @@ public class Strings extends org.apache.commons.lang3.StringUtils{
 	
 	public static boolean allNull(String ...strings){
 		for(String string : strings){
-			if(string == null){
+			if(string != null){
 				return false;
 			}
 		}
@@ -38,6 +38,22 @@ public class Strings extends org.apache.commons.lang3.StringUtils{
 			}
 		}
 		return false;
+	}
+	
+	public static boolean isBlank(String str) {
+		if (str == null) {
+			return true;
+		}
+		for (int i = 0; i < str.length(); i++) {
+			if (!Character.isWhitespace(str.charAt(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public static boolean isNotBlank(String str) {
+		return !isBlank(str);
 	}
 	
 	public static String trimToEmpty(Object obj){
