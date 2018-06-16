@@ -22,5 +22,6 @@
     <module>lam-mq-producer</module>
     <module>lam-mq-consumer</module>
     <module>lam-tcc-spring</module>
+    <module>lam-spring-boot</module>
   </modules>
 </project>
