@@ -12,6 +12,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>lam-spring-boot</name>
   <url>http://maven.apache.org</url>
+  <packaging>war</packaging>
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -30,6 +31,23 @@
   	<dependency>
 		<groupId>com.fasterxml.jackson.dataformat</groupId>
 		<artifactId>jackson-dataformat-xml</artifactId>
+	</dependency>
+	
+	<!-- jsp servlet jstl -->
+	<dependency>
+		<groupId>javax.servlet.jsp</groupId>
+		<artifactId>jsp-api</artifactId>
+		<version>2.1</version>
+	</dependency>
+	<dependency>
+		<groupId>javax.servlet</groupId>
+		<artifactId>servlet-api</artifactId>
+		<version>2.5</version>
+	</dependency>
+	<dependency>
+		<groupId>jstl</groupId>
+		<artifactId>jstl</artifactId>
+		<version>1.2</version>
 	</dependency>
   </dependencies>
 </project>

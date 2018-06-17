@@ -6,6 +6,7 @@ import javax.annotation.Resource;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
 import lam.spring.boot.model.MyThing;
 import lam.spring.boot.model.MyThing1;
@@ -25,11 +26,18 @@ public class FirstController {
 	@Resource
 	private IFooService fooService;
 	
-	@RequestMapping("/home")
-	public String home() {
+	@RequestMapping("/")
+	public String index() {
 		boolean b = fooService.dodo(new Random().nextInt(2));
 		System.out.println(b);
 		return "welcome!";
+	}
+	
+	@RequestMapping("/home")
+	public ModelAndView home() {
+		ModelAndView mav = new ModelAndView();
+		mav.setViewName("home");
+		return mav;
 	}
 	
 	@RequestMapping("/thing")
