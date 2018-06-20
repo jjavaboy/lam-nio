@@ -66,11 +66,11 @@
 		<artifactId>rocketmq-remoting</artifactId>
 		<version>3.2.6</version>
 	</dependency>
-	<dependency>
-	    <groupId>org.apache.kafka</groupId>
-	    <artifactId>kafka-clients</artifactId>
-	    <version>1.1.0</version>
-	</dependency>
+     <dependency>
+        <groupId>org.apache.kafka</groupId>
+		<artifactId>kafka_2.12</artifactId>
+        <version>1.0.0</version>
+    </dependency>
 	<dependency>
 		<groupId>com.alibaba</groupId>
 		<artifactId>fastjson</artifactId>

@@ -1,7 +1,11 @@
 package lam.kafka.consumer;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -11,6 +15,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 
 import lam.kafka.KafkaProperties;
 import lam.log.Console;
+import lam.util.Threads;
 
 /**
 * <p>
@@ -28,18 +33,23 @@ public class Consumer {
 		props.put(ConsumerConfig.GROUP_ID_CONFIG, "DemoConsumer");
 		props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, Boolean.TRUE.toString());
 		props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
-		props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "5000");
+		//props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, "3000");
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
 		
 		KafkaConsumer<String, String> consumer = new KafkaConsumer<String, String>(props);
 		try {
-			consumer.subscribe(Collections.singletonList("my-topic"));
-			ConsumerRecords<String, String> records = consumer.poll(3000L);
-			for (ConsumerRecord<String, String> record : records) {
-				Console.println("Received message:" + record.key() + ", " + record.value() + "at offset " + record.offset());
+			consumer.subscribe(Collections.singletonList(KafkaProperties.MY_TOPIC));
+			while (true) {
+				ConsumerRecords<String, String> records = consumer.poll(1000L);
+				for (ConsumerRecord<String, String> record : records) {
+					Console.println("Received message:" + record.key() + ", " + record.value() + "at offset " + record.offset());
+				}
+				Console.println("consumer get nothing");
+				Threads.sleepWithUninterrupt(3000L);
 			}
-			Console.print("consumer finish");
+		} catch(Exception e) {
+			e.printStackTrace();
 		} finally {
 			consumer.close();
 		}
