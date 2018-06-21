@@ -13,7 +13,13 @@ public class KafkaProperties {
 	
 	public static final int KAFKA_SERVER_PORT = 9092;
 	
+	public static final String ZOOKEEPER_CONNECT = "129.168.204.79:2181";
+	
 	public static final String MY_TOPIC = "my-topic";
+	
+	public static final String STREAMS_TOPIC = "streams-plaintext-input"; //"streams-plaintext-input"
+	
+	public static final String STREAMS_OTHER_TOPIC = "streams-plaintext-output";
 	
 	public static final long TIME_OUT_MILLISECOND = 3000L;
 	
