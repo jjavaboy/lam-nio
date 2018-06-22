@@ -4,6 +4,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -38,13 +39,28 @@ public class Producer {
 		
 		KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
 		try {
-		int messageNo = 2;
+		int messageNo = 7;
 			try {
-				//Future<RecordMetadata> future = 
-				producer.send(new ProducerRecord<String, String>(KafkaProperties.MY_TOPIC, String.valueOf(messageNo), "Message_" + messageNo));
-				//RecordMetadata metadata = future.get();
+				//The send is asynchronous and this method will return immediately once
+				//the record has been stored in the buffer of records waiting to be sent.
+				Future<RecordMetadata> future = 
+						producer.send(new ProducerRecord<String, String>(KafkaProperties.MY_TOPIC, String.valueOf(++messageNo), "Message_" + messageNo));
 				
-				//Console.print(metadata);
+				RecordMetadata metadata = future.get();
+				
+				Console.println("send message async, topic: " + metadata.topic() + ", offset: " + metadata.offset() + ", partition: " + metadata.partition());
+				
+				//Asynchronously send a record to a topic and invoke the provided callback when the send has been acknowledged.
+				producer.send(new ProducerRecord<String, String>(KafkaProperties.MY_TOPIC, String.valueOf(messageNo), "Message_" + messageNo),
+						new Callback() {
+							@Override
+							public void onCompletion(RecordMetadata metadata, Exception exception) {
+								if (metadata == null) {
+									exception.printStackTrace();
+								} else {
+									Console.println("callback when acknowledged, topic: " + metadata.topic() + ", offset: " + metadata.offset() + ", partition: " + metadata.partition());
+								}
+							}});
 				
 				Console.println("producer finish.");
 			} catch (Exception e) {
