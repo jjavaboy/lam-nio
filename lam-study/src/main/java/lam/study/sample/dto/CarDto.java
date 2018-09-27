@@ -1,4 +1,4 @@
-package lam.study.sample;
+package lam.study.sample.dto;
 /**
 * <p>
 * TODO
@@ -12,6 +12,8 @@ public class CarDto {
 	private String make;
     private int seatCount;
     private String type;
+
+    private String date;
     
 	public String getMake() {
 		return make;
@@ -31,7 +33,12 @@ public class CarDto {
 	public void setType(String type) {
 		this.type = type;
 	}
-    
-    
 
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
+	}
 }

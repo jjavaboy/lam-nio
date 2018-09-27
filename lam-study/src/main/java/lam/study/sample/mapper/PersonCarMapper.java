@@ -1,8 +1,7 @@
 package lam.study.sample.mapper;
 
-import lam.study.sample.Car;
-import lam.study.sample.dto.PersonCarDto;
-import lam.study.sample.model.Person;
+import lam.study.sample.model.*;
+import lam.study.sample.dto.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;

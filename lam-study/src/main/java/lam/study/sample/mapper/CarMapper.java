@@ -1,9 +1,10 @@
 package lam.study.sample.mapper;
 
-import lam.study.sample.Car;
-import lam.study.sample.CarDto;
+import lam.study.sample.dto.*;
+import lam.study.sample.model.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 import org.mapstruct.factory.Mappers;
 
@@ -26,4 +27,9 @@ public interface CarMapper {
 			@Mapping(source = "numberOfSeats", target = "seatCount")
 	})
 	CarDto carToCarDtoSpecial(Car car);
+
+	/**
+	 *  update field of CarDto carDto from field of Car car
+	 */
+	void updateCarDtoFromCar(Car car, @MappingTarget CarDto carDto);
 }

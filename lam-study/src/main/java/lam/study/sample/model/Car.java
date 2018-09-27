@@ -1,4 +1,9 @@
-package lam.study.sample;
+package lam.study.sample.model;
+
+import lam.study.sample.CarType;
+
+import java.util.Date;
+
 /**
 * <p>
 * TODO
@@ -12,6 +17,7 @@ public class Car {
     private String make;
     private int numberOfSeats;
     private CarType type;
+    private Date createTime;
     
 	public String getMake() {
 		return make;
@@ -31,7 +37,12 @@ public class Car {
 	public void setType(CarType type) {
 		this.type = type;
 	}
-    
-    
 
+	public Date getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Date createTime) {
+		this.createTime = createTime;
+	}
 }

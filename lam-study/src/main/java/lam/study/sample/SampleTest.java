@@ -1,12 +1,9 @@
 package lam.study.sample;
 
 import lam.study.StudyGson;
-import lam.study.sample.dto.PersonCarDto;
-import lam.study.sample.dto.PersonDto;
-import lam.study.sample.mapper.CarMapper;
-import lam.study.sample.mapper.PersonCarMapper;
-import lam.study.sample.mapper.PersonMapper;
-import lam.study.sample.model.Person;
+import lam.study.sample.dto.*;
+import lam.study.sample.mapper.*;
+import lam.study.sample.model.*;
 
 /**
 * <p>
@@ -19,14 +16,14 @@ import lam.study.sample.model.Person;
 public class SampleTest {
 	
 	public static void main(String[] args) {
-		lam.study.sample.Car car = new lam.study.sample.Car();
+		Car car = new Car();
 		car.setMake("makename");
 		car.setNumberOfSeats(2);
 		car.setType(CarType.SEAT);
 
 		System.out.println(StudyGson.GSON.toJson(car));
 		
-		lam.study.sample.CarDto carDto = CarMapper.INSTANCE.carToCarDto(car);
+		CarDto carDto = CarMapper.INSTANCE.carToCarDto(car);
 		
 		System.out.println(StudyGson.GSON.toJson(carDto));
 
@@ -51,6 +48,20 @@ public class SampleTest {
 		personCarDto = PersonCarMapper.INSTANCE.toPersonCarDto(car, 2, "lam");
 
 		System.out.println("PersonCarDto:" + StudyGson.GSON.toJson(personCarDto));
+
+		Car car0 = new Car();
+		car0.setMake("car0 make");
+		car0.setNumberOfSeats(1);
+		car0.setType(CarType.SEAT);
+
+		CarDto carDto1 = new CarDto();
+		carDto1.setMake("carDto0 make");
+		carDto1.setSeatCount(2);
+		carDto1.setType("type");
+
+		CarMapper.INSTANCE.updateCarDtoFromCar(car0, carDto1);
+		System.out.println("carDto1:" + StudyGson.GSON.toJson(carDto1));
+
 	}
 
 }
