@@ -22,7 +22,7 @@ public interface DataMapper {
 
     DataMapper INSTANCE = Mappers.getMapper(DataMapper.class);
 
-    @Mapping(source = "createTime", dateFormat = "yyyy-MM-dd HH:mm:ss", target = "date")
+    @Mapping(source = "createTime", dateFormat = "yyyy-MM-dd HH:mm:ss SSS", target = "date")
     CarDto dateToString(Car car);
 
     @IterableMapping(dateFormat = "yyyy/MM/dd HH:mm:ss,sss")

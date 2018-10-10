@@ -2,6 +2,7 @@ package lam.study.sample;
 
 import lam.study.StudyGson;
 import lam.study.sample.dto.CarDto;
+import lam.study.sample.mapper.CarWithUsesMapper;
 import lam.study.sample.mapper.DataMapper;
 import lam.study.sample.model.Car;
 
@@ -33,5 +34,8 @@ public class DataSampleTest {
         dates.add(date1);
         List<String> dateStrings = DataMapper.INSTANCE.dateListToStringList(dates);
         System.out.println("dateStrings:" + StudyGson.GSON.toJson(dateStrings));
+
+        CarDto carDto1 = CarWithUsesMapper.INSTANCE.toCarDto(car);
+        System.out.println("CarDto1:" + StudyGson.GSON.toJson(carDto1));
     }
 }
