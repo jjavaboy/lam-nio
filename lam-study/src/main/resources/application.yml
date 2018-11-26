@@ -1,0 +1,9 @@
+#server:
+#    port: 8080
+server:
+    port: 8090
+zuul:
+    routes:
+        sample:
+            path: /sample/**
+            url: http://localhost:8090/
