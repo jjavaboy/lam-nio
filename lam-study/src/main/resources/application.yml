@@ -7,3 +7,6 @@ zuul:
         sample:
             path: /sample/**
             url: http://localhost:8090/
+ribbon:
+    eureka:
+        enable: false

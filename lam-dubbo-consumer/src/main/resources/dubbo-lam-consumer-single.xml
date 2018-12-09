@@ -11,14 +11,14 @@
     <!-- <dubbo:registry address="multicast://224.5.6.7:1234" /> -->
     
     <!-- 使用zookeeper注册服务，如果有多个注册中心，可以使用id区分开来，address=192.168.20.110:2181,192.168.20.111:2181 -->
-    <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.20.112:2181" file="cache/lam-dubbo-consumer.cache"/>
+    <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.20.113:2181" file="cache/lam-dubbo-consumer.cache"/>
     
      <!-- 监控中心 dubbo的monitor-simple模块，consumer发送给monitor的调用时间，包括网络时间和方法执行时间 -->
     <!-- <dubbo:monitor protocol="dubbo" address="127.0.0.1:7070" /> -->
  
     <!-- dubbo的消息者的全局配置 -->
     <dubbo:consumer 
-    	timeout="10" 
+    	timeout="30" 
     	retries="2" 
     	loadbalance="random" 
     	async="false" 
@@ -27,7 +27,6 @@
     	owner="lam"
     	actives="0"
     	cluster="failover"
-    	filter="fallback"
     	 />
     <!-- 
     timeout:远程服务调用超时时间(毫秒)
@@ -46,8 +45,7 @@
     <!-- 生成远程服务代理，可以和本地bean一样使用demoService -->
     <dubbo:reference id="demoUserService" interface="lam.dubbo.api.DemoUserService" />
  
- 	<!-- <bean id="lamController" class="lam.dubbo.consumer.controller.LamController" init-method="start">
- 		<property name="loginService" ref="loginService"/>
- 		<property name="userService" ref="userService"/>
- 	</bean> -->
+ 	<bean id="lamController" class="lam.dubbo.consumer.controller.LamController" init-method="start">
+ 		<property name="demoUserService" ref="demoUserService"/>
+ 	</bean>
 </beans>

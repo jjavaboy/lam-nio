@@ -31,7 +31,7 @@
     <!-- <dubbo:registry address="multicast://224.5.6.7:1234" /> -->
     
     <!-- 使用zookeeper注册服务，如果有多个注册中心，可以使用id区分开来，address=192.168.20.110:2181,192.168.20.111:2181 -->
-    <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.20.112:2181" file="cache/lam-dubbo-provider.cache"/>
+    <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.20.113:2181" file="cache/lam-dubbo-provider.cache"/>
  
     <!-- 用dubbo协议在20880端口暴露服务 --> <!-- config in dubbo.properties -->
     <dubbo:protocol name="dubbo" port="20880" threadpool="fixed" threads="200" dispatcher="all" transporter="netty" charset="UTF-8" serialization="hessian2"/>

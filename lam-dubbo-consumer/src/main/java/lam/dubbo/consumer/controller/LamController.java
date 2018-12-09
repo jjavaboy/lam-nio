@@ -23,53 +23,46 @@ public class LamController {
 	
 	private static Logger logger = LoggerFactory.getLogger(LamController.class);
 	
-	private LoginService loginService;
-	
-	private DemoUserService userService;
-	
-	private static ThreadPoolExecutor executor = new ThreadPoolExecutor(
-			3, 3, 1000, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), 
-		    Executors.defaultThreadFactory(), 
-		    new ThreadPoolExecutor.AbortPolicy());
+	private lam.dubbo.api.DemoUserService demoUserService;
 	
 	public void start(){
-		executor.execute(new StartRunnable());
-	}
-	
-	private void sleepMilli(long timeout){
-		try {
-			TimeUnit.MILLISECONDS.sleep(timeout);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void setLoginService(LoginService loginService) {
-		this.loginService = loginService;
-	}
-	
-	public void setUserService(DemoUserService userService) {
-		this.userService = userService;
-	}
-	
-	private class StartRunnable implements Runnable{
-		@Override
-		public void run() {
-			try{
-				for(int i = 0; i < 5; i++){
-					String username = "user_" + i; 
-				    boolean li = loginService.login(username);
-			    	/*String hello = userService.sayHello(username);
-			    	String goodBye = userService.sayGoodBye(username);
-			    	boolean lo = loginService.logout(username);
-			    	logger.info(String.format("login:%b, %s, %s, logout:%b", li, hello, goodBye, lo));*/
-				    logger.info(String.format("login:%b", li));
-			    	sleepMilli(1L);
+		new Thread(){
+			public void run() {
+				try {
+					TimeUnit.SECONDS.sleep(30L);
+				} catch (InterruptedException e2) {
+					logger.error("sleep error", e2);
 				}
-			}catch(Exception e){
+		String result = demoUserService.sayHello("sky");
+        
+        logger.info("before disconnnect from zookeeper, result:" + result);
+        
+        logger.info("==========start to sleep in 30 seconds==============");
+        try {
+			TimeUnit.SECONDS.sleep(30L);
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+        
+        logger.info("==========finish to sleep in 30 seconds==============");
+        
+        for (int i = 0; i < 5; i++) {
+	        result = demoUserService.sayHello("sky");
+	        
+	        logger.info("==>>after disconnnect from zookeeper. result:" + result);
+	        
+	        try {
+				TimeUnit.SECONDS.sleep(1L);
+			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
+        }
+			};
+		}.start();
+	}
+	
+	public void setDemoUserService(lam.dubbo.api.DemoUserService demoUserService) {
+		this.demoUserService = demoUserService;
 	}
 
 }

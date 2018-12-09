@@ -1,6 +1,11 @@
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
@@ -87,7 +92,14 @@ public class LogTest {
 		for(int i = 0; i < 10000; i++){
 			logger.info("log " + i);
 		}
+		HashMap<String, String> hashMap = new HashMap<String, String>();
+		hashMap.put(null, null);
+		TreeMap<String, String> treeMap = new TreeMap<String, String>();
+		treeMap.put("", null);
+		treeMap.remove("");
+		SortedMap<String, String> sortedMap = Collections.synchronizedSortedMap(treeMap);
 		System.exit(0);
+		
 	}
 	
 	private static class Foo{

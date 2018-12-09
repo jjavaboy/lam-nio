@@ -27,13 +27,14 @@ public class FallbackHystrixFilter extends BaseFallbackHystrixFilter{
 		super("FallbackHystrix", new Callback(){
 			@Override
 			public Result call(Invoker<?> invoker, Invocation invocation) {
-				if("login".equals(invocation.getMethodName()) &&
+				/*if("login".equals(invocation.getMethodName()) &&
 				   "lam.dubbo.api.LoginService".equals(invoker.getInterface().getName())){
 					Result result = new RpcResult(false);
 					logger.info(String.format("%s.%s fail, return %s", invoker.getInterface().getName(), invocation.getMethodName(), result));
 					return result;
 				}
-				return null;
+				return null;*/
+				return invoker.invoke(invocation);
 			}});
 		logger.info(getClass().getName() + " constructor");
 	}
