@@ -35,12 +35,17 @@ public abstract class BaseRouteLocator extends SimpleRouteLocator implements Ref
 
     @Override
     protected void doRefresh() {
+        LOGGER.debug("[doRefresh] ============== begin  ==============");
         super.doRefresh();
+        LOGGER.debug("[doRefresh] all routes:{}", this.getRoutes());
+        LOGGER.debug("[doRefresh] ============== finish ==============");
     }
 
     @Override
     public void refresh() {
-       this.doRefresh();
+        LOGGER.debug("[refresh] *************** begin  ***************");
+        this.doRefresh();
+        LOGGER.debug("[refresh] *************** finish ***************");
     }
 
     @Override
