@@ -24,5 +24,6 @@
     <module>lam-tcc-spring</module>
     <module>lam-spring-boot</module>
     <module>lam-study</module>
+    <module>lam-kotlin-study</module>
   </modules>
 </project>
