@@ -25,5 +25,6 @@
     <module>lam-spring-boot</module>
     <module>lam-study</module>
     <module>lam-kotlin-study</module>
+      <module>lam-webflux</module>
   </modules>
 </project>
